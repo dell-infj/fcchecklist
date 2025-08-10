@@ -29,23 +29,11 @@ const Auth = () => {
     lastName: '',
     role: 'inspector',
     companyName: '',
-    adminId: ''
+    uniqueId: '',
+    adminUniqueId: ''
   });
 
   const [loading, setLoading] = useState(false);
-  const [admins, setAdmins] = useState<Array<{id: string, first_name: string, last_name: string, company_name: string}>>([]);
-
-  // Load admins for inspector signup
-  useEffect(() => {
-    const fetchAdmins = async () => {
-      const { data } = await supabase
-        .from('profiles')
-        .select('id, first_name, last_name, company_name')
-        .eq('role', 'admin');
-      if (data) setAdmins(data);
-    };
-    fetchAdmins();
-  }, []);
 
   // Redirect if already authenticated
   if (user) {
@@ -89,7 +77,8 @@ const Auth = () => {
       signupForm.lastName, 
       signupForm.role,
       signupForm.role === 'admin' ? signupForm.companyName : undefined,
-      signupForm.role === 'inspector' ? signupForm.adminId : undefined
+      signupForm.role === 'admin' ? signupForm.uniqueId : undefined,
+      signupForm.role === 'inspector' ? signupForm.adminUniqueId : undefined
     );
     
     if (error) {
@@ -317,57 +306,65 @@ const Auth = () => {
                         </Select>
                       </div>
                       
-                      {/* Campo nome da empresa para administradores */}
+                      {/* Campos para administradores */}
                       {signupForm.role === 'admin' && (
+                        <>
+                          <div className="space-y-2">
+                            <Label htmlFor="company-name">Nome da Empresa</Label>
+                            <Input
+                              id="company-name"
+                              placeholder="Transportadora ABC Ltda"
+                              value={signupForm.companyName}
+                              onChange={(e) => setSignupForm(prev => ({
+                                ...prev,
+                                companyName: e.target.value
+                              }))}
+                              required
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="unique-id">ID Único da Empresa</Label>
+                            <Input
+                              id="unique-id"
+                              placeholder="ABCTRANS2024"
+                              value={signupForm.uniqueId}
+                              onChange={(e) => setSignupForm(prev => ({
+                                ...prev,
+                                uniqueId: e.target.value.toUpperCase()
+                              }))}
+                              required
+                            />
+                            <p className="text-sm text-muted-foreground">
+                              Este ID será usado pelos inspetores para se vincularem à sua empresa
+                            </p>
+                          </div>
+                        </>
+                      )}
+                      
+                      {/* Campo para inspetores */}
+                      {signupForm.role === 'inspector' && (
                         <div className="space-y-2">
-                          <Label htmlFor="company-name">Nome da Empresa</Label>
+                          <Label htmlFor="admin-unique-id">ID Único do Administrador</Label>
                           <Input
-                            id="company-name"
-                            placeholder="Transportadora ABC Ltda"
-                            value={signupForm.companyName}
+                            id="admin-unique-id"
+                            placeholder="Digite o ID único fornecido pelo administrador"
+                            value={signupForm.adminUniqueId}
                             onChange={(e) => setSignupForm(prev => ({
                               ...prev,
-                              companyName: e.target.value
+                              adminUniqueId: e.target.value.toUpperCase()
                             }))}
                             required
                           />
-                        </div>
-                      )}
-                      
-                      {/* Campo seleção de administrador para inspetores */}
-                      {signupForm.role === 'inspector' && (
-                        <div className="space-y-2">
-                          <Label htmlFor="admin-select">Selecionar Administrador</Label>
-                          <Select 
-                            value={signupForm.adminId} 
-                            onValueChange={(value) => setSignupForm(prev => ({
-                              ...prev,
-                              adminId: value
-                            }))}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Escolha um administrador" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {admins.map((admin) => (
-                                <SelectItem key={admin.id} value={admin.id}>
-                                  {admin.first_name} {admin.last_name} - {admin.company_name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          {admins.length === 0 && (
-                            <p className="text-sm text-muted-foreground">
-                              Nenhum administrador encontrado. Entre em contato com o suporte.
-                            </p>
-                          )}
+                          <p className="text-sm text-muted-foreground">
+                            Solicite o ID único ao administrador da sua empresa
+                          </p>
                         </div>
                       )}
                       
                       <Button 
                         type="submit" 
                         className="w-full" 
-                        disabled={loading || (signupForm.role === 'inspector' && !signupForm.adminId)}
+                        disabled={loading || (signupForm.role === 'inspector' && !signupForm.adminUniqueId) || (signupForm.role === 'admin' && (!signupForm.companyName || !signupForm.uniqueId))}
                       >
                         {loading ? 'Criando conta...' : 'Criar Conta'}
                       </Button>

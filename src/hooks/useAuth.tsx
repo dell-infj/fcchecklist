@@ -11,6 +11,7 @@ interface Profile {
   phone?: string;
   company_name?: string;
   admin_id?: string;
+  unique_id?: string;
 }
 
 interface AuthContextType {
@@ -19,7 +20,7 @@ interface AuthContextType {
   profile: Profile | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string, firstName: string, lastName: string, role?: string, companyName?: string, adminId?: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, firstName: string, lastName: string, role?: string, companyName?: string, uniqueId?: string, adminUniqueId?: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
 
@@ -76,7 +77,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return { error };
   };
 
-  const signUp = async (email: string, password: string, firstName: string, lastName: string, role: string = 'inspector', companyName?: string, adminId?: string) => {
+  const signUp = async (email: string, password: string, firstName: string, lastName: string, role: string = 'inspector', companyName?: string, uniqueId?: string, adminUniqueId?: string) => {
     const redirectUrl = `${window.location.origin}/`;
     
     const userData: any = {
@@ -89,8 +90,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       userData.company_name = companyName;
     }
 
-    if (adminId) {
-      userData.admin_id = adminId;
+    if (uniqueId) {
+      userData.unique_id = uniqueId;
+    }
+
+    if (adminUniqueId) {
+      userData.admin_unique_id = adminUniqueId;
     }
     
     const { error } = await supabase.auth.signUp({
