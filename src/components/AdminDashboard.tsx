@@ -588,8 +588,8 @@ const AdminDashboard = () => {
                 <div>
                   <Label>ID Único da Empresa *</Label>
                   <div className="text-xs text-muted-foreground mb-2">
-                    IDs disponíveis: {profile?.company_ids?.length || 0} 
-                    {profile?.company_ids?.length > 0 && ` (${profile.company_ids.join(', ')})`}
+                    IDs disponíveis: {profile?.unique_id ? 1 : 0} 
+                    {profile?.unique_id && ` (${profile.unique_id})`}
                   </div>
                   <Popover open={companyIdSearchOpen} onOpenChange={setCompanyIdSearchOpen}>
                     <PopoverTrigger asChild>
@@ -615,27 +615,24 @@ const AdminDashboard = () => {
                           </div>
                         </CommandEmpty>
                         <CommandGroup className="max-h-64 overflow-auto">
-                          {(profile?.company_ids && profile.company_ids.length > 0) ? (
-                            profile.company_ids.map((companyId, index) => (
-                              <CommandItem
-                                key={index}
-                                value={companyId}
-                                onSelect={() => {
-                                  setNewInspector(prev => ({...prev, company_id: companyId}));
-                                  setCompanyIdSearchOpen(false);
-                                }}
-                              >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    newInspector.company_id === companyId ? "opacity-100" : "opacity-0"
-                                  )}
-                                />
-                                <div className="flex items-center gap-2">
-                                  <Badge variant="secondary">{companyId}</Badge>
-                                </div>
-                              </CommandItem>
-                            ))
+                          {profile?.unique_id ? (
+                            <CommandItem
+                              value={profile.unique_id}
+                              onSelect={() => {
+                                setNewInspector(prev => ({...prev, company_id: profile.unique_id}));
+                                setCompanyIdSearchOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  newInspector.company_id === profile.unique_id ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              <div className="flex items-center gap-2">
+                                <Badge variant="secondary">{profile.unique_id}</Badge>
+                              </div>
+                            </CommandItem>
                           ) : (
                             <div className="p-4 text-center">
                               <p className="text-sm text-muted-foreground mb-2">Nenhum ID único configurado.</p>
