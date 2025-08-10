@@ -23,13 +23,13 @@ const Layout = ({ children }: LayoutProps) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/30">
+    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-accent/5">
       {/* Header */}
-      <header className="bg-card border-b shadow-card">
+      <header className="bg-card border-b border-border shadow-warm backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-gradient-warm rounded-lg flex items-center justify-center shadow-fleet">
                 <span className="text-white font-bold text-sm">CC</span>
               </div>
               <div>

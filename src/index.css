@@ -8,57 +8,60 @@ Cores em HSL para sistema de checklist de frota profissional
 
 @layer base {
   :root {
-    /* Core branding colors */
-    --background: 240 5% 98%;
-    --foreground: 220 15% 12%;
+    /* Nova paleta terrosa/laranja para sistema de frota */
+    --background: 0 0% 97%; /* F8F8F8 - fundo claro */
+    --foreground: 25 35% 15%; /* texto escuro com toque terroso */
 
     --card: 0 0% 100%;
-    --card-foreground: 220 15% 12%;
+    --card-foreground: 25 35% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 15% 12%;
+    --popover-foreground: 25 35% 15%;
 
-    /* Fleet blue - professional logistics theme */
-    --primary: 210 85% 35%;
+    /* Segurança (FF7A29) - Cor principal do sistema */
+    --primary: 22 95% 57%; /* #FF7A29 - laranja de segurança */
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 210 85% 42%;
-    --primary-glow: 210 85% 55%;
+    --primary-hover: 25 85% 65%; /* versão mais clara para hover */
+    --primary-glow: 20 100% 75%; /* #FFB380 - pastel para brilhos */
 
-    /* Secondary - neutral gray for cards */
-    --secondary: 215 15% 95%;
-    --secondary-foreground: 220 15% 25%;
+    /* Pastel (FFB380) - Secundária suave */
+    --secondary: 20 100% 75%; /* #FFB380 - laranja pastel */
+    --secondary-foreground: 25 35% 15%;
 
-    /* Muted backgrounds */
-    --muted: 215 15% 96%;
-    --muted-foreground: 220 8% 45%;
+    /* Fundos e neutros */
+    --muted: 0 0% 88%; /* #E0E0E0 - cinza */
+    --muted-foreground: 25 15% 45%;
 
-    /* Accent - orange for alerts/warnings */
-    --accent: 35 85% 55%;
+    /* Areia (CC5E1E) - Accent para destaques */
+    --accent: 25 74% 46%; /* #CC5E1E - tom terra */
     --accent-foreground: 0 0% 100%;
 
-    /* Status colors */
+    /* Estados de status - adaptados à nova paleta */
     --success: 145 70% 42%;
     --success-foreground: 0 0% 100%;
-    --warning: 45 85% 55%;
-    --warning-foreground: 0 0% 100%;
+    --warning: 45 100% 60%; /* amarelo que combina com laranja */
+    --warning-foreground: 25 35% 15%;
     --destructive: 0 75% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Borders and inputs */
-    --border: 215 15% 88%;
-    --input: 215 15% 92%;
-    --ring: 210 85% 35%;
+    /* Bordas e inputs - tons terrosos */
+    --border: 25 15% 85%; /* tom sutil de areia */
+    --input: 25 15% 90%;
+    --ring: 22 95% 57%; /* mesmo que primary */
 
     --radius: 0.75rem;
 
-    /* Fleet-specific design tokens */
+    /* Tokens dinâmicos com nova paleta terrosa */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
-    --gradient-secondary: linear-gradient(135deg, hsl(var(--secondary)), hsl(var(--background)));
-    --shadow-fleet: 0 8px 25px -5px hsl(var(--primary) / 0.1);
-    --shadow-card: 0 4px 15px -3px hsl(220 15% 12% / 0.08);
+    --gradient-secondary: linear-gradient(135deg, hsl(var(--secondary)), hsl(var(--accent)));
+    --gradient-warm: linear-gradient(45deg, hsl(var(--accent)), hsl(var(--primary)), hsl(var(--secondary)));
+    --shadow-fleet: 0 8px 25px -5px hsl(var(--primary) / 0.15);
+    --shadow-card: 0 4px 15px -3px hsl(var(--accent) / 0.12);
+    --shadow-warm: 0 10px 30px -10px hsl(var(--primary) / 0.2);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
-    --sidebar-background: 220 15% 96%;
+    /* Sidebar adaptada à paleta terrosa */
+    --sidebar-background: 25 15% 96%;
 
     --sidebar-foreground: 240 5.3% 26.1%;
 
@@ -121,5 +124,34 @@ Cores em HSL para sistema de checklist de frota profissional
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  /* Sombras dinâmicas com nova paleta */
+  .shadow-warm {
+    box-shadow: var(--shadow-warm);
+  }
+  
+  .shadow-fleet {
+    box-shadow: var(--shadow-fleet);
+  }
+  
+  /* Gradientes dinâmicos */
+  .bg-gradient-warm {
+    background: var(--gradient-warm);
+  }
+  
+  .bg-gradient-primary {
+    background: var(--gradient-primary);
+  }
+  
+  /* Animações suaves para interações */
+  .hover-lift {
+    @apply transition-all duration-300 hover:shadow-warm hover:-translate-y-1;
+  }
+  
+  .warm-glow {
+    @apply hover:shadow-[0_0_20px_hsl(var(--primary-glow)/0.4)] transition-all duration-300;
   }
 }

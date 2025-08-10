@@ -155,7 +155,7 @@ const AdminDashboard = () => {
           <p className="text-muted-foreground">Visão geral da frota e inspeções</p>
         </div>
         <div className="flex gap-2">
-          <Button className="gap-2">
+          <Button variant="warm" className="gap-2">
             <Plus className="h-4 w-4" />
             Novo Veículo
           </Button>
@@ -168,7 +168,7 @@ const AdminDashboard = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="shadow-card">
+        <Card className="shadow-fleet hover-lift warm-glow">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-primary/10 rounded-lg">
@@ -182,7 +182,7 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="shadow-card">
+        <Card className="shadow-fleet hover-lift">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-warning/10 rounded-lg">
@@ -196,7 +196,7 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="shadow-card">
+        <Card className="shadow-fleet hover-lift">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-success/10 rounded-lg">
@@ -210,7 +210,7 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="shadow-card">
+        <Card className="shadow-fleet hover-lift warm-glow">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-accent/10 rounded-lg">
