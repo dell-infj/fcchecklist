@@ -10,7 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Truck, Shield, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import fleetHeroImage from '@/assets/fleet-hero.jpg';
-import fcGestaoTransparent from '@/assets/fc-gestao-transparent.png';
 
 const Auth = () => {
   const { signIn, signUp, user } = useAuth();
@@ -106,29 +105,22 @@ const Auth = () => {
                 alt="Fleet Management System" 
                 className="w-full h-[600px] object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-black/40">
-                <div className="absolute inset-0 flex flex-col justify-center items-center text-white">
-                  <img 
-                    src={fcGestaoTransparent} 
-                    alt="FC GESTÃO" 
-                    className="w-72 h-72 mb-8 drop-shadow-2xl opacity-90"
-                  />
-                  <div className="text-center space-y-4">
-                    <h1 className="text-4xl font-bold">
-                      Sistema de Checklist Inteligente
-                    </h1>
-                    <p className="text-xl opacity-90">
-                      Transforme sua operação com tecnologia avançada
-                    </p>
-                    <div className="flex gap-6 justify-center mt-6">
-                      <div className="flex items-center gap-2">
-                        <Truck className="h-5 w-5" />
-                        <span>Gestão de Veículos</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Shield className="h-5 w-5" />
-                        <span>Inspeções Seguras</span>
-                      </div>
+              <div className="absolute inset-0 bg-gradient-to-t from-primary/90 to-transparent">
+                <div className="absolute bottom-8 left-8 text-white">
+                  <h1 className="text-4xl font-bold mb-4">
+                    Cargo Care Cam
+                  </h1>
+                  <p className="text-xl mb-6 opacity-90">
+                    Sistema profissional de checklist para frotas
+                  </p>
+                  <div className="flex gap-4">
+                    <div className="flex items-center gap-2">
+                      <Truck className="h-5 w-5" />
+                      <span>Gestão de Veículos</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Shield className="h-5 w-5" />
+                      <span>Inspeções Seguras</span>
                     </div>
                   </div>
                 </div>
@@ -140,10 +132,10 @@ const Auth = () => {
           <div className="w-full max-w-md mx-auto">
             <div className="text-center mb-8 lg:hidden">
               <h1 className="text-3xl font-bold text-primary mb-2">
-                Checklist
+                Cargo Care Cam
               </h1>
               <p className="text-muted-foreground">
-                Sistema de gestão inteligente
+                Sistema de checklist para frotas
               </p>
             </div>
 
