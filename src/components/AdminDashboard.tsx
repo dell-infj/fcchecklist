@@ -110,6 +110,8 @@ const AdminDashboard = () => {
 
   const loadDashboardData = async () => {
     try {
+      console.log('Loading dashboard data...', { profile });
+      console.log('Profile company_ids:', profile?.company_ids);
       // Get total vehicles
       const { count: vehicleCount } = await supabase
         .from('vehicles')
@@ -585,6 +587,10 @@ const AdminDashboard = () => {
                 </div>
                 <div>
                   <Label>ID Único da Empresa *</Label>
+                  <div className="text-xs text-muted-foreground mb-2">
+                    IDs disponíveis: {profile?.company_ids?.length || 0} 
+                    {profile?.company_ids?.length > 0 && ` (${profile.company_ids.join(', ')})`}
+                  </div>
                   <Popover open={companyIdSearchOpen} onOpenChange={setCompanyIdSearchOpen}>
                     <PopoverTrigger asChild>
                       <Button
@@ -609,26 +615,35 @@ const AdminDashboard = () => {
                           </div>
                         </CommandEmpty>
                         <CommandGroup className="max-h-64 overflow-auto">
-                          {(profile?.company_ids || []).map((companyId, index) => (
-                            <CommandItem
-                              key={index}
-                              value={companyId}
-                              onSelect={() => {
-                                setNewInspector(prev => ({...prev, company_id: companyId}));
-                                setCompanyIdSearchOpen(false);
-                              }}
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  newInspector.company_id === companyId ? "opacity-100" : "opacity-0"
-                                )}
-                              />
-                              <div className="flex items-center gap-2">
-                                <Badge variant="secondary">{companyId}</Badge>
-                              </div>
-                            </CommandItem>
-                          ))}
+                          {(profile?.company_ids && profile.company_ids.length > 0) ? (
+                            profile.company_ids.map((companyId, index) => (
+                              <CommandItem
+                                key={index}
+                                value={companyId}
+                                onSelect={() => {
+                                  setNewInspector(prev => ({...prev, company_id: companyId}));
+                                  setCompanyIdSearchOpen(false);
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    newInspector.company_id === companyId ? "opacity-100" : "opacity-0"
+                                  )}
+                                />
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="secondary">{companyId}</Badge>
+                                </div>
+                              </CommandItem>
+                            ))
+                          ) : (
+                            <div className="p-4 text-center">
+                              <p className="text-sm text-muted-foreground mb-2">Nenhum ID único configurado.</p>
+                              <p className="text-xs text-muted-foreground">
+                                Configure IDs únicos no seu perfil primeiro.
+                              </p>
+                            </div>
+                          )}
                         </CommandGroup>
                       </Command>
                     </PopoverContent>
