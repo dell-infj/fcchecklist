@@ -106,9 +106,17 @@ const Auth = () => {
                 className="w-full h-[600px] object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-primary/90 to-transparent">
+                {/* FC Logo */}
+                <div className="absolute top-8 right-8">
+                  <img 
+                    src="/lovable-uploads/8ca766ed-435b-41a5-b398-a52b283c8e31.png" 
+                    alt="FC Gestão" 
+                    className="h-24 w-auto"
+                  />
+                </div>
                 <div className="absolute bottom-8 left-8 text-white">
                   <h1 className="text-4xl font-bold mb-4">
-                    Cargo Care Cam
+                    FC checklist
                   </h1>
                   <p className="text-xl mb-6 opacity-90">
                     Sistema profissional de checklist para frotas
@@ -132,7 +140,7 @@ const Auth = () => {
           <div className="w-full max-w-md mx-auto">
             <div className="text-center mb-8 lg:hidden">
               <h1 className="text-3xl font-bold text-primary mb-2">
-                Cargo Care Cam
+                FC checklist
               </h1>
               <p className="text-muted-foreground">
                 Sistema de checklist para frotas
