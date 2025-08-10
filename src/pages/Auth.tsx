@@ -139,6 +139,13 @@ const Auth = () => {
           {/* Auth Forms */}
           <div className="w-full max-w-md mx-auto">
             <div className="text-center mb-8 lg:hidden">
+              <div className="mb-4">
+                <img 
+                  src="/lovable-uploads/8ca766ed-435b-41a5-b398-a52b283c8e31.png" 
+                  alt="FC Gestão" 
+                  className="h-20 w-auto mx-auto"
+                />
+              </div>
               <h1 className="text-3xl font-bold text-primary mb-2">
                 FC checklist
               </h1>
