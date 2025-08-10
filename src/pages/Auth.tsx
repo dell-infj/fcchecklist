@@ -107,11 +107,11 @@ const Auth = () => {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-primary/90 to-transparent">
                 {/* FC Logo */}
-                <div className="absolute top-8 right-8">
+                <div className="absolute inset-0 flex items-center justify-center">
                   <img 
                     src="/lovable-uploads/8ca766ed-435b-41a5-b398-a52b283c8e31.png" 
                     alt="FC Gestão" 
-                    className="h-24 w-auto"
+                    className="h-72 w-auto"
                   />
                 </div>
                 <div className="absolute bottom-8 left-8 text-white">
