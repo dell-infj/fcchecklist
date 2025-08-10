@@ -14,7 +14,156 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      checklists: {
+        Row: {
+          additional_notes: string | null
+          all_cabinets_latches: string | null
+          all_interior_lights: boolean | null
+          all_outside_lights: boolean | null
+          cigarette_lighter: string | null
+          created_at: string
+          exterior_photo_url: string | null
+          fire_extinguisher: boolean | null
+          id: string
+          inspection_date: string
+          inspector_id: string
+          inspector_signature: string | null
+          interior_photo_url: string | null
+          overall_condition: string | null
+          passenger_seat: boolean | null
+          status: string
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          additional_notes?: string | null
+          all_cabinets_latches?: string | null
+          all_interior_lights?: boolean | null
+          all_outside_lights?: boolean | null
+          cigarette_lighter?: string | null
+          created_at?: string
+          exterior_photo_url?: string | null
+          fire_extinguisher?: boolean | null
+          id?: string
+          inspection_date?: string
+          inspector_id: string
+          inspector_signature?: string | null
+          interior_photo_url?: string | null
+          overall_condition?: string | null
+          passenger_seat?: boolean | null
+          status?: string
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          additional_notes?: string | null
+          all_cabinets_latches?: string | null
+          all_interior_lights?: boolean | null
+          all_outside_lights?: boolean | null
+          cigarette_lighter?: string | null
+          created_at?: string
+          exterior_photo_url?: string | null
+          fire_extinguisher?: boolean | null
+          id?: string
+          inspection_date?: string
+          inspector_id?: string
+          inspector_signature?: string | null
+          interior_photo_url?: string | null
+          overall_condition?: string | null
+          passenger_seat?: boolean | null
+          status?: string
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checklists_inspector_id_fkey"
+            columns: ["inspector_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "checklists_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          first_name: string
+          id: string
+          last_name: string
+          phone: string | null
+          role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          first_name: string
+          id?: string
+          last_name: string
+          phone?: string | null
+          role?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          first_name?: string
+          id?: string
+          last_name?: string
+          phone?: string | null
+          role?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vehicles: {
+        Row: {
+          created_at: string
+          customer_name: string
+          customer_phone: string | null
+          id: string
+          license_plate: string | null
+          model: string | null
+          status: string
+          truck_number: string
+          updated_at: string
+          year: number | null
+        }
+        Insert: {
+          created_at?: string
+          customer_name: string
+          customer_phone?: string | null
+          id?: string
+          license_plate?: string | null
+          model?: string | null
+          status?: string
+          truck_number: string
+          updated_at?: string
+          year?: number | null
+        }
+        Update: {
+          created_at?: string
+          customer_name?: string
+          customer_phone?: string | null
+          id?: string
+          license_plate?: string | null
+          model?: string | null
+          status?: string
+          truck_number?: string
+          updated_at?: string
+          year?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

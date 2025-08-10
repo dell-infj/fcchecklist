@@ -1,0 +1,313 @@
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { ClipboardList, Truck, CheckCircle, Clock, Plus } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
+
+interface Vehicle {
+  id: string;
+  truck_number: string;
+  customer_name: string;
+  customer_phone?: string;
+  model?: string;
+  status: string;
+}
+
+interface MyChecklist {
+  id: string;
+  status: string;
+  inspection_date: string;
+  vehicle: {
+    truck_number: string;
+    customer_name: string;
+  };
+}
+
+const InspectorDashboard = () => {
+  const { profile } = useAuth();
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [myChecklists, setMyChecklists] = useState<MyChecklist[]>([]);
+  const [stats, setStats] = useState({
+    pending: 0,
+    completed: 0,
+    todayCompleted: 0
+  });
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (profile) {
+      loadInspectorData();
+    }
+  }, [profile]);
+
+  const loadInspectorData = async () => {
+    try {
+      // Get all active vehicles
+      const { data: vehicleData } = await supabase
+        .from('vehicles')
+        .select('*')
+        .eq('status', 'active')
+        .order('truck_number');
+
+      // Get my checklists
+      const { data: checklistData } = await supabase
+        .from('checklists')
+        .select(`
+          id,
+          status,
+          inspection_date,
+          vehicles (
+            truck_number,
+            customer_name
+          )
+        `)
+        .eq('inspector_id', profile?.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      // Calculate stats
+      const today = new Date().toISOString().split('T')[0];
+      const pending = checklistData?.filter(c => c.status === 'draft').length || 0;
+      const completed = checklistData?.filter(c => c.status === 'completed').length || 0;
+      const todayCompleted = checklistData?.filter(
+        c => c.status === 'completed' && c.inspection_date === today
+      ).length || 0;
+
+      setVehicles(vehicleData || []);
+      setMyChecklists(checklistData?.map(item => ({
+        id: item.id,
+        status: item.status,
+        inspection_date: item.inspection_date,
+        vehicle: {
+          truck_number: item.vehicles?.truck_number || '',
+          customer_name: item.vehicles?.customer_name || ''
+        }
+      })) || []);
+      setStats({ pending, completed, todayCompleted });
+
+    } catch (error) {
+      console.error('Error loading inspector data:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao carregar dados do inspetor",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const startNewInspection = async (vehicleId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('checklists')
+        .insert({
+          vehicle_id: vehicleId,
+          inspector_id: profile?.id,
+          status: 'draft'
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast({
+        title: "Nova inspeção iniciada",
+        description: "Checklist criado com sucesso!"
+      });
+
+      // Reload data to show the new checklist
+      loadInspectorData();
+    } catch (error) {
+      console.error('Error creating checklist:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao criar nova inspeção",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return <Badge variant="default" className="bg-success">Concluído</Badge>;
+      case 'draft':
+        return <Badge variant="secondary">Em Andamento</Badge>;
+      case 'reviewed':
+        return <Badge variant="outline">Revisado</Badge>;
+      default:
+        return <Badge variant="secondary">{status}</Badge>;
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {[...Array(3)].map((_, i) => (
+          <Card key={i} className="animate-pulse">
+            <CardContent className="p-6">
+              <div className="h-16 bg-muted rounded"></div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">Painel do Inspetor</h2>
+          <p className="text-muted-foreground">
+            Bem-vindo, {profile?.first_name}! Gerencie suas inspeções aqui.
+          </p>
+        </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="shadow-card">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-warning/10 rounded-lg">
+                <Clock className="h-6 w-6 text-warning" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Pendentes</p>
+                <p className="text-2xl font-bold">{stats.pending}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-card">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-success/10 rounded-lg">
+                <CheckCircle className="h-6 w-6 text-success" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Concluídas</p>
+                <p className="text-2xl font-bold">{stats.completed}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-card">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-primary/10 rounded-lg">
+                <ClipboardList className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Hoje</p>
+                <p className="text-2xl font-bold">{stats.todayCompleted}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Vehicles List */}
+      <Card className="shadow-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Truck className="h-5 w-5" />
+            Veículos Disponíveis
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {vehicles.length === 0 ? (
+            <p className="text-muted-foreground text-center py-6">
+              Nenhum veículo disponível para inspeção
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {vehicles.map((vehicle) => (
+                <Card key={vehicle.id} className="border">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-semibold">
+                          Caminhão {vehicle.truck_number}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {vehicle.customer_name}
+                        </p>
+                        {vehicle.model && (
+                          <p className="text-xs text-muted-foreground">
+                            {vehicle.model}
+                          </p>
+                        )}
+                      </div>
+                      <Button 
+                        size="sm" 
+                        onClick={() => startNewInspection(vehicle.id)}
+                        className="gap-2"
+                      >
+                        <Plus className="h-4 w-4" />
+                        Iniciar Inspeção
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* My Checklists */}
+      <Card className="shadow-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ClipboardList className="h-5 w-5" />
+            Minhas Inspeções
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {myChecklists.length === 0 ? (
+            <p className="text-muted-foreground text-center py-6">
+              Nenhuma inspeção encontrada
+            </p>
+          ) : (
+            <div className="space-y-4">
+              {myChecklists.map((checklist) => (
+                <div key={checklist.id} className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg">
+                  <div>
+                    <p className="font-medium">
+                      Caminhão {checklist.vehicle.truck_number}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {checklist.vehicle.customer_name}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(checklist.inspection_date).toLocaleDateString('pt-BR')}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {getStatusBadge(checklist.status)}
+                    {checklist.status === 'draft' && (
+                      <Button size="sm" variant="outline">
+                        Continuar
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default InspectorDashboard;
