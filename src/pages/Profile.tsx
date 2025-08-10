@@ -23,7 +23,7 @@ const Profile = () => {
     company_name: profile?.company_name || '',
     address: profile?.address || '',
     cnpj: profile?.cnpj || '',
-    company_ids: profile?.company_ids || []
+    company_ids: profile?.company_ids || (profile?.unique_id ? [profile.unique_id] : [])
   });
   
   const [newCompanyId, setNewCompanyId] = useState('');
@@ -58,6 +58,11 @@ const Profile = () => {
     
     setLoading(true);
     try {
+      // Ensure we include the original unique_id if it exists
+      const finalCompanyIds = formData.company_ids.length > 0 
+        ? formData.company_ids 
+        : (profile.unique_id ? [profile.unique_id] : []);
+
       const { error } = await supabase
         .from('profiles')
         .update({
@@ -67,7 +72,7 @@ const Profile = () => {
           company_name: formData.company_name,
           address: formData.address,
           cnpj: formData.cnpj,
-          company_ids: formData.company_ids,
+          company_ids: finalCompanyIds,
         })
         .eq('id', profile.id);
 
@@ -214,10 +219,18 @@ const Profile = () => {
               </Button>
             </div>
             
-            {formData.company_ids.length > 0 && (
+            {(formData.company_ids.length > 0 || profile?.unique_id) && (
               <div className="space-y-2">
                 <Label>IDs Cadastrados:</Label>
                 <div className="flex flex-wrap gap-2">
+                  {/* Show current unique_id if not in company_ids */}
+                  {profile?.unique_id && !formData.company_ids.includes(profile.unique_id) && (
+                    <div className="flex items-center gap-2 bg-primary/10 px-3 py-1 rounded-full text-sm border border-primary/20">
+                      <span className="font-medium">{profile.unique_id}</span>
+                      <span className="text-xs text-muted-foreground">(Original)</span>
+                    </div>
+                  )}
+                  {/* Show company_ids */}
                   {formData.company_ids.map((id, index) => (
                     <div
                       key={index}
