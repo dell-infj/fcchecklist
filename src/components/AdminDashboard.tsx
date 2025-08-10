@@ -6,9 +6,13 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Truck, CheckCircle, AlertCircle, Users, Plus, FileText } from 'lucide-react';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Truck, CheckCircle, AlertCircle, Users, Plus, FileText, Check, ChevronsUpDown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { cn } from '@/lib/utils';
 
 interface DashboardStats {
   totalVehicles: number;
@@ -33,6 +37,7 @@ interface RecentChecklist {
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  const { profile } = useAuth();
   const [stats, setStats] = useState<DashboardStats>({
     totalVehicles: 0,
     activeInspections: 0,
@@ -43,6 +48,7 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [isVehicleDialogOpen, setIsVehicleDialogOpen] = useState(false);
   const [isInspectorDialogOpen, setIsInspectorDialogOpen] = useState(false);
+  const [companyIdSearchOpen, setCompanyIdSearchOpen] = useState(false);
   const [newVehicle, setNewVehicle] = useState({
     truck_number: '',
     customer_name: '',
@@ -57,7 +63,7 @@ const AdminDashboard = () => {
     first_name: '',
     last_name: '',
     phone: '',
-    company_name: ''
+    company_id: '' // Mudado de company_name para company_id
   });
   const { toast } = useToast();
 
@@ -209,7 +215,7 @@ const AdminDashboard = () => {
             last_name: newInspector.last_name,
             role: 'inspector',
             phone: newInspector.phone,
-            company_name: newInspector.company_name
+            company_name: newInspector.company_id // Usar o ID selecionado como nome da empresa
           }
         }
       });
@@ -228,7 +234,7 @@ const AdminDashboard = () => {
         first_name: '',
         last_name: '',
         phone: '',
-        company_name: ''
+        company_id: ''
       });
       
       // Recarregar dados
@@ -415,18 +421,60 @@ const AdminDashboard = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="inspector_company">Empresa</Label>
-                  <Input
-                    id="inspector_company"
-                    value={newInspector.company_name}
-                    onChange={(e) => setNewInspector(prev => ({...prev, company_name: e.target.value}))}
-                    placeholder="Nome da empresa"
-                  />
+                  <Label>ID Único da Empresa *</Label>
+                  <Popover open={companyIdSearchOpen} onOpenChange={setCompanyIdSearchOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={companyIdSearchOpen}
+                        className="w-full justify-between"
+                      >
+                        {newInspector.company_id || "Selecionar ID da empresa..."}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0">
+                      <Command>
+                        <CommandInput placeholder="Pesquisar ID da empresa..." />
+                        <CommandEmpty>
+                          <div className="p-4 text-center">
+                            <p className="text-sm text-muted-foreground mb-2">Nenhum ID encontrado.</p>
+                            <p className="text-xs text-muted-foreground">
+                              Adicione IDs únicos no seu perfil primeiro.
+                            </p>
+                          </div>
+                        </CommandEmpty>
+                        <CommandGroup className="max-h-64 overflow-auto">
+                          {(profile?.company_ids || []).map((companyId, index) => (
+                            <CommandItem
+                              key={index}
+                              value={companyId}
+                              onSelect={() => {
+                                setNewInspector(prev => ({...prev, company_id: companyId}));
+                                setCompanyIdSearchOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  newInspector.company_id === companyId ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              <div className="flex items-center gap-2">
+                                <Badge variant="secondary">{companyId}</Badge>
+                              </div>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 <div className="flex gap-2 pt-4">
                   <Button 
                     onClick={handleCreateInspector}
-                    disabled={!newInspector.email || !newInspector.password || !newInspector.first_name || !newInspector.last_name}
+                    disabled={!newInspector.email || !newInspector.password || !newInspector.first_name || !newInspector.last_name || !newInspector.company_id}
                     className="flex-1"
                   >
                     Cadastrar
