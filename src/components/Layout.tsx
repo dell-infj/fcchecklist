@@ -29,11 +29,14 @@ const Layout = ({ children }: LayoutProps) => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-warm rounded-lg flex items-center justify-center shadow-fleet">
-                <span className="text-white font-bold text-sm">CC</span>
+              <div className="w-10 h-10 flex items-center justify-center">
+                <img 
+                  src="/lovable-uploads/3ff7c9af-3109-4509-bc5c-81649a11772f.png" 
+                  alt="FC Gestão Logo" 
+                  className="w-10 h-10 object-contain"
+                />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-primary">Cargo Care Cam</h1>
                 <p className="text-sm text-muted-foreground">Sistema de Checklist</p>
               </div>
             </div>
