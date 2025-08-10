@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Truck, Shield, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import fleetHeroImage from '@/assets/fleet-hero.jpg';
 
 const Auth = () => {
@@ -26,10 +27,25 @@ const Auth = () => {
     password: '',
     firstName: '',
     lastName: '',
-    role: 'inspector'
+    role: 'inspector',
+    companyName: '',
+    adminId: ''
   });
 
   const [loading, setLoading] = useState(false);
+  const [admins, setAdmins] = useState<Array<{id: string, first_name: string, last_name: string, company_name: string}>>([]);
+
+  // Load admins for inspector signup
+  useEffect(() => {
+    const fetchAdmins = async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, company_name')
+        .eq('role', 'admin');
+      if (data) setAdmins(data);
+    };
+    fetchAdmins();
+  }, []);
 
   // Redirect if already authenticated
   if (user) {
@@ -71,7 +87,9 @@ const Auth = () => {
       signupForm.password, 
       signupForm.firstName, 
       signupForm.lastName, 
-      signupForm.role
+      signupForm.role,
+      signupForm.role === 'admin' ? signupForm.companyName : undefined,
+      signupForm.role === 'inspector' ? signupForm.adminId : undefined
     );
     
     if (error) {
@@ -298,10 +316,58 @@ const Auth = () => {
                           </SelectContent>
                         </Select>
                       </div>
+                      
+                      {/* Campo nome da empresa para administradores */}
+                      {signupForm.role === 'admin' && (
+                        <div className="space-y-2">
+                          <Label htmlFor="company-name">Nome da Empresa</Label>
+                          <Input
+                            id="company-name"
+                            placeholder="Transportadora ABC Ltda"
+                            value={signupForm.companyName}
+                            onChange={(e) => setSignupForm(prev => ({
+                              ...prev,
+                              companyName: e.target.value
+                            }))}
+                            required
+                          />
+                        </div>
+                      )}
+                      
+                      {/* Campo seleção de administrador para inspetores */}
+                      {signupForm.role === 'inspector' && (
+                        <div className="space-y-2">
+                          <Label htmlFor="admin-select">Selecionar Administrador</Label>
+                          <Select 
+                            value={signupForm.adminId} 
+                            onValueChange={(value) => setSignupForm(prev => ({
+                              ...prev,
+                              adminId: value
+                            }))}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Escolha um administrador" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {admins.map((admin) => (
+                                <SelectItem key={admin.id} value={admin.id}>
+                                  {admin.first_name} {admin.last_name} - {admin.company_name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          {admins.length === 0 && (
+                            <p className="text-sm text-muted-foreground">
+                              Nenhum administrador encontrado. Entre em contato com o suporte.
+                            </p>
+                          )}
+                        </div>
+                      )}
+                      
                       <Button 
                         type="submit" 
                         className="w-full" 
-                        disabled={loading}
+                        disabled={loading || (signupForm.role === 'inspector' && !signupForm.adminId)}
                       >
                         {loading ? 'Criando conta...' : 'Criar Conta'}
                       </Button>

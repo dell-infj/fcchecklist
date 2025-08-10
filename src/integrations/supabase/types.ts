@@ -94,6 +94,8 @@ export type Database = {
       }
       profiles: {
         Row: {
+          admin_id: string | null
+          company_name: string | null
           created_at: string
           first_name: string
           id: string
@@ -104,6 +106,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          admin_id?: string | null
+          company_name?: string | null
           created_at?: string
           first_name: string
           id?: string
@@ -114,6 +118,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          admin_id?: string | null
+          company_name?: string | null
           created_at?: string
           first_name?: string
           id?: string
@@ -123,7 +129,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       vehicles: {
         Row: {

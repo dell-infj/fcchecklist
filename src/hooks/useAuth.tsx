@@ -9,6 +9,8 @@ interface Profile {
   last_name: string;
   role: 'admin' | 'inspector';
   phone?: string;
+  company_name?: string;
+  admin_id?: string;
 }
 
 interface AuthContextType {
@@ -17,7 +19,7 @@ interface AuthContextType {
   profile: Profile | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string, firstName: string, lastName: string, role?: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, firstName: string, lastName: string, role?: string, companyName?: string, adminId?: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
 
@@ -74,19 +76,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return { error };
   };
 
-  const signUp = async (email: string, password: string, firstName: string, lastName: string, role: string = 'inspector') => {
+  const signUp = async (email: string, password: string, firstName: string, lastName: string, role: string = 'inspector', companyName?: string, adminId?: string) => {
     const redirectUrl = `${window.location.origin}/`;
+    
+    const userData: any = {
+      first_name: firstName,
+      last_name: lastName,
+      role: role
+    };
+
+    if (companyName) {
+      userData.company_name = companyName;
+    }
+
+    if (adminId) {
+      userData.admin_id = adminId;
+    }
     
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: redirectUrl,
-        data: {
-          first_name: firstName,
-          last_name: lastName,
-          role: role
-        }
+        data: userData
       }
     });
     return { error };
