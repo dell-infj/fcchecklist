@@ -49,6 +49,9 @@ const AdminDashboard = () => {
   const [isVehicleDialogOpen, setIsVehicleDialogOpen] = useState(false);
   const [isInspectorDialogOpen, setIsInspectorDialogOpen] = useState(false);
   const [companyIdSearchOpen, setCompanyIdSearchOpen] = useState(false);
+  const [userSearchOpen, setUserSearchOpen] = useState(false);
+  const [searchUsers, setSearchUsers] = useState<any[]>([]);
+  const [userSearchQuery, setUserSearchQuery] = useState('');
   const [newVehicle, setNewVehicle] = useState({
     truck_number: '',
     customer_name: '',
@@ -58,18 +61,52 @@ const AdminDashboard = () => {
     customer_phone: ''
   });
   const [newInspector, setNewInspector] = useState({
+    user_id: '', // Para usuário existente
     email: '',
     password: '',
     first_name: '',
     last_name: '',
     phone: '',
-    company_id: '' // Mudado de company_name para company_id
+    company_id: '',
+    is_existing_user: false // Flag para saber se é usuário existente ou novo
   });
   const { toast } = useToast();
 
   useEffect(() => {
     loadDashboardData();
   }, []);
+
+  // Pesquisar usuários existentes
+  useEffect(() => {
+    const searchExistingUsers = async () => {
+      if (userSearchQuery.length < 2) {
+        setSearchUsers([]);
+        return;
+      }
+
+      try {
+        const { data } = await supabase
+          .from('profiles')
+          .select('id, user_id, first_name, last_name, role')
+          .neq('role', 'inspector') // Excluir quem já é inspetor
+          .or(`first_name.ilike.%${userSearchQuery}%,last_name.ilike.%${userSearchQuery}%`)
+          .limit(10);
+
+        // Buscar emails dos usuários (simplificado)
+        const usersWithEmails = (data || []).map(profile => ({
+          ...profile,
+          email: `${profile.first_name.toLowerCase()}.${profile.last_name.toLowerCase()}@email.com` // Placeholder
+        }));
+
+        setSearchUsers(usersWithEmails);
+      } catch (error) {
+        console.error('Error searching users:', error);
+      }
+    };
+
+    const debounceTimer = setTimeout(searchExistingUsers, 300);
+    return () => clearTimeout(debounceTimer);
+  }, [userSearchQuery]);
 
   const loadDashboardData = async () => {
     try {
@@ -206,36 +243,54 @@ const AdminDashboard = () => {
 
   const handleCreateInspector = async () => {
     try {
-      const { error } = await supabase.auth.signUp({
-        email: newInspector.email,
-        password: newInspector.password,
-        options: {
-          data: {
-            first_name: newInspector.first_name,
-            last_name: newInspector.last_name,
+      if (newInspector.is_existing_user) {
+        // Promover usuário existente a inspetor
+        const { error } = await supabase
+          .from('profiles')
+          .update({
             role: 'inspector',
-            phone: newInspector.phone,
-            company_name: newInspector.company_id // Usar o ID selecionado como nome da empresa
-          }
-        }
-      });
+            company_name: newInspector.company_id,
+            phone: newInspector.phone || null
+          })
+          .eq('id', newInspector.user_id);
 
-      if (error) throw error;
+        if (error) throw error;
+      } else {
+        // Criar novo usuário
+        const { error } = await supabase.auth.signUp({
+          email: newInspector.email,
+          password: newInspector.password,
+          options: {
+            data: {
+              first_name: newInspector.first_name,
+              last_name: newInspector.last_name,
+              role: 'inspector',
+              phone: newInspector.phone,
+              company_name: newInspector.company_id
+            }
+          }
+        });
+
+        if (error) throw error;
+      }
 
       toast({
         title: "Sucesso!",
-        description: "Inspetor cadastrado com sucesso"
+        description: newInspector.is_existing_user ? "Usuário promovido a inspetor com sucesso" : "Inspetor cadastrado com sucesso"
       });
 
       setIsInspectorDialogOpen(false);
       setNewInspector({
+        user_id: '',
         email: '',
         password: '',
         first_name: '',
         last_name: '',
         phone: '',
-        company_id: ''
+        company_id: '',
+        is_existing_user: false
       });
+      setUserSearchQuery('');
       
       // Recarregar dados
       loadDashboardData();
@@ -371,6 +426,111 @@ const AdminDashboard = () => {
                 <DialogTitle>Cadastrar Novo Inspetor</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
+                {/* Pesquisa de usuários existentes */}
+                <div className="space-y-2">
+                  <Label>Pesquisar Usuário Existente (Opcional)</Label>
+                  <Popover open={userSearchOpen} onOpenChange={setUserSearchOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={userSearchOpen}
+                        className="w-full justify-between"
+                      >
+                        {newInspector.is_existing_user ? 
+                          `${newInspector.first_name} ${newInspector.last_name}` :
+                          "Pesquisar usuário existente..."
+                        }
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0">
+                      <Command>
+                        <CommandInput 
+                          placeholder="Digite nome do usuário..." 
+                          value={userSearchQuery}
+                          onValueChange={setUserSearchQuery}
+                        />
+                        <CommandEmpty>
+                          {userSearchQuery.length < 2 ? 
+                            "Digite pelo menos 2 caracteres..." : 
+                            "Nenhum usuário encontrado."
+                          }
+                        </CommandEmpty>
+                        <CommandGroup className="max-h-64 overflow-auto">
+                          {searchUsers.map((user) => (
+                            <CommandItem
+                              key={user.id}
+                              value={`${user.first_name} ${user.last_name} ${user.email}`}
+                              onSelect={() => {
+                                setNewInspector(prev => ({
+                                  ...prev,
+                                  user_id: user.id,
+                                  first_name: user.first_name,
+                                  last_name: user.last_name,
+                                  email: user.email,
+                                  is_existing_user: true,
+                                  password: '' // Limpar senha pois não é necessário
+                                }));
+                                setUserSearchOpen(false);
+                                setUserSearchQuery('');
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  newInspector.user_id === user.id ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              <div className="flex flex-col">
+                                <span className="font-medium">
+                                  {user.first_name} {user.last_name}
+                                </span>
+                                <span className="text-sm text-muted-foreground">
+                                  {user.email}
+                                </span>
+                              </div>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                  {newInspector.is_existing_user && (
+                    <div className="text-xs text-muted-foreground p-2 bg-blue-50 rounded">
+                      Usuário existente selecionado. Será promovido a inspetor.
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">
+                      {newInspector.is_existing_user ? "Editar dados do usuário" : "Dados do novo inspetor"}
+                    </span>
+                    {newInspector.is_existing_user && (
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          setNewInspector({
+                            user_id: '',
+                            email: '',
+                            password: '',
+                            first_name: '',
+                            last_name: '',
+                            phone: '',
+                            company_id: '',
+                            is_existing_user: false
+                          });
+                          setUserSearchQuery('');
+                        }}
+                      >
+                        Criar Novo
+                      </Button>
+                    )}
+                  </div>
+                </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <Label htmlFor="inspector_first_name">Nome *</Label>
@@ -399,18 +559,21 @@ const AdminDashboard = () => {
                     value={newInspector.email}
                     onChange={(e) => setNewInspector(prev => ({...prev, email: e.target.value}))}
                     placeholder="joao@empresa.com"
+                    disabled={newInspector.is_existing_user}
                   />
                 </div>
-                <div>
-                  <Label htmlFor="inspector_password">Senha *</Label>
-                  <Input
-                    id="inspector_password"
-                    type="password"
-                    value={newInspector.password}
-                    onChange={(e) => setNewInspector(prev => ({...prev, password: e.target.value}))}
-                    placeholder="Mínimo 6 caracteres"
-                  />
-                </div>
+                {!newInspector.is_existing_user && (
+                  <div>
+                    <Label htmlFor="inspector_password">Senha *</Label>
+                    <Input
+                      id="inspector_password"
+                      type="password"
+                      value={newInspector.password}
+                      onChange={(e) => setNewInspector(prev => ({...prev, password: e.target.value}))}
+                      placeholder="Mínimo 6 caracteres"
+                    />
+                  </div>
+                )}
                 <div>
                   <Label htmlFor="inspector_phone">Telefone</Label>
                   <Input
@@ -474,7 +637,7 @@ const AdminDashboard = () => {
                 <div className="flex gap-2 pt-4">
                   <Button 
                     onClick={handleCreateInspector}
-                    disabled={!newInspector.email || !newInspector.password || !newInspector.first_name || !newInspector.last_name || !newInspector.company_id}
+                    disabled={!newInspector.first_name || !newInspector.last_name || !newInspector.company_id || (!newInspector.is_existing_user && (!newInspector.email || !newInspector.password))}
                     className="flex-1"
                   >
                     Cadastrar
