@@ -12,6 +12,9 @@ interface Profile {
   company_name?: string;
   admin_id?: string;
   unique_id?: string;
+  address?: string;
+  cnpj?: string;
+  company_ids?: string[];
 }
 
 interface AuthContextType {

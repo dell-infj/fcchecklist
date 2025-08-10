@@ -94,7 +94,10 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address: string | null
           admin_id: string | null
+          cnpj: string | null
+          company_ids: string[] | null
           company_name: string | null
           created_at: string
           first_name: string
@@ -107,7 +110,10 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          address?: string | null
           admin_id?: string | null
+          cnpj?: string | null
+          company_ids?: string[] | null
           company_name?: string | null
           created_at?: string
           first_name: string
@@ -120,7 +126,10 @@ export type Database = {
           user_id: string
         }
         Update: {
+          address?: string | null
           admin_id?: string | null
+          cnpj?: string | null
+          company_ids?: string[] | null
           company_name?: string | null
           created_at?: string
           first_name?: string

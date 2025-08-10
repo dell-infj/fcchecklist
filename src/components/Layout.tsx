@@ -39,7 +39,10 @@ const Layout = ({ children }: LayoutProps) => {
             </div>
             
             <div className="flex items-center gap-4">
-              <Card className="px-4 py-2">
+              <Card 
+                className="px-4 py-2 cursor-pointer hover:bg-accent transition-colors"
+                onClick={() => navigate('/profile')}
+              >
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4 text-primary" />
                   <div className="text-sm">
