@@ -82,11 +82,14 @@ const Auth = () => {
     );
     
     if (error) {
+      console.log('Signup error details:', error);
       toast({
         title: "Erro no cadastro",
         description: error.message === "User already registered"
           ? "Este email já está cadastrado"
-          : "Erro ao criar conta. Tente novamente.",
+          : error.message === "Email address format is invalid" || error.message.includes("Email address") || error.message.includes("invalid")
+          ? "Email inválido. Use um domínio válido como .com, .com.br, etc."
+          : `Erro ao criar conta: ${error.message}`,
         variant: "destructive"
       });
     } else {
@@ -272,6 +275,9 @@ const Auth = () => {
                           }))}
                           required
                         />
+                        <p className="text-xs text-muted-foreground">
+                          Use um email com domínio válido (.com, .com.br, .org, etc.)
+                        </p>
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="signup-password">Senha</Label>
