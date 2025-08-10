@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -31,6 +32,7 @@ interface RecentChecklist {
 }
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
   const [stats, setStats] = useState<DashboardStats>({
     totalVehicles: 0,
     activeInspections: 0,
@@ -40,6 +42,7 @@ const AdminDashboard = () => {
   const [recentChecklists, setRecentChecklists] = useState<RecentChecklist[]>([]);
   const [loading, setLoading] = useState(true);
   const [isVehicleDialogOpen, setIsVehicleDialogOpen] = useState(false);
+  const [isInspectorDialogOpen, setIsInspectorDialogOpen] = useState(false);
   const [newVehicle, setNewVehicle] = useState({
     truck_number: '',
     customer_name: '',
@@ -47,6 +50,15 @@ const AdminDashboard = () => {
     model: '',
     year: '',
     customer_phone: ''
+  });
+  const [newInspector, setNewInspector] = useState({
+    email: '',
+    password: '',
+    first_name: '',
+    last_name: '',
+    phone: '',
+    company_name: '',
+    unique_id: ''
   });
   const { toast } = useToast();
 
@@ -187,6 +199,53 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleCreateInspector = async () => {
+    try {
+      const { error } = await supabase.auth.signUp({
+        email: newInspector.email,
+        password: newInspector.password,
+        options: {
+          data: {
+            first_name: newInspector.first_name,
+            last_name: newInspector.last_name,
+            role: 'inspector',
+            phone: newInspector.phone,
+            company_name: newInspector.company_name,
+            unique_id: newInspector.unique_id
+          }
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso!",
+        description: "Inspetor cadastrado com sucesso"
+      });
+
+      setIsInspectorDialogOpen(false);
+      setNewInspector({
+        email: '',
+        password: '',
+        first_name: '',
+        last_name: '',
+        phone: '',
+        company_name: '',
+        unique_id: ''
+      });
+      
+      // Recarregar dados
+      loadDashboardData();
+    } catch (error) {
+      console.error('Error creating inspector:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao cadastrar inspetor",
+        variant: "destructive"
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -297,6 +356,104 @@ const AdminDashboard = () => {
               </div>
             </DialogContent>
           </Dialog>
+          <Dialog open={isInspectorDialogOpen} onOpenChange={setIsInspectorDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                <Users className="h-4 w-4" />
+                Novo Inspetor
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Cadastrar Novo Inspetor</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label htmlFor="inspector_first_name">Nome *</Label>
+                    <Input
+                      id="inspector_first_name"
+                      value={newInspector.first_name}
+                      onChange={(e) => setNewInspector(prev => ({...prev, first_name: e.target.value}))}
+                      placeholder="João"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="inspector_last_name">Sobrenome *</Label>
+                    <Input
+                      id="inspector_last_name"
+                      value={newInspector.last_name}
+                      onChange={(e) => setNewInspector(prev => ({...prev, last_name: e.target.value}))}
+                      placeholder="Silva"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="inspector_email">Email *</Label>
+                  <Input
+                    id="inspector_email"
+                    type="email"
+                    value={newInspector.email}
+                    onChange={(e) => setNewInspector(prev => ({...prev, email: e.target.value}))}
+                    placeholder="joao@empresa.com"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="inspector_password">Senha *</Label>
+                  <Input
+                    id="inspector_password"
+                    type="password"
+                    value={newInspector.password}
+                    onChange={(e) => setNewInspector(prev => ({...prev, password: e.target.value}))}
+                    placeholder="Mínimo 6 caracteres"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="inspector_phone">Telefone</Label>
+                  <Input
+                    id="inspector_phone"
+                    value={newInspector.phone}
+                    onChange={(e) => setNewInspector(prev => ({...prev, phone: e.target.value}))}
+                    placeholder="(11) 99999-9999"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="inspector_company">Empresa</Label>
+                  <Input
+                    id="inspector_company"
+                    value={newInspector.company_name}
+                    onChange={(e) => setNewInspector(prev => ({...prev, company_name: e.target.value}))}
+                    placeholder="Nome da empresa"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="inspector_unique_id">ID Único</Label>
+                  <Input
+                    id="inspector_unique_id"
+                    value={newInspector.unique_id}
+                    onChange={(e) => setNewInspector(prev => ({...prev, unique_id: e.target.value}))}
+                    placeholder="ID único do inspetor"
+                  />
+                </div>
+                <div className="flex gap-2 pt-4">
+                  <Button 
+                    onClick={handleCreateInspector}
+                    disabled={!newInspector.email || !newInspector.password || !newInspector.first_name || !newInspector.last_name}
+                    className="flex-1"
+                  >
+                    Cadastrar
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setIsInspectorDialogOpen(false)}
+                    className="flex-1"
+                  >
+                    Cancelar
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
           <Button 
             variant="outline" 
             className="gap-2"
@@ -396,10 +553,7 @@ const AdminDashboard = () => {
                   size="sm" 
                   variant="default" 
                   className="gap-2"
-                  onClick={() => toast({
-                    title: "Em desenvolvimento",
-                    description: "Funcionalidade de novo checklist será implementada em breve"
-                  })}
+                  onClick={() => navigate('/checklist/new')}
                 >
                   <Plus className="h-4 w-4" />
                   Novo Checklist
@@ -421,10 +575,7 @@ const AdminDashboard = () => {
               <Button 
                 variant="default" 
                 className="gap-2"
-                onClick={() => toast({
-                  title: "Em desenvolvimento",
-                  description: "Funcionalidade de novo checklist será implementada em breve"
-                })}
+                onClick={() => navigate('/checklist/new')}
               >
                 <Plus className="h-4 w-4" />
                 Criar Primeiro Checklist

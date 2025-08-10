@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -27,6 +28,7 @@ interface MyChecklist {
 }
 
 const InspectorDashboard = () => {
+  const navigate = useNavigate();
   const { profile } = useAuth();
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [myChecklists, setMyChecklists] = useState<MyChecklist[]>([]);
@@ -291,10 +293,7 @@ const InspectorDashboard = () => {
                   size="sm" 
                   variant="default" 
                   className="gap-2"
-                  onClick={() => toast({
-                    title: "Em desenvolvimento", 
-                    description: "Selecione um veículo acima para criar nova inspeção"
-                  })}
+                  onClick={() => navigate('/checklist/new')}
                 >
                   <Plus className="h-4 w-4" />
                   Nova Inspeção
@@ -316,13 +315,7 @@ const InspectorDashboard = () => {
               <Button 
                 variant="default" 
                 className="gap-2"
-                onClick={() => {
-                  document.querySelector('[data-vehicles-section]')?.scrollIntoView({ behavior: 'smooth' });
-                  toast({
-                    title: "Dica",
-                    description: "Selecione um veículo da lista acima para começar"
-                  });
-                }}
+                onClick={() => navigate('/checklist/new')}
               >
                 <Plus className="h-4 w-4" />
                 Criar Primeira Inspeção
