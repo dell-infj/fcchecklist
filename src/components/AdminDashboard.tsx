@@ -57,8 +57,7 @@ const AdminDashboard = () => {
     first_name: '',
     last_name: '',
     phone: '',
-    company_name: '',
-    unique_id: ''
+    company_name: ''
   });
   const { toast } = useToast();
 
@@ -210,8 +209,7 @@ const AdminDashboard = () => {
             last_name: newInspector.last_name,
             role: 'inspector',
             phone: newInspector.phone,
-            company_name: newInspector.company_name,
-            unique_id: newInspector.unique_id
+            company_name: newInspector.company_name
           }
         }
       });
@@ -230,8 +228,7 @@ const AdminDashboard = () => {
         first_name: '',
         last_name: '',
         phone: '',
-        company_name: '',
-        unique_id: ''
+        company_name: ''
       });
       
       // Recarregar dados
@@ -424,15 +421,6 @@ const AdminDashboard = () => {
                     value={newInspector.company_name}
                     onChange={(e) => setNewInspector(prev => ({...prev, company_name: e.target.value}))}
                     placeholder="Nome da empresa"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="inspector_unique_id">ID Único</Label>
-                  <Input
-                    id="inspector_unique_id"
-                    value={newInspector.unique_id}
-                    onChange={(e) => setNewInspector(prev => ({...prev, unique_id: e.target.value}))}
-                    placeholder="ID único do inspetor"
                   />
                 </div>
                 <div className="flex gap-2 pt-4">

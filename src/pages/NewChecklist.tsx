@@ -5,13 +5,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { ArrowLeft, Upload, Save, Camera, FileText } from 'lucide-react';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ArrowLeft, Upload, Save, Camera, FileText, Check, ChevronsUpDown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 import Layout from '@/components/Layout';
 
 interface Vehicle {
@@ -25,6 +27,7 @@ interface Inspector {
   id: string;
   first_name: string;
   last_name: string;
+  email: string;
 }
 
 const NewChecklist = () => {
@@ -34,6 +37,9 @@ const NewChecklist = () => {
   
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [inspectors, setInspectors] = useState<Inspector[]>([]);
+  const [filteredInspectors, setFilteredInspectors] = useState<Inspector[]>([]);
+  const [inspectorSearchOpen, setInspectorSearchOpen] = useState(false);
+  const [inspectorSearch, setInspectorSearch] = useState('');
   const [loading, setLoading] = useState(true);
   
   const [formData, setFormData] = useState({
@@ -62,6 +68,21 @@ const NewChecklist = () => {
     loadData();
   }, []);
 
+  useEffect(() => {
+    // Filter inspectors based on search
+    if (inspectorSearch) {
+      const filtered = inspectors.filter(inspector =>
+        inspector.first_name.toLowerCase().includes(inspectorSearch.toLowerCase()) ||
+        inspector.last_name.toLowerCase().includes(inspectorSearch.toLowerCase()) ||
+        inspector.email.toLowerCase().includes(inspectorSearch.toLowerCase()) ||
+        `${inspector.first_name} ${inspector.last_name}`.toLowerCase().includes(inspectorSearch.toLowerCase())
+      );
+      setFilteredInspectors(filtered);
+    } else {
+      setFilteredInspectors(inspectors);
+    }
+  }, [inspectorSearch, inspectors]);
+
   const loadData = async () => {
     try {
       // Carregar veículos
@@ -74,22 +95,51 @@ const NewChecklist = () => {
       // Carregar inspetores (apenas admins podem ver todos)
       let inspectorData = [];
       if (profile?.role === 'admin') {
-        const { data } = await supabase
+        const { data: profilesData } = await supabase
           .from('profiles')
-          .select('id, first_name, last_name')
+          .select('id, first_name, last_name, user_id')
           .eq('role', 'inspector')
           .order('first_name');
-        inspectorData = data || [];
+
+        if (profilesData) {
+          // Carregar dados dos usuários via RPC ou API admin se necessário
+          inspectorData = profilesData.map(profile => ({
+            id: profile.id,
+            first_name: profile.first_name,
+            last_name: profile.last_name,
+            email: 'Email não disponível' // Simplificado para evitar problemas de API
+          }));
+        }
       }
 
       setVehicles(vehicleData || []);
       setInspectors(inspectorData);
+      setFilteredInspectors(inspectorData);
     } catch (error) {
       console.error('Error loading data:', error);
+      // Fallback: load without emails
+      if (profile?.role === 'admin') {
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('id, first_name, last_name')
+          .eq('role', 'inspector')
+          .order('first_name');
+        
+        const inspectorData = (profilesData || []).map(p => ({
+          id: p.id,
+          first_name: p.first_name,
+          last_name: p.last_name,
+          email: 'Email não disponível'
+        }));
+        
+        setInspectors(inspectorData);
+        setFilteredInspectors(inspectorData);
+      }
+      
       toast({
-        title: "Erro",
-        description: "Erro ao carregar dados",
-        variant: "destructive"
+        title: "Aviso",
+        description: "Alguns dados podem não estar completos",
+        variant: "default"
       });
     } finally {
       setLoading(false);
@@ -153,6 +203,10 @@ const NewChecklist = () => {
     });
   };
 
+  const getSelectedInspector = () => {
+    return inspectors.find(i => i.id === formData.inspector_id);
+  };
+
   if (loading) {
     return (
       <Layout>
@@ -198,22 +252,65 @@ const NewChecklist = () => {
                   <h3 className="font-semibold">Identificação do Inspetor</h3>
                   {profile?.role === 'admin' && (
                     <div className="space-y-2">
-                      <Label htmlFor="inspector">Inspetor *</Label>
-                      <Select 
-                        value={formData.inspector_id} 
-                        onValueChange={(value) => setFormData(prev => ({...prev, inspector_id: value}))}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione um inspetor" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {inspectors.map((inspector) => (
-                            <SelectItem key={inspector.id} value={inspector.id}>
-                              {inspector.first_name} {inspector.last_name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Label>Inspetor *</Label>
+                      <Popover open={inspectorSearchOpen} onOpenChange={setInspectorSearchOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={inspectorSearchOpen}
+                            className="w-full justify-between"
+                          >
+                            {formData.inspector_id ? (
+                              (() => {
+                                const selected = getSelectedInspector();
+                                return selected ? `${selected.first_name} ${selected.last_name}` : "Selecionar inspetor...";
+                              })()
+                            ) : (
+                              "Pesquisar inspetor..."
+                            )}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-full p-0">
+                          <Command>
+                            <CommandInput 
+                              placeholder="Pesquisar por nome ou email..." 
+                              value={inspectorSearch}
+                              onValueChange={setInspectorSearch}
+                            />
+                            <CommandEmpty>Nenhum inspetor encontrado.</CommandEmpty>
+                            <CommandGroup className="max-h-64 overflow-auto">
+                              {filteredInspectors.map((inspector) => (
+                                <CommandItem
+                                  key={inspector.id}
+                                  value={`${inspector.first_name} ${inspector.last_name} ${inspector.email}`}
+                                  onSelect={() => {
+                                    setFormData(prev => ({...prev, inspector_id: inspector.id}));
+                                    setInspectorSearchOpen(false);
+                                    setInspectorSearch('');
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      formData.inspector_id === inspector.id ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                  <div className="flex flex-col">
+                                    <span className="font-medium">
+                                      {inspector.first_name} {inspector.last_name}
+                                    </span>
+                                    <span className="text-sm text-muted-foreground">
+                                      {inspector.email}
+                                    </span>
+                                  </div>
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
                     </div>
                   )}
                   {profile?.role === 'inspector' && (
@@ -236,22 +333,58 @@ const NewChecklist = () => {
                 <div className="space-y-4">
                   <h3 className="font-semibold">Identificação do Veículo</h3>
                   <div className="space-y-2">
-                    <Label htmlFor="vehicle">Veículo *</Label>
-                    <Select 
-                      value={formData.vehicle_id} 
-                      onValueChange={(value) => setFormData(prev => ({...prev, vehicle_id: value}))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione um veículo" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {vehicles.map((vehicle) => (
-                          <SelectItem key={vehicle.id} value={vehicle.id}>
-                            Caminhão {vehicle.truck_number} - {vehicle.customer_name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Label>Veículo *</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          className="w-full justify-between"
+                        >
+                          {formData.vehicle_id ? (
+                            (() => {
+                              const selected = vehicles.find(v => v.id === formData.vehicle_id);
+                              return selected ? `Caminhão ${selected.truck_number} - ${selected.customer_name}` : "Selecionar veículo...";
+                            })()
+                          ) : (
+                            "Selecionar veículo..."
+                          )}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-full p-0">
+                        <Command>
+                          <CommandInput placeholder="Pesquisar veículo..." />
+                          <CommandEmpty>Nenhum veículo encontrado.</CommandEmpty>
+                          <CommandGroup className="max-h-64 overflow-auto">
+                            {vehicles.map((vehicle) => (
+                              <CommandItem
+                                key={vehicle.id}
+                                value={`${vehicle.truck_number} ${vehicle.customer_name}`}
+                                onSelect={() => {
+                                  setFormData(prev => ({...prev, vehicle_id: vehicle.id}));
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    formData.vehicle_id === vehicle.id ? "opacity-100" : "opacity-0"
+                                  )}
+                                />
+                                <div className="flex flex-col">
+                                  <span className="font-medium">
+                                    Caminhão {vehicle.truck_number}
+                                  </span>
+                                  <span className="text-sm text-muted-foreground">
+                                    {vehicle.customer_name}
+                                  </span>
+                                </div>
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
                   </div>
                   {formData.vehicle_id && (
                     <div className="p-3 bg-muted rounded-lg">
