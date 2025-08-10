@@ -216,7 +216,7 @@ const InspectorDashboard = () => {
       </div>
 
       {/* Vehicles List */}
-      <Card className="shadow-card">
+      <Card className="shadow-card" data-vehicles-section>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Truck className="h-5 w-5" />
@@ -268,16 +268,66 @@ const InspectorDashboard = () => {
       {/* My Checklists */}
       <Card className="shadow-card">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ClipboardList className="h-5 w-5" />
-            Minhas Inspeções
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <ClipboardList className="h-5 w-5" />
+              Minhas Inspeções
+            </CardTitle>
+            {myChecklists.length > 0 && (
+              <div className="flex gap-2">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="gap-2"
+                  onClick={() => toast({
+                    title: "Em desenvolvimento",
+                    description: "Funcionalidade de filtros será implementada em breve"
+                  })}
+                >
+                  <ClipboardList className="h-4 w-4" />
+                  Ver Todas
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="default" 
+                  className="gap-2"
+                  onClick={() => toast({
+                    title: "Em desenvolvimento", 
+                    description: "Selecione um veículo acima para criar nova inspeção"
+                  })}
+                >
+                  <Plus className="h-4 w-4" />
+                  Nova Inspeção
+                </Button>
+              </div>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           {myChecklists.length === 0 ? (
-            <p className="text-muted-foreground text-center py-6">
-              Nenhuma inspeção encontrada
-            </p>
+            <div className="text-center py-12">
+              <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
+                <ClipboardList className="h-12 w-12 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-medium mb-2">Nenhuma inspeção encontrada</h3>
+              <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
+                Comece selecionando um veículo acima para criar sua primeira inspeção.
+              </p>
+              <Button 
+                variant="default" 
+                className="gap-2"
+                onClick={() => {
+                  document.querySelector('[data-vehicles-section]')?.scrollIntoView({ behavior: 'smooth' });
+                  toast({
+                    title: "Dica",
+                    description: "Selecione um veículo da lista acima para começar"
+                  });
+                }}
+              >
+                <Plus className="h-4 w-4" />
+                Criar Primeira Inspeção
+              </Button>
+            </div>
           ) : (
             <div className="space-y-4">
               {myChecklists.map((checklist) => (

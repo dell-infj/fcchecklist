@@ -373,16 +373,63 @@ const AdminDashboard = () => {
       {/* Recent Checklists */}
       <Card className="shadow-card">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Checklists Recentes
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Checklists Recentes
+            </CardTitle>
+            {recentChecklists.length > 0 && (
+              <div className="flex gap-2">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="gap-2"
+                  onClick={() => toast({
+                    title: "Em desenvolvimento",
+                    description: "Funcionalidade de filtros será implementada em breve"
+                  })}
+                >
+                  <FileText className="h-4 w-4" />
+                  Ver Todos
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="default" 
+                  className="gap-2"
+                  onClick={() => toast({
+                    title: "Em desenvolvimento",
+                    description: "Funcionalidade de novo checklist será implementada em breve"
+                  })}
+                >
+                  <Plus className="h-4 w-4" />
+                  Novo Checklist
+                </Button>
+              </div>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           {recentChecklists.length === 0 ? (
-            <p className="text-muted-foreground text-center py-6">
-              Nenhum checklist encontrado
-            </p>
+            <div className="text-center py-12">
+              <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
+                <FileText className="h-12 w-12 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-medium mb-2">Nenhum checklist encontrado</h3>
+              <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
+                Comece criando seu primeiro checklist de inspeção para acompanhar as verificações da frota.
+              </p>
+              <Button 
+                variant="default" 
+                className="gap-2"
+                onClick={() => toast({
+                  title: "Em desenvolvimento",
+                  description: "Funcionalidade de novo checklist será implementada em breve"
+                })}
+              >
+                <Plus className="h-4 w-4" />
+                Criar Primeiro Checklist
+              </Button>
+            </div>
           ) : (
             <div className="space-y-4">
               {recentChecklists.map((checklist) => (
