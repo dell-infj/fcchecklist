@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Truck, CheckCircle, AlertCircle, Users, Plus, FileText } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -36,6 +39,15 @@ const AdminDashboard = () => {
   });
   const [recentChecklists, setRecentChecklists] = useState<RecentChecklist[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isVehicleDialogOpen, setIsVehicleDialogOpen] = useState(false);
+  const [newVehicle, setNewVehicle] = useState({
+    truck_number: '',
+    customer_name: '',
+    license_plate: '',
+    model: '',
+    year: '',
+    customer_phone: ''
+  });
   const { toast } = useToast();
 
   useEffect(() => {
@@ -133,6 +145,48 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleCreateVehicle = async () => {
+    try {
+      const { error } = await supabase
+        .from('vehicles')
+        .insert([{
+          truck_number: newVehicle.truck_number,
+          customer_name: newVehicle.customer_name,
+          license_plate: newVehicle.license_plate || null,
+          model: newVehicle.model || null,
+          year: newVehicle.year ? parseInt(newVehicle.year) : null,
+          customer_phone: newVehicle.customer_phone || null
+        }]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso!",
+        description: "Veículo cadastrado com sucesso"
+      });
+
+      setIsVehicleDialogOpen(false);
+      setNewVehicle({
+        truck_number: '',
+        customer_name: '',
+        license_plate: '',
+        model: '',
+        year: '',
+        customer_phone: ''
+      });
+      
+      // Recarregar dados
+      loadDashboardData();
+    } catch (error) {
+      console.error('Error creating vehicle:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao cadastrar veículo",
+        variant: "destructive"
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -155,11 +209,102 @@ const AdminDashboard = () => {
           <p className="text-muted-foreground">Visão geral da frota e inspeções</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="warm" className="gap-2">
-            <Plus className="h-4 w-4" />
-            Novo Veículo
-          </Button>
-          <Button variant="outline" className="gap-2">
+          <Dialog open={isVehicleDialogOpen} onOpenChange={setIsVehicleDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="default" className="gap-2">
+                <Plus className="h-4 w-4" />
+                Novo Veículo
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Cadastrar Novo Veículo</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="truck_number">Número do Caminhão *</Label>
+                  <Input
+                    id="truck_number"
+                    value={newVehicle.truck_number}
+                    onChange={(e) => setNewVehicle(prev => ({...prev, truck_number: e.target.value}))}
+                    placeholder="Ex: CAM-001"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="customer_name">Nome do Cliente *</Label>
+                  <Input
+                    id="customer_name"
+                    value={newVehicle.customer_name}
+                    onChange={(e) => setNewVehicle(prev => ({...prev, customer_name: e.target.value}))}
+                    placeholder="Ex: Transportadora ABC"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="license_plate">Placa</Label>
+                  <Input
+                    id="license_plate"
+                    value={newVehicle.license_plate}
+                    onChange={(e) => setNewVehicle(prev => ({...prev, license_plate: e.target.value}))}
+                    placeholder="Ex: ABC-1234"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label htmlFor="model">Modelo</Label>
+                    <Input
+                      id="model"
+                      value={newVehicle.model}
+                      onChange={(e) => setNewVehicle(prev => ({...prev, model: e.target.value}))}
+                      placeholder="Ex: Volvo FH"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="year">Ano</Label>
+                    <Input
+                      id="year"
+                      type="number"
+                      value={newVehicle.year}
+                      onChange={(e) => setNewVehicle(prev => ({...prev, year: e.target.value}))}
+                      placeholder="2024"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="customer_phone">Telefone do Cliente</Label>
+                  <Input
+                    id="customer_phone"
+                    value={newVehicle.customer_phone}
+                    onChange={(e) => setNewVehicle(prev => ({...prev, customer_phone: e.target.value}))}
+                    placeholder="(11) 99999-9999"
+                  />
+                </div>
+                <div className="flex gap-2 pt-4">
+                  <Button 
+                    onClick={handleCreateVehicle}
+                    disabled={!newVehicle.truck_number || !newVehicle.customer_name}
+                    className="flex-1"
+                  >
+                    Cadastrar
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setIsVehicleDialogOpen(false)}
+                    className="flex-1"
+                  >
+                    Cancelar
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+          <Button 
+            variant="outline" 
+            className="gap-2"
+            onClick={() => toast({
+              title: "Em desenvolvimento",
+              description: "Funcionalidade de relatórios será implementada em breve"
+            })}
+          >
             <FileText className="h-4 w-4" />
             Relatórios
           </Button>
