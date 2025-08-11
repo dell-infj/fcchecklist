@@ -32,6 +32,7 @@ export type Database = {
           overall_condition: string | null
           passenger_seat: boolean | null
           status: string
+          unique_id: string | null
           updated_at: string
           vehicle_id: string
         }
@@ -52,6 +53,7 @@ export type Database = {
           overall_condition?: string | null
           passenger_seat?: boolean | null
           status?: string
+          unique_id?: string | null
           updated_at?: string
           vehicle_id: string
         }
@@ -72,6 +74,7 @@ export type Database = {
           overall_condition?: string | null
           passenger_seat?: boolean | null
           status?: string
+          unique_id?: string | null
           updated_at?: string
           vehicle_id?: string
         }
@@ -161,6 +164,7 @@ export type Database = {
           model: string | null
           status: string
           truck_number: string
+          unique_id: string | null
           updated_at: string
           year: number | null
         }
@@ -173,6 +177,7 @@ export type Database = {
           model?: string | null
           status?: string
           truck_number: string
+          unique_id?: string | null
           updated_at?: string
           year?: number | null
         }
@@ -185,6 +190,7 @@ export type Database = {
           model?: string | null
           status?: string
           truck_number?: string
+          unique_id?: string | null
           updated_at?: string
           year?: number | null
         }
