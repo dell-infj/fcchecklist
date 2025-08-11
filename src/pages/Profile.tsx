@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -198,12 +199,27 @@ const Profile = () => {
           </Card>
         </div>
 
-        {/* IDs Únicos da Empresa */}
+        {/* ID Único Principal */}
+        <Card className="border-primary/20 bg-primary/5">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              ID Único Principal
+              <Badge variant="default" className="bg-primary">
+                {profile?.unique_id || 'Não definido'}
+              </Badge>
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Este é o ID principal do seu cadastro, usado para conectar sua equipe
+            </p>
+          </CardHeader>
+        </Card>
+
+        {/* IDs Únicos Adicionais */}
         <Card>
           <CardHeader>
-            <CardTitle>IDs Únicos da Empresa</CardTitle>
+            <CardTitle>IDs Únicos Adicionais</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Adicione múltiplos IDs únicos para referenciar nos veículos
+              Adicione IDs únicos de outras empresas para trabalhar em múltiplas equipes
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
