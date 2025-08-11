@@ -9,6 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Plus, Edit, Trash2, GripVertical, Save, Settings, ArrowUp, ArrowDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import Layout from '@/components/Layout';
 
 interface ChecklistItem {
@@ -23,56 +25,9 @@ interface ChecklistItem {
 const ChecklistEditor = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [items, setItems] = useState<ChecklistItem[]>([
-    {
-      id: '1',
-      name: 'Todas as luzes internas funcionando',
-      description: 'Verificar se todas as luzes internas estão funcionando corretamente',
-      category: 'interior',
-      required: true,
-      order: 1
-    },
-    {
-      id: '2',
-      name: 'Banco do passageiro',
-      description: 'Verificar condições do banco do passageiro',
-      category: 'interior',
-      required: true,
-      order: 2
-    },
-    {
-      id: '3',
-      name: 'Extintor de incêndio',
-      description: 'Verificar presença e validade do extintor',
-      category: 'safety',
-      required: true,
-      order: 3
-    },
-    {
-      id: '4',
-      name: 'Todas as luzes externas funcionando',
-      description: 'Verificar luzes externas, faróis, lanternas',
-      category: 'exterior',
-      required: true,
-      order: 4
-    },
-    {
-      id: '5',
-      name: 'Fechaduras de todos os armários',
-      description: 'Testar fechaduras dos compartimentos de carga',
-      category: 'mechanical',
-      required: false,
-      order: 5
-    },
-    {
-      id: '6',
-      name: 'Acendedor de cigarro',
-      description: 'Verificar funcionamento do acendedor',
-      category: 'interior',
-      required: false,
-      order: 6
-    }
-  ]);
+  const { profile } = useAuth();
+  const [items, setItems] = useState<ChecklistItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -84,6 +39,10 @@ const ChecklistEditor = () => {
     required: false
   });
 
+  useEffect(() => {
+    loadChecklistItems();
+  }, []);
+
   const categories = [
     { value: 'interior', label: 'Interior', color: 'bg-blue-100 text-blue-800' },
     { value: 'exterior', label: 'Exterior', color: 'bg-green-100 text-green-800' },
@@ -91,11 +50,43 @@ const ChecklistEditor = () => {
     { value: 'mechanical', label: 'Mecânico', color: 'bg-yellow-100 text-yellow-800' }
   ];
 
+  const loadChecklistItems = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('checklist_items')
+        .select('*')
+        .eq('active', true)
+        .order('item_order');
+
+      if (error) throw error;
+
+      const checklistItems: ChecklistItem[] = (data || []).map(item => ({
+        id: item.id,
+        name: item.name,
+        description: item.description,
+        category: item.category as ChecklistItem['category'],
+        required: item.required,
+        order: item.item_order
+      }));
+
+      setItems(checklistItems);
+    } catch (error) {
+      console.error('Error loading checklist items:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao carregar itens do checklist",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getCategoryInfo = (category: string) => {
     return categories.find(c => c.value === category) || categories[0];
   };
 
-  const moveItem = (index: number, direction: 'up' | 'down') => {
+  const moveItem = async (index: number, direction: 'up' | 'down') => {
     const newIndex = direction === 'up' ? index - 1 : index + 1;
     if (newIndex < 0 || newIndex >= items.length) return;
 
@@ -109,15 +100,37 @@ const ChecklistEditor = () => {
       order: idx + 1
     }));
 
-    setItems(updatedItems);
-    
-    toast({
-      title: "Ordem atualizada",
-      description: "A ordem dos itens foi alterada com sucesso"
-    });
+    try {
+      // Atualizar ordem no banco de dados
+      const updates = updatedItems.map(item => ({
+        id: item.id,
+        item_order: item.order
+      }));
+
+      for (const update of updates) {
+        await supabase
+          .from('checklist_items')
+          .update({ item_order: update.item_order })
+          .eq('id', update.id);
+      }
+
+      setItems(updatedItems);
+      
+      toast({
+        title: "Ordem atualizada",
+        description: "A ordem dos itens foi alterada com sucesso"
+      });
+    } catch (error) {
+      console.error('Error updating order:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar ordem dos itens",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (!formData.name.trim()) {
       toast({
         title: "Nome obrigatório",
@@ -127,26 +140,50 @@ const ChecklistEditor = () => {
       return;
     }
 
-    const newItem: ChecklistItem = {
-      id: Date.now().toString(),
-      name: formData.name,
-      description: formData.description,
-      category: formData.category,
-      required: formData.required,
-      order: items.length + 1
-    };
+    try {
+      const { data, error } = await supabase
+        .from('checklist_items')
+        .insert({
+          name: formData.name,
+          description: formData.description,
+          category: formData.category,
+          required: formData.required,
+          item_order: items.length + 1,
+          unique_id: profile?.unique_id
+        })
+        .select()
+        .single();
 
-    setItems(prev => [...prev, newItem]);
-    setFormData({ name: '', description: '', category: 'interior', required: false });
-    setIsAddDialogOpen(false);
+      if (error) throw error;
 
-    toast({
-      title: "Item adicionado",
-      description: "Novo item foi adicionado ao checklist"
-    });
+      const newItem: ChecklistItem = {
+        id: data.id,
+        name: data.name,
+        description: data.description,
+        category: data.category as ChecklistItem['category'],
+        required: data.required,
+        order: data.item_order
+      };
+
+      setItems(prev => [...prev, newItem]);
+      setFormData({ name: '', description: '', category: 'interior', required: false });
+      setIsAddDialogOpen(false);
+
+      toast({
+        title: "Item adicionado",
+        description: "Novo item foi adicionado ao checklist"
+      });
+    } catch (error) {
+      console.error('Error adding item:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao adicionar item",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleEdit = () => {
+  const handleEdit = async () => {
     if (!currentItem || !formData.name.trim()) {
       toast({
         title: "Nome obrigatório",
@@ -156,29 +193,66 @@ const ChecklistEditor = () => {
       return;
     }
 
-    setItems(prev => prev.map(item => 
-      item.id === currentItem.id 
-        ? { ...item, name: formData.name, description: formData.description, category: formData.category, required: formData.required }
-        : item
-    ));
+    try {
+      const { error } = await supabase
+        .from('checklist_items')
+        .update({
+          name: formData.name,
+          description: formData.description,
+          category: formData.category,
+          required: formData.required
+        })
+        .eq('id', currentItem.id);
 
-    setIsEditDialogOpen(false);
-    setCurrentItem(null);
-    setFormData({ name: '', description: '', category: 'interior', required: false });
+      if (error) throw error;
 
-    toast({
-      title: "Item atualizado",
-      description: "Item foi atualizado com sucesso"
-    });
+      setItems(prev => prev.map(item => 
+        item.id === currentItem.id 
+          ? { ...item, name: formData.name, description: formData.description, category: formData.category, required: formData.required }
+          : item
+      ));
+
+      setIsEditDialogOpen(false);
+      setCurrentItem(null);
+      setFormData({ name: '', description: '', category: 'interior', required: false });
+
+      toast({
+        title: "Item atualizado",
+        description: "Item foi atualizado com sucesso"
+      });
+    } catch (error) {
+      console.error('Error updating item:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar item",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleDelete = (id: string) => {
-    setItems(prev => prev.filter(item => item.id !== id));
-    
-    toast({
-      title: "Item removido",
-      description: "Item foi removido do checklist"
-    });
+  const handleDelete = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('checklist_items')
+        .update({ active: false })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setItems(prev => prev.filter(item => item.id !== id));
+      
+      toast({
+        title: "Item removido",
+        description: "Item foi removido do checklist"
+      });
+    } catch (error) {
+      console.error('Error deleting item:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao remover item",
+        variant: "destructive"
+      });
+    }
   };
 
   const openEditDialog = (item: ChecklistItem) => {
@@ -193,56 +267,35 @@ const ChecklistEditor = () => {
   };
 
   const handleSaveChanges = () => {
-    // Aqui implementaríamos a lógica para salvar no banco de dados
     toast({
       title: "Configurações salvas",
-      description: "As alterações do checklist foram salvas com sucesso"
+      description: "As alterações foram sincronizadas automaticamente"
     });
   };
 
-  const resetToDefault = () => {
-    // Reset para itens padrão
-    const defaultItems: ChecklistItem[] = [
-      {
-        id: '1',
-        name: 'Todas as luzes internas funcionando',
-        description: 'Verificar se todas as luzes internas estão funcionando corretamente',
-        category: 'interior',
-        required: true,
-        order: 1
-      },
-      {
-        id: '2',
-        name: 'Banco do passageiro',
-        description: 'Verificar condições do banco do passageiro',
-        category: 'interior',
-        required: true,
-        order: 2
-      },
-      {
-        id: '3',
-        name: 'Extintor de incêndio',
-        description: 'Verificar presença e validade do extintor',
-        category: 'safety',
-        required: true,
-        order: 3
-      },
-      {
-        id: '4',
-        name: 'Todas as luzes externas funcionando',
-        description: 'Verificar luzes externas, faróis, lanternas',
-        category: 'exterior',
-        required: true,
-        order: 4
-      }
-    ];
+  const resetToDefault = async () => {
+    try {
+      // Desativar todos os itens atuais
+      await supabase
+        .from('checklist_items')
+        .update({ active: false })
+        .eq('unique_id', profile?.unique_id);
 
-    setItems(defaultItems);
-    
-    toast({
-      title: "Checklist resetado",
-      description: "Checklist foi resetado para configuração padrão"
-    });
+      // Recarregar itens do banco (que agora serão os padrão)
+      await loadChecklistItems();
+      
+      toast({
+        title: "Checklist resetado",
+        description: "Checklist foi resetado para configuração padrão"
+      });
+    } catch (error) {
+      console.error('Error resetting to default:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao resetar checklist",
+        variant: "destructive"
+      });
+    }
   };
 
   const ItemForm = ({ isEdit = false }: { isEdit?: boolean }) => (
@@ -314,6 +367,19 @@ const ChecklistEditor = () => {
       </div>
     </div>
   );
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="max-w-4xl mx-auto">
+          <div className="animate-pulse space-y-6">
+            <div className="h-8 bg-muted rounded w-1/3"></div>
+            <div className="h-64 bg-muted rounded"></div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>

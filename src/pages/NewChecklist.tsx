@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Calendar } from '@/components/ui/calendar';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -18,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import Layout from '@/components/Layout';
 import SignatureCanvas from '@/components/SignatureCanvas';
+import DynamicChecklistForm from '@/components/DynamicChecklistForm';
 
 interface Vehicle {
   id: string;
@@ -33,36 +33,18 @@ interface Inspector {
   email: string;
 }
 
-interface ChecklistItem {
-  status: string;
-  observation: string;
-}
-
 interface FormData {
   vehicle_id: string;
   inspector_id: string;
   inspection_date: Date;
   vehicle_mileage: string;
-  all_cabinets_latches: ChecklistItem;
-  cigarette_lighter: ChecklistItem;
-  all_interior_lights: ChecklistItem;
-  passenger_seat: ChecklistItem;
-  fire_extinguisher: ChecklistItem;
-  functional_camera: ChecklistItem;
-  cabin_curtains: ChecklistItem;
-  all_outside_lights: ChecklistItem;
-  windshield_wipers: ChecklistItem;
-  tires: ChecklistItem;
-  chains: ChecklistItem;
-  safety_triangles: ChecklistItem;
-  engine_oil: ChecklistItem;
-  vehicle_water: ChecklistItem;
-  battery: ChecklistItem;
   overall_condition: string;
   additional_notes: string;
   interior_photo_url: string;
   exterior_photo_url: string;
   inspector_signature: string;
+  // Campos dinâmicos para checklist serão adicionados automaticamente
+  [key: string]: any;
 }
 
 const NewChecklist = () => {
@@ -83,23 +65,6 @@ const NewChecklist = () => {
     inspector_id: profile?.role === 'inspector' ? profile.id : '',
     inspection_date: new Date(),
     vehicle_mileage: '',
-    
-    // Novos itens do checklist com status e observações
-    all_cabinets_latches: { status: 'funcionando', observation: '' },
-    cigarette_lighter: { status: 'funcionando', observation: '' },
-    all_interior_lights: { status: 'funcionando', observation: '' },
-    passenger_seat: { status: 'funcionando', observation: '' },
-    fire_extinguisher: { status: 'funcionando', observation: '' },
-    functional_camera: { status: 'funcionando', observation: '' },
-    cabin_curtains: { status: 'funcionando', observation: '' },
-    all_outside_lights: { status: 'funcionando', observation: '' },
-    windshield_wipers: { status: 'funcionando', observation: '' },
-    tires: { status: 'funcionando', observation: '' },
-    chains: { status: 'funcionando', observation: '' },
-    safety_triangles: { status: 'funcionando', observation: '' },
-    engine_oil: { status: 'funcionando', observation: '' },
-    vehicle_water: { status: 'funcionando', observation: '' },
-    battery: { status: 'funcionando', observation: '' },
     
     // Observações e fotos
     overall_condition: '',
@@ -207,19 +172,40 @@ const NewChecklist = () => {
         vehicle_id: formData.vehicle_id,
         inspector_id: formData.inspector_id,
         inspection_date: format(formData.inspection_date, 'yyyy-MM-dd'),
-        all_interior_lights: formData.all_interior_lights.status === 'funcionando',
-        passenger_seat: formData.passenger_seat.status === 'funcionando',
-        fire_extinguisher: formData.fire_extinguisher.status === 'funcionando',
-        all_outside_lights: formData.all_outside_lights.status === 'funcionando',
-        all_cabinets_latches: formData.all_cabinets_latches.status,
-        cigarette_lighter: formData.cigarette_lighter.status,
         overall_condition: formData.overall_condition,
         additional_notes: formData.additional_notes,
         interior_photo_url: formData.interior_photo_url,
         exterior_photo_url: formData.exterior_photo_url,
         inspector_signature: formData.inspector_signature,
-        status: 'completed'
+        status: 'completed',
+        unique_id: profile?.unique_id
       };
+
+      // Adicionar dados dinâmicos do checklist
+      Object.keys(formData).forEach(key => {
+        if (key !== 'vehicle_id' && key !== 'inspector_id' && key !== 'inspection_date' && 
+            key !== 'vehicle_mileage' && key !== 'overall_condition' && key !== 'additional_notes' &&
+            key !== 'interior_photo_url' && key !== 'exterior_photo_url' && key !== 'inspector_signature') {
+          
+          const itemData = formData[key];
+          if (itemData && typeof itemData === 'object' && 'status' in itemData) {
+            // Mapear campos conhecidos para o banco de dados
+            if (key === 'todas_as_luzes_internas_funcionando') {
+              (checklistData as any).all_interior_lights = itemData.status === 'funcionando';
+            } else if (key === 'banco_do_passageiro') {
+              (checklistData as any).passenger_seat = itemData.status === 'funcionando';
+            } else if (key === 'extintor_de_incendio') {
+              (checklistData as any).fire_extinguisher = itemData.status === 'funcionando';
+            } else if (key === 'todas_as_luzes_externas_funcionando') {
+              (checklistData as any).all_outside_lights = itemData.status === 'funcionando';
+            } else if (key === 'fechaduras_de_todos_os_armarios') {
+              (checklistData as any).all_cabinets_latches = itemData.status;
+            } else if (key === 'acendedor_de_cigarro') {
+              (checklistData as any).cigarette_lighter = itemData.status;
+            }
+          }
+        }
+      });
 
       const { error } = await supabase
         .from('checklists')
@@ -492,178 +478,10 @@ const NewChecklist = () => {
               <CardTitle className="text-xl">Itens de Inspeção</CardTitle>
             </CardHeader>
             <CardContent className="space-y-8 p-8">
-              {/* Renderizar itens do checklist */}
-              {[
-                { key: 'all_cabinets_latches', label: 'Todos os gabinetes/trincos' },
-                { key: 'cigarette_lighter', label: 'Acendedor de cigarros' },
-                { key: 'all_interior_lights', label: 'Todas as luzes internas' },
-                { key: 'passenger_seat', label: 'Assento do passageiro' },
-                { key: 'fire_extinguisher', label: 'Extintor de incêndio' },
-                { key: 'functional_camera', label: 'Câmera funcional' },
-                { key: 'cabin_curtains', label: 'Cortinas da cabine/área de dormir' },
-                { key: 'all_outside_lights', label: 'Todas as luzes externas' },
-                { key: 'windshield_wipers', label: 'Palhetas do limpador de para-brisa' },
-                { key: 'tires', label: 'Pneus' },
-                { key: 'chains', label: 'Correntes' },
-                { key: 'safety_triangles', label: 'Triângulos de segurança' },
-                { key: 'engine_oil', label: 'Óleo motor' },
-                { key: 'vehicle_water', label: 'Água do veículo' },
-                { key: 'battery', label: 'Bateria' }
-              ].map((item, index) => (
-                <div key={item.key} className="bg-muted/30 p-4 md:p-6 rounded-lg border border-border hover-lift">
-                  {/* Mobile Layout */}
-                  <div className="block lg:hidden space-y-4">
-                    {/* Nome do item */}
-                    <div>
-                      <Label className="text-base font-semibold text-foreground">
-                        {index + 1}. {item.label}
-                      </Label>
-                    </div>
-                    
-                    {/* Status options - Mobile Stack */}
-                    <div>
-                      <RadioGroup
-                        value={(formData[item.key as keyof FormData] as ChecklistItem)?.status || 'funcionando'}
-                        onValueChange={(value) => 
-                          setFormData(prev => ({
-                            ...prev,
-                            [item.key]: { 
-                              ...(prev[item.key as keyof FormData] as ChecklistItem), 
-                              status: value 
-                            }
-                          }))
-                        }
-                        className="grid grid-cols-3 gap-3"
-                      >
-                        <div className="flex flex-col items-center space-y-2 p-3 rounded-lg border-2 border-success/30 bg-success/5">
-                          <RadioGroupItem 
-                            value="funcionando" 
-                            id={`${item.key}_funcionando_mobile`}
-                            className="w-5 h-5 border-2 border-success text-success data-[state=checked]:bg-success data-[state=checked]:border-success"
-                          />
-                          <Label htmlFor={`${item.key}_funcionando_mobile`} className="text-success font-medium text-sm text-center leading-tight">
-                            Funcionando
-                          </Label>
-                        </div>
-                        <div className="flex flex-col items-center space-y-2 p-3 rounded-lg border-2 border-warning/30 bg-warning/5">
-                          <RadioGroupItem 
-                            value="revisao" 
-                            id={`${item.key}_revisao_mobile`}
-                            className="w-5 h-5 border-2 border-warning text-warning data-[state=checked]:bg-warning data-[state=checked]:border-warning"
-                          />
-                          <Label htmlFor={`${item.key}_revisao_mobile`} className="text-warning font-medium text-sm text-center leading-tight">
-                            Revisão
-                          </Label>
-                        </div>
-                        <div className="flex flex-col items-center space-y-2 p-3 rounded-lg border-2 border-destructive/30 bg-destructive/5">
-                          <RadioGroupItem 
-                            value="ausente" 
-                            id={`${item.key}_ausente_mobile`}
-                            className="w-5 h-5 border-2 border-destructive text-destructive data-[state=checked]:bg-destructive data-[state=checked]:border-destructive"
-                          />
-                          <Label htmlFor={`${item.key}_ausente_mobile`} className="text-destructive font-medium text-sm text-center leading-tight">
-                            Ausente
-                          </Label>
-                        </div>
-                      </RadioGroup>
-                    </div>
-                    
-                    {/* Observação - Mobile */}
-                    <div>
-                      <Input
-                        placeholder="Observação..."
-                        value={(formData[item.key as keyof FormData] as ChecklistItem)?.observation || ''}
-                        onChange={(e) => 
-                          setFormData(prev => ({
-                            ...prev,
-                            [item.key]: { 
-                              ...(prev[item.key as keyof FormData] as ChecklistItem), 
-                              observation: e.target.value 
-                            }
-                          }))
-                        }
-                        className="h-12 text-base"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Desktop Layout */}
-                  <div className="hidden lg:grid lg:grid-cols-12 gap-4 items-center">
-                    {/* Nome do item */}
-                    <div className="lg:col-span-4">
-                      <Label className="text-base font-semibold text-foreground">
-                        {index + 1}. {item.label}
-                      </Label>
-                    </div>
-                    
-                    {/* Status options */}
-                    <div className="lg:col-span-6">
-                      <RadioGroup
-                        value={(formData[item.key as keyof FormData] as ChecklistItem)?.status || 'funcionando'}
-                        onValueChange={(value) => 
-                          setFormData(prev => ({
-                            ...prev,
-                            [item.key]: { 
-                              ...(prev[item.key as keyof FormData] as ChecklistItem), 
-                              status: value 
-                            }
-                          }))
-                        }
-                        className="flex flex-row gap-4"
-                      >
-                        <div className="flex flex-col items-center space-y-2 p-3 rounded-lg border-2 border-success/30 bg-success/5 min-w-[100px]">
-                          <RadioGroupItem 
-                            value="funcionando" 
-                            id={`${item.key}_funcionando`}
-                            className="w-5 h-5 border-2 border-success text-success data-[state=checked]:bg-success data-[state=checked]:border-success"
-                          />
-                          <Label htmlFor={`${item.key}_funcionando`} className="text-success font-medium text-sm text-center leading-tight">
-                            Funcionando
-                          </Label>
-                        </div>
-                        <div className="flex flex-col items-center space-y-2 p-3 rounded-lg border-2 border-warning/30 bg-warning/5 min-w-[100px]">
-                          <RadioGroupItem 
-                            value="revisao" 
-                            id={`${item.key}_revisao`}
-                            className="w-5 h-5 border-2 border-warning text-warning data-[state=checked]:bg-warning data-[state=checked]:border-warning"
-                          />
-                          <Label htmlFor={`${item.key}_revisao`} className="text-warning font-medium text-sm text-center leading-tight">
-                            Revisão
-                          </Label>
-                        </div>
-                        <div className="flex flex-col items-center space-y-2 p-3 rounded-lg border-2 border-destructive/30 bg-destructive/5 min-w-[100px]">
-                          <RadioGroupItem 
-                            value="ausente" 
-                            id={`${item.key}_ausente`}
-                            className="w-5 h-5 border-2 border-destructive text-destructive data-[state=checked]:bg-destructive data-[state=checked]:border-destructive"
-                          />
-                          <Label htmlFor={`${item.key}_ausente`} className="text-destructive font-medium text-sm text-center leading-tight">
-                            Ausente
-                          </Label>
-                        </div>
-                      </RadioGroup>
-                    </div>
-                    
-                    {/* Observação */}
-                    <div className="lg:col-span-2">
-                      <Input
-                        placeholder="Observação..."
-                        value={(formData[item.key as keyof FormData] as ChecklistItem)?.observation || ''}
-                        onChange={(e) => 
-                          setFormData(prev => ({
-                            ...prev,
-                            [item.key]: { 
-                              ...(prev[item.key as keyof FormData] as ChecklistItem), 
-                              observation: e.target.value 
-                            }
-                          }))
-                        }
-                        className="h-10"
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
+              <DynamicChecklistForm 
+                formData={formData}
+                setFormData={setFormData}
+              />
             </CardContent>
           </Card>
 

@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      checklist_items: {
+        Row: {
+          active: boolean
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          item_order: number
+          name: string
+          required: boolean
+          unique_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          item_order?: number
+          name: string
+          required?: boolean
+          unique_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          item_order?: number
+          name?: string
+          required?: boolean
+          unique_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       checklists: {
         Row: {
           additional_notes: string | null
