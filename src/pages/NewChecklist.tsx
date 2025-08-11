@@ -17,6 +17,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import Layout from '@/components/Layout';
+import SignatureCanvas from '@/components/SignatureCanvas';
 
 interface Vehicle {
   id: string;
@@ -735,19 +736,13 @@ const NewChecklist = () => {
             <CardHeader className="bg-gradient-warm text-white rounded-t-lg">
               <CardTitle className="text-xl">Finalização</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6 p-8">
-              <div className="space-y-3">
-                <Label htmlFor="inspector_signature" className="text-base font-semibold">
-                  Assinatura do Inspetor
-                </Label>
-                <Input
-                  id="inspector_signature"
-                  placeholder="Digite seu nome para confirmar a inspeção"
-                  value={formData.inspector_signature}
-                  onChange={(e) => setFormData(prev => ({...prev, inspector_signature: e.target.value}))}
-                  className="h-12 text-base"
-                />
-              </div>
+            <CardContent className="space-y-6 p-4 sm:p-6 lg:p-8">
+              <SignatureCanvas
+                value={formData.inspector_signature}
+                onSignatureChange={(signature) => 
+                  setFormData(prev => ({...prev, inspector_signature: signature}))
+                }
+              />
 
               <div className="flex flex-col sm:flex-row gap-4 pt-6">
                 <Button 
