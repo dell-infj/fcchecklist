@@ -256,44 +256,44 @@ const NewChecklist = () => {
 
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto space-y-6 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto space-y-4 px-4">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        <div className="flex flex-col gap-3">
           <Button
             variant="outline"
             size="lg"
             onClick={() => navigate('/')}
-            className="gap-2 h-12 px-6 w-full sm:w-auto"
+            className="gap-2 h-12 px-4 w-full"
           >
             <ArrowLeft className="h-5 w-5" />
             Voltar
           </Button>
           <div className="flex items-center gap-3">
             <FileText className="h-6 w-6 text-primary" />
-            <h1 className="text-2xl sm:text-3xl font-bold">Novo Checklist de Inspeção</h1>
+            <h1 className="text-xl font-bold">Novo Checklist de Inspeção</h1>
           </div>
         </div>
 
-        <div className="grid gap-8">
+        <div className="grid gap-6">
           {/* Seção de Identificação */}
           <Card className="shadow-warm">
             <CardHeader className="bg-gradient-secondary text-foreground rounded-t-lg">
-              <CardTitle className="text-xl">Identificação do Inspetor e Veículo</CardTitle>
+              <CardTitle className="text-lg">Identificação do Inspetor e Veículo</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6 p-4 sm:p-6 lg:p-8">
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-                <div className="space-y-6">
-                  <h3 className="font-semibold text-lg">Identificação do Inspetor</h3>
+            <CardContent className="space-y-6 p-4">
+              <div className="grid grid-cols-1 gap-6">
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-base">Identificação do Inspetor</h3>
                   {profile?.role === 'admin' && (
-                    <div className="space-y-3">
-                      <Label className="text-base font-semibold">Inspetor *</Label>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold">Inspetor *</Label>
                       <Popover open={inspectorSearchOpen} onOpenChange={setInspectorSearchOpen}>
                         <PopoverTrigger asChild>
                           <Button
                             variant="outline"
                             role="combobox"
                             aria-expanded={inspectorSearchOpen}
-                            className="w-full justify-between h-12 text-sm sm:text-base px-3"
+                            className="w-full justify-between h-10 text-sm px-3"
                           >
                             {formData.inspector_id ? (
                               (() => {
@@ -353,14 +353,14 @@ const NewChecklist = () => {
                       <p className="text-sm text-muted-foreground">Inspetor</p>
                     </div>
                   )}
-                  <div className="space-y-3">
-                    <Label className="text-base font-semibold">Data da Inspeção *</Label>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold">Data da Inspeção *</Label>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
                           className={cn(
-                            "w-full justify-start text-left font-normal h-12 text-base",
+                            "w-full justify-start text-left font-normal h-10 text-sm",
                             !formData.inspection_date && "text-muted-foreground"
                           )}
                         >
@@ -385,16 +385,16 @@ const NewChecklist = () => {
                   </div>
                 </div>
 
-                <div className="space-y-6">
-                  <h3 className="font-semibold text-lg">Identificação do Veículo</h3>
-                  <div className="space-y-3">
-                    <Label className="text-base font-semibold">Veículo *</Label>
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-base">Identificação do Veículo</h3>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold">Veículo *</Label>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
                           role="combobox"
-                          className="w-full justify-between h-12 text-base"
+                          className="w-full justify-between h-10 text-sm"
                         >
                           {formData.vehicle_id ? (
                             (() => {
@@ -441,14 +441,14 @@ const NewChecklist = () => {
                       </PopoverContent>
                     </Popover>
                   </div>
-                  <div className="space-y-3">
-                    <Label className="text-base font-semibold">Quilometragem do Veículo *</Label>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold">Quilometragem *</Label>
                     <Input
                       type="number"
                       placeholder="Ex: 150000"
                       value={formData.vehicle_mileage}
                       onChange={(e) => setFormData(prev => ({...prev, vehicle_mileage: e.target.value}))}
-                      className="h-12 text-base"
+                      className="h-10 text-sm"
                     />
                   </div>
                   {formData.vehicle_id && (
@@ -475,9 +475,9 @@ const NewChecklist = () => {
           {/* Seção do Checklist */}
           <Card className="shadow-warm">
             <CardHeader className="bg-gradient-primary text-white rounded-t-lg">
-              <CardTitle className="text-xl">Itens de Inspeção</CardTitle>
+              <CardTitle className="text-lg">Itens de Inspeção</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-8 p-8">
+            <CardContent className="space-y-6 p-4">
               <DynamicChecklistForm 
                 formData={formData}
                 setFormData={setFormData}
@@ -488,40 +488,40 @@ const NewChecklist = () => {
           {/* Seção de Mídia e Observações */}
           <Card className="shadow-warm">
             <CardHeader className="bg-gradient-secondary text-foreground rounded-t-lg">
-              <CardTitle className="text-xl">Fotos e Observações</CardTitle>
+              <CardTitle className="text-lg">Fotos e Observações</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6 p-8">
+            <CardContent className="space-y-4 p-4">
               {/* Upload de Fotos */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <h3 className="font-semibold text-lg">Foto do Interior</h3>
-                  <div className="border-2 border-dashed border-primary/30 rounded-lg p-8 text-center hover-lift warm-glow">
-                    <Camera className="h-12 w-12 mx-auto mb-4 text-primary" />
-                    <p className="text-sm text-muted-foreground mb-4">Clique para adicionar foto do interior</p>
+              <div className="grid grid-cols-1 gap-4">
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-base">Foto do Interior</h3>
+                  <div className="border-2 border-dashed border-primary/30 rounded-lg p-4 text-center hover-lift warm-glow">
+                    <Camera className="h-8 w-8 mx-auto mb-2 text-primary" />
+                    <p className="text-xs text-muted-foreground mb-3">Clique para adicionar foto do interior</p>
                     <Button 
                       variant="outline" 
-                      size="lg"
+                      size="sm"
                       onClick={() => handleFileUpload('interior_photo_url')}
-                      className="gap-2 h-12 px-6"
+                      className="gap-2 h-10 px-4 w-full"
                     >
-                      <Upload className="h-5 w-5" />
+                      <Upload className="h-4 w-4" />
                       Enviar Foto
                     </Button>
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  <h3 className="font-semibold text-lg">Foto do Exterior</h3>
-                  <div className="border-2 border-dashed border-primary/30 rounded-lg p-8 text-center hover-lift warm-glow">
-                    <Camera className="h-12 w-12 mx-auto mb-4 text-primary" />
-                    <p className="text-sm text-muted-foreground mb-4">Clique para adicionar foto do exterior</p>
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-base">Foto do Exterior</h3>
+                  <div className="border-2 border-dashed border-primary/30 rounded-lg p-4 text-center hover-lift warm-glow">
+                    <Camera className="h-8 w-8 mx-auto mb-2 text-primary" />
+                    <p className="text-xs text-muted-foreground mb-3">Clique para adicionar foto do exterior</p>
                     <Button 
                       variant="outline" 
-                      size="lg"
+                      size="sm"
                       onClick={() => handleFileUpload('exterior_photo_url')}
-                      className="gap-2 h-12 px-6"
+                      className="gap-2 h-10 px-4 w-full"
                     >
-                      <Upload className="h-5 w-5" />
+                      <Upload className="h-4 w-4" />
                       Enviar Foto
                     </Button>
                   </div>
@@ -529,9 +529,9 @@ const NewChecklist = () => {
               </div>
 
               {/* Observações */}
-              <div className="space-y-6">
-                <div className="space-y-3">
-                  <Label htmlFor="overall_condition" className="text-base font-semibold">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="overall_condition" className="text-sm font-semibold">
                     Condição Geral do Veículo
                   </Label>
                   <Textarea
@@ -539,13 +539,13 @@ const NewChecklist = () => {
                     placeholder="Descreva a condição geral do veículo..."
                     value={formData.overall_condition}
                     onChange={(e) => setFormData(prev => ({...prev, overall_condition: e.target.value}))}
-                    rows={4}
-                    className="min-h-[100px] text-base"
+                    rows={3}
+                    className="min-h-[80px] text-sm"
                   />
                 </div>
 
-                <div className="space-y-3">
-                  <Label htmlFor="additional_notes" className="text-base font-semibold">
+                <div className="space-y-2">
+                  <Label htmlFor="additional_notes" className="text-sm font-semibold">
                     Observações Adicionais
                   </Label>
                   <Textarea
@@ -553,8 +553,8 @@ const NewChecklist = () => {
                     placeholder="Observações adicionais, problemas encontrados, etc..."
                     value={formData.additional_notes}
                     onChange={(e) => setFormData(prev => ({...prev, additional_notes: e.target.value}))}
-                    rows={5}
-                    className="min-h-[120px] text-base"
+                    rows={4}
+                    className="min-h-[100px] text-sm"
                   />
                 </div>
               </div>
@@ -564,9 +564,9 @@ const NewChecklist = () => {
           {/* Seção de Finalização */}
           <Card className="shadow-warm">
             <CardHeader className="bg-gradient-warm text-white rounded-t-lg">
-              <CardTitle className="text-xl">Finalização</CardTitle>
+              <CardTitle className="text-lg">Finalização</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6 p-4 sm:p-6 lg:p-8">
+            <CardContent className="space-y-4 p-4">
               <SignatureCanvas
                 value={formData.inspector_signature}
                 onSignatureChange={(signature) => 
@@ -574,21 +574,21 @@ const NewChecklist = () => {
                 }
               />
 
-              <div className="flex flex-col sm:flex-row gap-4 pt-6">
+              <div className="flex flex-col gap-3 pt-4">
                 <Button 
                   variant="outline" 
                   size="lg"
                   onClick={() => navigate('/')}
-                  className="w-full sm:flex-1 h-14 text-base font-semibold"
+                  className="w-full h-12 text-sm font-semibold"
                 >
                   Cancelar
                 </Button>
                 <Button 
                   size="lg"
                   onClick={handleSubmit}
-                  className="w-full sm:flex-1 gap-3 h-14 text-base font-semibold warm-glow"
+                  className="w-full gap-2 h-12 text-sm font-semibold warm-glow"
                 >
-                  <Save className="h-5 w-5" />
+                  <Save className="h-4 w-4" />
                   Salvar Checklist
                 </Button>
               </div>
