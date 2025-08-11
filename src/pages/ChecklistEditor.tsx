@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Plus, Edit, Trash2, GripVertical, Save, Settings, ArrowUp, ArrowDown } from 'lucide-react';
+import { ArrowLeft, Plus, Edit, Trash2, Save, Settings, ArrowUp, ArrowDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -22,6 +22,91 @@ interface ChecklistItem {
   order: number;
 }
 
+// Componente separado para o formulário
+const ItemForm = React.memo(({ 
+  isEdit = false, 
+  formData, 
+  setFormData, 
+  onSubmit, 
+  onCancel 
+}: { 
+  isEdit?: boolean;
+  formData: any;
+  setFormData: (data: any) => void;
+  onSubmit: () => void;
+  onCancel: () => void;
+}) => {
+  const categories = [
+    { value: 'interior', label: 'Interior' },
+    { value: 'exterior', label: 'Exterior' },
+    { value: 'safety', label: 'Segurança' },
+    { value: 'mechanical', label: 'Mecânico' }
+  ];
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <Label htmlFor="name">Nome do Item *</Label>
+        <Input
+          id="name"
+          value={formData.name}
+          onChange={(e) => setFormData({...formData, name: e.target.value})}
+          placeholder="Ex: Verificar luzes internas"
+        />
+      </div>
+      <div>
+        <Label htmlFor="description">Descrição</Label>
+        <Textarea
+          id="description"
+          value={formData.description}
+          onChange={(e) => setFormData({...formData, description: e.target.value})}
+          placeholder="Descrição detalhada do que verificar"
+          rows={3}
+        />
+      </div>
+      <div>
+        <Label htmlFor="category">Categoria</Label>
+        <select
+          id="category"
+          value={formData.category}
+          onChange={(e) => setFormData({...formData, category: e.target.value})}
+          className="w-full h-10 px-3 py-2 border border-input bg-background rounded-md text-sm"
+        >
+          {categories.map(cat => (
+            <option key={cat.value} value={cat.value}>{cat.label}</option>
+          ))}
+        </select>
+      </div>
+      <div className="flex items-center space-x-2">
+        <input
+          id="required"
+          type="checkbox"
+          checked={formData.required}
+          onChange={(e) => setFormData({...formData, required: e.target.checked})}
+          className="w-4 h-4"
+        />
+        <Label htmlFor="required">Item obrigatório</Label>
+      </div>
+      <div className="flex gap-2 pt-4">
+        <Button 
+          onClick={onSubmit}
+          disabled={!formData.name.trim()}
+          className="flex-1"
+        >
+          {isEdit ? 'Atualizar' : 'Adicionar'}
+        </Button>
+        <Button 
+          variant="outline" 
+          onClick={onCancel}
+          className="flex-1"
+        >
+          Cancelar
+        </Button>
+      </div>
+    </div>
+  );
+});
+
 const ChecklistEditor = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -35,13 +120,9 @@ const ChecklistEditor = () => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    category: 'interior' as ChecklistItem['category'],
+    category: 'interior',
     required: false
   });
-
-  useEffect(() => {
-    loadChecklistItems();
-  }, []);
 
   const categories = [
     { value: 'interior', label: 'Interior', color: 'bg-blue-100 text-blue-800' },
@@ -49,6 +130,10 @@ const ChecklistEditor = () => {
     { value: 'safety', label: 'Segurança', color: 'bg-red-100 text-red-800' },
     { value: 'mechanical', label: 'Mecânico', color: 'bg-yellow-100 text-yellow-800' }
   ];
+
+  useEffect(() => {
+    loadChecklistItems();
+  }, []);
 
   const loadChecklistItems = async () => {
     try {
@@ -94,24 +179,17 @@ const ChecklistEditor = () => {
     const [movedItem] = newItems.splice(index, 1);
     newItems.splice(newIndex, 0, movedItem);
 
-    // Atualizar ordem
     const updatedItems = newItems.map((item, idx) => ({
       ...item,
       order: idx + 1
     }));
 
     try {
-      // Atualizar ordem no banco de dados
-      const updates = updatedItems.map(item => ({
-        id: item.id,
-        item_order: item.order
-      }));
-
-      for (const update of updates) {
+      for (const [idx, item] of updatedItems.entries()) {
         await supabase
           .from('checklist_items')
-          .update({ item_order: update.item_order })
-          .eq('id', update.id);
+          .update({ item_order: idx + 1 })
+          .eq('id', item.id);
       }
 
       setItems(updatedItems);
@@ -130,7 +208,7 @@ const ChecklistEditor = () => {
     }
   };
 
-  const handleAdd = async () => {
+  const handleAdd = useCallback(async () => {
     if (!formData.name.trim()) {
       toast({
         title: "Nome obrigatório",
@@ -181,9 +259,9 @@ const ChecklistEditor = () => {
         variant: "destructive"
       });
     }
-  };
+  }, [formData, items.length, profile?.unique_id, toast]);
 
-  const handleEdit = async () => {
+  const handleEdit = useCallback(async () => {
     if (!currentItem || !formData.name.trim()) {
       toast({
         title: "Nome obrigatório",
@@ -208,7 +286,7 @@ const ChecklistEditor = () => {
 
       setItems(prev => prev.map(item => 
         item.id === currentItem.id 
-          ? { ...item, name: formData.name, description: formData.description, category: formData.category, required: formData.required }
+          ? { ...item, name: formData.name, description: formData.description, category: formData.category as ChecklistItem['category'], required: formData.required }
           : item
       ));
 
@@ -228,7 +306,7 @@ const ChecklistEditor = () => {
         variant: "destructive"
       });
     }
-  };
+  }, [currentItem, formData, toast]);
 
   const handleDelete = async (id: string) => {
     try {
@@ -266,22 +344,24 @@ const ChecklistEditor = () => {
     setIsEditDialogOpen(true);
   };
 
-  const handleSaveChanges = () => {
-    toast({
-      title: "Configurações salvas",
-      description: "As alterações foram sincronizadas automaticamente"
-    });
-  };
+  const handleCancelAdd = useCallback(() => {
+    setIsAddDialogOpen(false);
+    setFormData({ name: '', description: '', category: 'interior', required: false });
+  }, []);
+
+  const handleCancelEdit = useCallback(() => {
+    setIsEditDialogOpen(false);
+    setCurrentItem(null);
+    setFormData({ name: '', description: '', category: 'interior', required: false });
+  }, []);
 
   const resetToDefault = async () => {
     try {
-      // Desativar todos os itens atuais
       await supabase
         .from('checklist_items')
         .update({ active: false })
         .eq('unique_id', profile?.unique_id);
 
-      // Recarregar itens do banco (que agora serão os padrão)
       await loadChecklistItems();
       
       toast({
@@ -297,76 +377,6 @@ const ChecklistEditor = () => {
       });
     }
   };
-
-  const ItemForm = ({ isEdit = false }: { isEdit?: boolean }) => (
-    <div className="space-y-4">
-      <div>
-        <Label htmlFor="name">Nome do Item *</Label>
-        <Input
-          id="name"
-          value={formData.name}
-          onChange={(e) => setFormData(prev => ({...prev, name: e.target.value}))}
-          placeholder="Ex: Verificar luzes internas"
-        />
-      </div>
-      <div>
-        <Label htmlFor="description">Descrição</Label>
-        <Textarea
-          id="description"
-          value={formData.description}
-          onChange={(e) => setFormData(prev => ({...prev, description: e.target.value}))}
-          placeholder="Descrição detalhada do que verificar"
-          rows={3}
-        />
-      </div>
-      <div>
-        <Label htmlFor="category">Categoria</Label>
-        <select
-          id="category"
-          value={formData.category}
-          onChange={(e) => setFormData(prev => ({...prev, category: e.target.value as ChecklistItem['category']}))}
-          className="w-full h-10 px-3 py-2 border border-input bg-background rounded-md text-sm"
-        >
-          {categories.map(cat => (
-            <option key={cat.value} value={cat.value}>{cat.label}</option>
-          ))}
-        </select>
-      </div>
-      <div className="flex items-center space-x-2">
-        <input
-          id="required"
-          type="checkbox"
-          checked={formData.required}
-          onChange={(e) => setFormData(prev => ({...prev, required: e.target.checked}))}
-          className="w-4 h-4"
-        />
-        <Label htmlFor="required">Item obrigatório</Label>
-      </div>
-      <div className="flex gap-2 pt-4">
-        <Button 
-          onClick={isEdit ? handleEdit : handleAdd}
-          disabled={!formData.name.trim()}
-          className="flex-1"
-        >
-          {isEdit ? 'Atualizar' : 'Adicionar'}
-        </Button>
-        <Button 
-          variant="outline" 
-          onClick={() => {
-            if (isEdit) {
-              setIsEditDialogOpen(false);
-            } else {
-              setIsAddDialogOpen(false);
-            }
-            setFormData({ name: '', description: '', category: 'interior', required: false });
-          }}
-          className="flex-1"
-        >
-          Cancelar
-        </Button>
-      </div>
-    </div>
-  );
 
   if (loading) {
     return (
@@ -414,14 +424,14 @@ const ChecklistEditor = () => {
               <DialogHeader>
                 <DialogTitle>Adicionar Novo Item</DialogTitle>
               </DialogHeader>
-              <ItemForm />
+              <ItemForm
+                formData={formData}
+                setFormData={setFormData}
+                onSubmit={handleAdd}
+                onCancel={handleCancelAdd}
+              />
             </DialogContent>
           </Dialog>
-
-          <Button variant="outline" onClick={handleSaveChanges} className="gap-2">
-            <Save className="h-4 w-4" />
-            Salvar Alterações
-          </Button>
 
           <Button variant="outline" onClick={resetToDefault} className="gap-2">
             Resetar Padrão
@@ -550,7 +560,13 @@ const ChecklistEditor = () => {
             <DialogHeader>
               <DialogTitle>Editar Item</DialogTitle>
             </DialogHeader>
-            <ItemForm isEdit />
+            <ItemForm
+              isEdit
+              formData={formData}
+              setFormData={setFormData}
+              onSubmit={handleEdit}
+              onCancel={handleCancelEdit}
+            />
           </DialogContent>
         </Dialog>
       </div>
