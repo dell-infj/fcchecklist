@@ -1,5 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Canvas as FabricCanvas } from 'fabric';
+import React, { useRef, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { RotateCcw, Check } from 'lucide-react';
@@ -15,67 +14,153 @@ export const SignatureCanvas: React.FC<SignatureCanvasProps> = ({
   value 
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
+  const [isDrawing, setIsDrawing] = useState(false);
   const [isEmpty, setIsEmpty] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
-    if (!canvasRef.current) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-    const canvas = new FabricCanvas(canvasRef.current, {
-      width: 400,
-      height: 200,
-      backgroundColor: "#ffffff",
-      isDrawingMode: true,
-    });
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
-    // Configure brush for signature
-    canvas.freeDrawingBrush.color = "#000000";
-    canvas.freeDrawingBrush.width = 2;
+    // Set canvas size
+    canvas.width = 400;
+    canvas.height = 200;
 
-    // Handle path creation (when user finishes drawing)
-    canvas.on('path:created', () => {
-      setIsEmpty(false);
-      // Convert canvas to data URL for saving
-      const signature = canvas.toDataURL({
-        format: 'png',
-        quality: 1,
-        multiplier: 1
-      });
-      onSignatureChange(signature);
-    });
+    // Set drawing style
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
 
-    // Handle object modifications
-    canvas.on('object:modified', () => {
-      const signature = canvas.toDataURL({
-        format: 'png',
-        quality: 1,
-        multiplier: 1
-      });
-      onSignatureChange(signature);
-    });
-
-    setFabricCanvas(canvas);
+    // Fill with white background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Load existing signature if provided
     if (value && value.trim() !== '') {
-      canvas.loadFromJSON(value, () => {
-        canvas.renderAll();
+      const img = new Image();
+      img.onload = () => {
+        ctx.drawImage(img, 0, 0);
         setIsEmpty(false);
-      });
+      };
+      img.src = value;
     }
+  }, [value]);
 
-    return () => {
-      canvas.dispose();
+  const getMousePosition = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
+
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+
+    return {
+      x: (e.clientX - rect.left) * scaleX,
+      y: (e.clientY - rect.top) * scaleY
     };
-  }, [onSignatureChange]);
+  };
+
+  const getTouchPosition = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
+
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const touch = e.touches[0];
+
+    return {
+      x: (touch.clientX - rect.left) * scaleX,
+      y: (touch.clientY - rect.top) * scaleY
+    };
+  };
+
+  const startDrawing = (x: number, y: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    setIsDrawing(true);
+    setIsEmpty(false);
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+  };
+
+  const draw = (x: number, y: number) => {
+    if (!isDrawing) return;
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    ctx.lineTo(x, y);
+    ctx.stroke();
+  };
+
+  const stopDrawing = () => {
+    if (!isDrawing) return;
+    setIsDrawing(false);
+    
+    // Save signature
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const signature = canvas.toDataURL('image/png');
+      onSignatureChange(signature);
+    }
+  };
+
+  // Mouse events
+  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const { x, y } = getMousePosition(e);
+    startDrawing(x, y);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const { x, y } = getMousePosition(e);
+    draw(x, y);
+  };
+
+  const handleMouseUp = () => {
+    stopDrawing();
+  };
+
+  // Touch events
+  const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
+    const { x, y } = getTouchPosition(e);
+    startDrawing(x, y);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
+    const { x, y } = getTouchPosition(e);
+    draw(x, y);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
+    stopDrawing();
+  };
 
   const handleClear = () => {
-    if (!fabricCanvas) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Clear and fill with white background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    fabricCanvas.clear();
-    fabricCanvas.backgroundColor = "#ffffff";
-    fabricCanvas.renderAll();
     setIsEmpty(true);
     onSignatureChange('');
     
@@ -86,7 +171,7 @@ export const SignatureCanvas: React.FC<SignatureCanvasProps> = ({
   };
 
   const handleSave = () => {
-    if (!fabricCanvas || isEmpty) {
+    if (isEmpty) {
       toast({
         title: "Assinatura vazia",
         description: "Por favor, desenhe sua assinatura antes de salvar",
@@ -95,12 +180,10 @@ export const SignatureCanvas: React.FC<SignatureCanvasProps> = ({
       return;
     }
 
-    const signature = fabricCanvas.toDataURL({
-      format: 'png',
-      quality: 1,
-      multiplier: 1
-    });
-    
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const signature = canvas.toDataURL('image/png');
     onSignatureChange(signature);
     
     toast({
@@ -118,9 +201,20 @@ export const SignatureCanvas: React.FC<SignatureCanvasProps> = ({
       <div className="bg-muted/20 p-4 rounded-lg border-2 border-dashed border-primary/30">
         <div className="bg-white rounded-lg border border-border overflow-hidden shadow-sm">
           <canvas 
-            ref={canvasRef} 
-            className="w-full h-auto touch-none"
-            style={{ touchAction: 'none' }}
+            ref={canvasRef}
+            className="w-full h-auto cursor-crosshair touch-none"
+            style={{ 
+              touchAction: 'none',
+              maxWidth: '100%',
+              height: 'auto'
+            }}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
           />
         </div>
         
