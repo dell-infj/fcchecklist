@@ -521,35 +521,35 @@ const NewChecklist = () => {
                             }
                           }))
                         }
-                        className="grid grid-cols-3 gap-2"
+                        className="grid grid-cols-3 gap-3"
                       >
-                        <div className="flex items-center space-x-2 p-2 rounded border">
+                        <div className="flex flex-col items-center space-y-2 p-3 rounded-lg border-2 border-success/30 bg-success/5">
                           <RadioGroupItem 
                             value="funcionando" 
                             id={`${item.key}_funcionando_mobile`}
-                            className="border-2 border-success w-4 h-4"
+                            className="w-5 h-5 border-2 border-success text-success data-[state=checked]:bg-success data-[state=checked]:border-success"
                           />
-                          <Label htmlFor={`${item.key}_funcionando_mobile`} className="text-success font-medium text-sm">
+                          <Label htmlFor={`${item.key}_funcionando_mobile`} className="text-success font-medium text-sm text-center leading-tight">
                             Funcionando
                           </Label>
                         </div>
-                        <div className="flex items-center space-x-2 p-2 rounded border">
+                        <div className="flex flex-col items-center space-y-2 p-3 rounded-lg border-2 border-warning/30 bg-warning/5">
                           <RadioGroupItem 
                             value="revisao" 
                             id={`${item.key}_revisao_mobile`}
-                            className="border-2 border-warning w-4 h-4"
+                            className="w-5 h-5 border-2 border-warning text-warning data-[state=checked]:bg-warning data-[state=checked]:border-warning"
                           />
-                          <Label htmlFor={`${item.key}_revisao_mobile`} className="text-warning font-medium text-sm">
+                          <Label htmlFor={`${item.key}_revisao_mobile`} className="text-warning font-medium text-sm text-center leading-tight">
                             Revisão
                           </Label>
                         </div>
-                        <div className="flex items-center space-x-2 p-2 rounded border">
+                        <div className="flex flex-col items-center space-y-2 p-3 rounded-lg border-2 border-destructive/30 bg-destructive/5">
                           <RadioGroupItem 
                             value="ausente" 
                             id={`${item.key}_ausente_mobile`}
-                            className="border-2 border-destructive w-4 h-4"
+                            className="w-5 h-5 border-2 border-destructive text-destructive data-[state=checked]:bg-destructive data-[state=checked]:border-destructive"
                           />
-                          <Label htmlFor={`${item.key}_ausente_mobile`} className="text-destructive font-medium text-sm">
+                          <Label htmlFor={`${item.key}_ausente_mobile`} className="text-destructive font-medium text-sm text-center leading-tight">
                             Ausente
                           </Label>
                         </div>
@@ -597,35 +597,35 @@ const NewChecklist = () => {
                             }
                           }))
                         }
-                        className="flex flex-row gap-6"
+                        className="flex flex-row gap-4"
                       >
-                        <div className="flex items-center space-x-2">
+                        <div className="flex flex-col items-center space-y-2 p-3 rounded-lg border-2 border-success/30 bg-success/5 min-w-[100px]">
                           <RadioGroupItem 
                             value="funcionando" 
                             id={`${item.key}_funcionando`}
-                            className="border-2 border-success w-5 h-5"
+                            className="w-5 h-5 border-2 border-success text-success data-[state=checked]:bg-success data-[state=checked]:border-success"
                           />
-                          <Label htmlFor={`${item.key}_funcionando`} className="text-success font-medium">
+                          <Label htmlFor={`${item.key}_funcionando`} className="text-success font-medium text-sm text-center leading-tight">
                             Funcionando
                           </Label>
                         </div>
-                        <div className="flex items-center space-x-2">
+                        <div className="flex flex-col items-center space-y-2 p-3 rounded-lg border-2 border-warning/30 bg-warning/5 min-w-[100px]">
                           <RadioGroupItem 
                             value="revisao" 
                             id={`${item.key}_revisao`}
-                            className="border-2 border-warning w-5 h-5"
+                            className="w-5 h-5 border-2 border-warning text-warning data-[state=checked]:bg-warning data-[state=checked]:border-warning"
                           />
-                          <Label htmlFor={`${item.key}_revisao`} className="text-warning font-medium">
+                          <Label htmlFor={`${item.key}_revisao`} className="text-warning font-medium text-sm text-center leading-tight">
                             Revisão
                           </Label>
                         </div>
-                        <div className="flex items-center space-x-2">
+                        <div className="flex flex-col items-center space-y-2 p-3 rounded-lg border-2 border-destructive/30 bg-destructive/5 min-w-[100px]">
                           <RadioGroupItem 
                             value="ausente" 
                             id={`${item.key}_ausente`}
-                            className="border-2 border-destructive w-5 h-5"
+                            className="w-5 h-5 border-2 border-destructive text-destructive data-[state=checked]:bg-destructive data-[state=checked]:border-destructive"
                           />
-                          <Label htmlFor={`${item.key}_ausente`} className="text-destructive font-medium">
+                          <Label htmlFor={`${item.key}_ausente`} className="text-destructive font-medium text-sm text-center leading-tight">
                             Ausente
                           </Label>
                         </div>
