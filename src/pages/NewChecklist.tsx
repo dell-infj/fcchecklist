@@ -42,6 +42,7 @@ interface FormData {
   vehicle_id: string;
   inspector_id: string;
   inspection_date: Date;
+  vehicle_mileage: string;
   all_cabinets_latches: ChecklistItem;
   cigarette_lighter: ChecklistItem;
   all_interior_lights: ChecklistItem;
@@ -81,6 +82,7 @@ const NewChecklist = () => {
     vehicle_id: '',
     inspector_id: profile?.role === 'inspector' ? profile.id : '',
     inspection_date: new Date(),
+    vehicle_mileage: '',
     
     // Novos itens do checklist com status e observações
     all_cabinets_latches: { status: 'funcionando', observation: '' },
@@ -190,10 +192,10 @@ const NewChecklist = () => {
   };
 
   const handleSubmit = async () => {
-    if (!formData.vehicle_id || !formData.inspector_id) {
+    if (!formData.vehicle_id || !formData.inspector_id || !formData.vehicle_mileage) {
       toast({
         title: "Campos obrigatórios",
-        description: "Selecione o veículo e inspetor",
+        description: "Preencha todos os campos obrigatórios: veículo, inspetor e quilometragem",
         variant: "destructive"
       });
       return;
@@ -365,35 +367,47 @@ const NewChecklist = () => {
                       <p className="text-sm text-muted-foreground">Inspetor</p>
                     </div>
                   )}
-                  <div className="space-y-3">
-                    <Label className="text-base font-semibold">Data da Inspeção *</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-start text-left font-normal h-12 text-base",
-                            !formData.inspection_date && "text-muted-foreground"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-5 w-5" />
-                          {formData.inspection_date ? (
-                            format(formData.inspection_date, "PPP", { locale: ptBR })
-                          ) : (
-                            <span>Selecione uma data</span>
-                          )}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={formData.inspection_date}
-                          onSelect={(date) => date && setFormData(prev => ({...prev, inspection_date: date}))}
-                          initialFocus
-                          className="pointer-events-auto"
-                        />
-                      </PopoverContent>
-                    </Popover>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                      <Label className="text-base font-semibold">Data da Inspeção *</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full justify-start text-left font-normal h-12 text-base",
+                              !formData.inspection_date && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-5 w-5" />
+                            {formData.inspection_date ? (
+                              format(formData.inspection_date, "PPP", { locale: ptBR })
+                            ) : (
+                              <span>Selecione uma data</span>
+                            )}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={formData.inspection_date}
+                            onSelect={(date) => date && setFormData(prev => ({...prev, inspection_date: date}))}
+                            initialFocus
+                            className="pointer-events-auto"
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                    <div className="space-y-3">
+                      <Label className="text-base font-semibold">Quilometragem do Veículo *</Label>
+                      <Input
+                        type="number"
+                        placeholder="Ex: 150000"
+                        value={formData.vehicle_mileage}
+                        onChange={(e) => setFormData(prev => ({...prev, vehicle_mileage: e.target.value}))}
+                        className="h-12 text-base"
+                      />
+                    </div>
                   </div>
                 </div>
 
