@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils';
 import Layout from '@/components/Layout';
 import SignatureCanvas from '@/components/SignatureCanvas';
 import DynamicChecklistForm from '@/components/DynamicChecklistForm';
+import ImageCapture from '@/components/ImageCapture';
 
 interface Vehicle {
   id: string;
@@ -229,13 +230,6 @@ const NewChecklist = () => {
     }
   };
 
-  const handleFileUpload = (field: string) => {
-    // Simular upload de arquivo
-    toast({
-      title: "Em desenvolvimento",
-      description: "Funcionalidade de upload será implementada em breve"
-    });
-  };
 
   const getSelectedInspector = () => {
     return inspectors.find(i => i.id === formData.inspector_id);
@@ -495,36 +489,26 @@ const NewChecklist = () => {
               <div className="grid grid-cols-1 gap-4">
                 <div className="space-y-3">
                   <h3 className="font-semibold text-base">Foto do Interior</h3>
-                  <div className="border-2 border-dashed border-primary/30 rounded-lg p-4 text-center hover-lift warm-glow">
-                    <Camera className="h-8 w-8 mx-auto mb-2 text-primary" />
-                    <p className="text-xs text-muted-foreground mb-3">Clique para adicionar foto do interior</p>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleFileUpload('interior_photo_url')}
-                      className="gap-2 h-10 px-4 w-full"
-                    >
-                      <Upload className="h-4 w-4" />
-                      Enviar Foto
-                    </Button>
-                  </div>
+                  <ImageCapture
+                    value={formData.interior_photo_url}
+                    onImageCapture={(imageData) => 
+                      setFormData(prev => ({...prev, interior_photo_url: imageData}))
+                    }
+                    placeholder="Clique para adicionar foto do interior"
+                    className="hover-lift warm-glow"
+                  />
                 </div>
 
                 <div className="space-y-3">
                   <h3 className="font-semibold text-base">Foto do Exterior</h3>
-                  <div className="border-2 border-dashed border-primary/30 rounded-lg p-4 text-center hover-lift warm-glow">
-                    <Camera className="h-8 w-8 mx-auto mb-2 text-primary" />
-                    <p className="text-xs text-muted-foreground mb-3">Clique para adicionar foto do exterior</p>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleFileUpload('exterior_photo_url')}
-                      className="gap-2 h-10 px-4 w-full"
-                    >
-                      <Upload className="h-4 w-4" />
-                      Enviar Foto
-                    </Button>
-                  </div>
+                  <ImageCapture
+                    value={formData.exterior_photo_url}
+                    onImageCapture={(imageData) => 
+                      setFormData(prev => ({...prev, exterior_photo_url: imageData}))
+                    }
+                    placeholder="Clique para adicionar foto do exterior"
+                    className="hover-lift warm-glow"
+                  />
                 </div>
               </div>
 
