@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import Layout from '@/components/Layout';
+import TeamMembers from '@/components/TeamMembers';
 
 const Profile = () => {
   const { profile } = useAuth();
@@ -250,6 +251,9 @@ const Profile = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* Quadro de Colaboradores */}
+        <TeamMembers />
 
         {/* Botão Salvar */}
         <div className="flex justify-end">
