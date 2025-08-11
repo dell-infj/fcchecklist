@@ -12,7 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import Layout from '@/components/Layout';
 import TeamMembers from '@/components/TeamMembers';
-import OnlineUsers from '@/components/OnlineUsers';
+import TeamPresence from '@/components/TeamPresence';
 
 const Profile = () => {
   const { profile } = useAuth();
@@ -281,11 +281,11 @@ const Profile = () => {
           </CardContent>
         </Card>
 
-        {/* Usuários Online */}
-        <OnlineUsers />
+        {/* Equipe e Presença em Tempo Real */}
+        <TeamPresence />
 
-        {/* Quadro de Colaboradores */}
-        <TeamMembers />
+        {/* Quadro de Colaboradores (Gerenciamento) */}
+        {profile?.role === 'admin' && <TeamMembers />}
 
         {/* Botão Salvar */}
         <div className="flex justify-end">
