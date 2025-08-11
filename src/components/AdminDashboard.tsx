@@ -360,7 +360,7 @@ const AdminDashboard = () => {
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="customer_name">Nome do Cliente *</Label>
+                  <Label htmlFor="customer_name">Nome do Proprietário *</Label>
                   <Input
                     id="customer_name"
                     value={newVehicle.customer_name}
