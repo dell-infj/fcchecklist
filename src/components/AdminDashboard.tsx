@@ -668,10 +668,7 @@ const AdminDashboard = () => {
           <Button 
             variant="outline" 
             className="gap-2"
-            onClick={() => toast({
-              title: "Em desenvolvimento",
-              description: "Funcionalidade de relatórios será implementada em breve"
-            })}
+            onClick={() => navigate('/reports')}
           >
             <FileText className="h-4 w-4" />
             Relatórios
