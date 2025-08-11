@@ -6,11 +6,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Plus, Edit, Trash2, GripVertical, Save, Settings } from 'lucide-react';
+import { ArrowLeft, Plus, Edit, Trash2, GripVertical, Save, Settings, ArrowUp, ArrowDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import Layout from '@/components/Layout';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 interface ChecklistItem {
   id: string;
@@ -96,17 +95,18 @@ const ChecklistEditor = () => {
     return categories.find(c => c.value === category) || categories[0];
   };
 
-  const handleDragEnd = (result: any) => {
-    if (!result.destination) return;
+  const moveItem = (index: number, direction: 'up' | 'down') => {
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= items.length) return;
 
-    const newItems = Array.from(items);
-    const [reorderedItem] = newItems.splice(result.source.index, 1);
-    newItems.splice(result.destination.index, 0, reorderedItem);
+    const newItems = [...items];
+    const [movedItem] = newItems.splice(index, 1);
+    newItems.splice(newIndex, 0, movedItem);
 
     // Atualizar ordem
-    const updatedItems = newItems.map((item, index) => ({
+    const updatedItems = newItems.map((item, idx) => ({
       ...item,
-      order: index + 1
+      order: idx + 1
     }));
 
     setItems(updatedItems);
@@ -403,75 +403,78 @@ const ChecklistEditor = () => {
           <CardHeader>
             <CardTitle>Itens do Checklist</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Arraste os itens para reordenar. Use as ações para editar ou remover.
+              Use os botões de seta para reordenar os itens. Use as ações para editar ou remover.
             </p>
           </CardHeader>
           <CardContent>
-            <DragDropContext onDragEnd={handleDragEnd}>
-              <Droppable droppableId="checklist-items">
-                {(provided) => (
-                  <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-3">
-                    {items.map((item, index) => (
-                      <Draggable key={item.id} draggableId={item.id} index={index}>
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            className={`p-4 border rounded-lg bg-background ${
-                              snapshot.isDragging ? 'shadow-lg' : 'shadow-sm'
-                            }`}
-                          >
-                            <div className="flex items-start gap-3">
-                              <div {...provided.dragHandleProps} className="mt-1">
-                                <GripVertical className="h-5 w-5 text-muted-foreground cursor-grab" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-start justify-between gap-3">
-                                  <div className="flex-1">
-                                    <h4 className="font-medium">{item.name}</h4>
-                                    {item.description && (
-                                      <p className="text-sm text-muted-foreground mt-1">{item.description}</p>
-                                    )}
-                                    <div className="flex items-center gap-2 mt-2">
-                                      <Badge variant="outline" className={getCategoryInfo(item.category).color}>
-                                        {getCategoryInfo(item.category).label}
-                                      </Badge>
-                                      {item.required && (
-                                        <Badge variant="default" className="bg-success text-white">
-                                          Obrigatório
-                                        </Badge>
-                                      )}
-                                    </div>
-                                  </div>
-                                  <div className="flex gap-2">
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => openEditDialog(item)}
-                                    >
-                                      <Edit className="h-4 w-4" />
-                                    </Button>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => handleDelete(item.id)}
-                                      className="text-destructive hover:text-destructive"
-                                    >
-                                      <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
+            <div className="space-y-3">
+              {items.map((item, index) => (
+                <div
+                  key={item.id}
+                  className="p-4 border rounded-lg bg-background shadow-sm"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="flex flex-col gap-1 mt-1">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => moveItem(index, 'up')}
+                        disabled={index === 0}
+                        className="p-1 h-6 w-6"
+                      >
+                        <ArrowUp className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => moveItem(index, 'down')}
+                        disabled={index === items.length - 1}
+                        className="p-1 h-6 w-6"
+                      >
+                        <ArrowDown className="h-3 w-3" />
+                      </Button>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1">
+                          <h4 className="font-medium">{item.name}</h4>
+                          {item.description && (
+                            <p className="text-sm text-muted-foreground mt-1">{item.description}</p>
+                          )}
+                          <div className="flex items-center gap-2 mt-2">
+                            <Badge variant="outline" className={getCategoryInfo(item.category).color}>
+                              {getCategoryInfo(item.category).label}
+                            </Badge>
+                            {item.required && (
+                              <Badge variant="default" className="bg-success text-white">
+                                Obrigatório
+                              </Badge>
+                            )}
                           </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openEditDialog(item)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDelete(item.id)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                )}
-              </Droppable>
-            </DragDropContext>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
 
