@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Truck, CheckCircle, AlertCircle, Users, Plus, FileText, Check, ChevronsUpDown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -53,7 +54,7 @@ const AdminDashboard = () => {
   const [searchUsers, setSearchUsers] = useState<any[]>([]);
   const [userSearchQuery, setUserSearchQuery] = useState('');
   const [newVehicle, setNewVehicle] = useState({
-    truck_number: '',
+    vehicle_category: '',
     customer_name: '',
     license_plate: '',
     model: '',
@@ -206,7 +207,7 @@ const AdminDashboard = () => {
       const { error } = await supabase
         .from('vehicles')
         .insert([{
-          truck_number: newVehicle.truck_number,
+          truck_number: newVehicle.vehicle_category,
           customer_name: newVehicle.customer_name,
           license_plate: newVehicle.license_plate || null,
           model: newVehicle.model || null,
@@ -223,7 +224,7 @@ const AdminDashboard = () => {
 
       setIsVehicleDialogOpen(false);
       setNewVehicle({
-        truck_number: '',
+        vehicle_category: '',
         customer_name: '',
         license_plate: '',
         model: '',
@@ -341,13 +342,22 @@ const AdminDashboard = () => {
               </DialogHeader>
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="truck_number">Número do Caminhão *</Label>
-                  <Input
-                    id="truck_number"
-                    value={newVehicle.truck_number}
-                    onChange={(e) => setNewVehicle(prev => ({...prev, truck_number: e.target.value}))}
-                    placeholder="Ex: CAM-001"
-                  />
+                  <Label htmlFor="vehicle_category">Categoria do Veículo *</Label>
+                  <Select value={newVehicle.vehicle_category} onValueChange={(value) => setNewVehicle(prev => ({...prev, vehicle_category: value}))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione a categoria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="carro">Carro</SelectItem>
+                      <SelectItem value="caminhao">Caminhão</SelectItem>
+                      <SelectItem value="moto">Moto</SelectItem>
+                      <SelectItem value="retroescavadeira">Retroescavadeira</SelectItem>
+                      <SelectItem value="van">Van</SelectItem>
+                      <SelectItem value="onibus">Ônibus</SelectItem>
+                      <SelectItem value="trator">Trator</SelectItem>
+                      <SelectItem value="outros">Outros</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label htmlFor="customer_name">Nome do Cliente *</Label>
@@ -400,7 +410,7 @@ const AdminDashboard = () => {
                 <div className="flex gap-2 pt-4">
                   <Button 
                     onClick={handleCreateVehicle}
-                    disabled={!newVehicle.truck_number || !newVehicle.customer_name}
+                    disabled={!newVehicle.vehicle_category || !newVehicle.customer_name}
                     className="flex-1"
                   >
                     Cadastrar
