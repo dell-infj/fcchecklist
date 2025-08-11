@@ -352,7 +352,7 @@ const AdminDashboard = () => {
                       <SelectItem value="caminhao">Caminhão</SelectItem>
                       <SelectItem value="moto">Moto</SelectItem>
                       <SelectItem value="retroescavadeira">Retroescavadeira</SelectItem>
-                      <SelectItem value="van">Van</SelectItem>
+                      <SelectItem value="passageiro">Passageiro</SelectItem>
                       <SelectItem value="onibus">Ônibus</SelectItem>
                       <SelectItem value="trator">Trator</SelectItem>
                       <SelectItem value="outros">Outros</SelectItem>
