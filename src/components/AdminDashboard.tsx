@@ -321,16 +321,16 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 px-4">
+      <div className="flex flex-col gap-4">
         <div>
-          <h2 className="text-2xl font-bold">Dashboard Administrativo</h2>
-          <p className="text-muted-foreground">Visão geral da frota e inspeções</p>
+          <h2 className="text-xl font-bold">Dashboard Administrativo</h2>
+          <p className="text-muted-foreground text-sm">Visão geral da frota e inspeções</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2">
           <Dialog open={isVehicleDialogOpen} onOpenChange={setIsVehicleDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="default" className="gap-2">
+              <Button variant="default" className="gap-2 w-full h-12">
                 <Plus className="h-4 w-4" />
                 Novo Veículo
               </Button>
@@ -418,7 +418,7 @@ const AdminDashboard = () => {
           </Dialog>
           <Dialog open={isInspectorDialogOpen} onOpenChange={setIsInspectorDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" className="gap-2">
+              <Button variant="outline" className="gap-2 w-full h-12">
                 <Users className="h-4 w-4" />
                 Novo Inspetor
               </Button>
@@ -665,14 +665,31 @@ const AdminDashboard = () => {
               </div>
             </DialogContent>
           </Dialog>
-          <Button 
-            variant="outline" 
-            className="gap-2"
-            onClick={() => navigate('/reports')}
-          >
-            <FileText className="h-4 w-4" />
-            Relatórios
-          </Button>
+          <div className="flex flex-col gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => navigate('/checklist-editor')}
+              className="w-full h-12 gap-2"
+            >
+              <FileText className="h-4 w-4" />
+              Editor de Checklist
+            </Button>
+            <Button 
+              onClick={() => navigate('/checklist/new')}
+              className="w-full h-12 gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Nova Inspeção
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full h-12 gap-2"
+              onClick={() => navigate('/reports')}
+            >
+              <FileText className="h-4 w-4" />
+              Relatórios
+            </Button>
+          </div>
         </div>
       </div>
 
