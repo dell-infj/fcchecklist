@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Users, UserCheck, Shield } from 'lucide-react';
+import { Users, UserCheck, Shield, Circle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -15,9 +15,15 @@ interface TeamMember {
   unique_id?: string;
 }
 
+interface OnlineUser {
+  user_id: string;
+  online_at: string;
+}
+
 const TeamMembers = () => {
   const { profile } = useAuth();
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -47,6 +53,51 @@ const TeamMembers = () => {
 
     fetchTeamMembers();
   }, [profile?.unique_id, profile?.id]);
+
+  // Configurar presença em tempo real
+  useEffect(() => {
+    if (!profile?.unique_id) return;
+
+    const channel = supabase.channel(`team_${profile.unique_id}`);
+
+    // Configurar tracking de presença
+    channel
+      .on('presence', { event: 'sync' }, () => {
+        const state = channel.presenceState();
+        const onlineUserIds = new Set<string>();
+        
+        Object.values(state).forEach((presences: any) => {
+          presences.forEach((presence: any) => {
+            if (presence.user_id) {
+              onlineUserIds.add(presence.user_id);
+            }
+          });
+        });
+        
+        setOnlineUsers(onlineUserIds);
+      })
+      .on('presence', { event: 'join' }, ({ newPresences }) => {
+        console.log('User joined:', newPresences);
+      })
+      .on('presence', { event: 'leave' }, ({ leftPresences }) => {
+        console.log('User left:', leftPresences);
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          // Enviar presença do usuário atual
+          await channel.track({
+            user_id: profile.id,
+            online_at: new Date().toISOString(),
+            name: `${profile.first_name} ${profile.last_name}`,
+            role: profile.role
+          });
+        }
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [profile?.unique_id, profile?.id, profile?.first_name, profile?.last_name, profile?.role]);
 
   if (loading) {
     return (
@@ -105,6 +156,7 @@ const TeamMembers = () => {
           <div className="space-y-3">
             {teamMembers.map((member) => {
               const isCurrentUser = member.id === profile.id;
+              const isOnline = onlineUsers.has(member.id);
               return (
                 <div
                   key={member.id}
@@ -115,13 +167,16 @@ const TeamMembers = () => {
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center relative ${
                       isCurrentUser ? 'bg-primary/20' : 'bg-primary/10'
                     }`}>
                       {member.role === 'admin' ? (
                         <Shield className="h-5 w-5 text-primary" />
                       ) : (
                         <UserCheck className="h-5 w-5 text-primary" />
+                      )}
+                      {isOnline && (
+                        <Circle className="absolute -bottom-1 -right-1 h-3 w-3 fill-green-500 text-green-500" />
                       )}
                     </div>
                     <div>
@@ -130,6 +185,11 @@ const TeamMembers = () => {
                         {isCurrentUser && (
                           <Badge variant="outline" className="text-xs">
                             Você
+                          </Badge>
+                        )}
+                        {isOnline && (
+                          <Badge variant="outline" className="text-xs text-green-600 border-green-300">
+                            Online
                           </Badge>
                         )}
                       </div>
