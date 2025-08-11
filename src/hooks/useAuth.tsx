@@ -45,11 +45,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (session?.user) {
           // Defer profile fetch with setTimeout to prevent deadlock
           setTimeout(async () => {
-            const { data: profileData } = await supabase
+            const { data: profileData, error } = await supabase
               .from('profiles')
               .select('*')
               .eq('user_id', session.user.id)
               .single();
+            
+            console.log('Profile fetch result:', { profileData, error });
+            if (profileData) {
+              console.log('Profile unique_id:', profileData.unique_id);
+            }
+            
             setProfile(profileData as Profile);
             setLoading(false);
           }, 0);
