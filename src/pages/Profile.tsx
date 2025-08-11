@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import Layout from '@/components/Layout';
 import TeamMembers from '@/components/TeamMembers';
+import OnlineUsers from '@/components/OnlineUsers';
 
 const Profile = () => {
   const { profile } = useAuth();
@@ -279,6 +280,9 @@ const Profile = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* Usuários Online */}
+        <OnlineUsers />
 
         {/* Quadro de Colaboradores */}
         <TeamMembers />
