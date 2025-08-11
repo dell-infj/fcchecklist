@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Calendar } from '@/components/ui/calendar';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ArrowLeft, Upload, Save, Camera, FileText, Check, ChevronsUpDown } from 'lucide-react';
+import { ArrowLeft, Upload, Save, Camera, FileText, Check, ChevronsUpDown, CalendarIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -30,6 +32,37 @@ interface Inspector {
   email: string;
 }
 
+interface ChecklistItem {
+  status: string;
+  observation: string;
+}
+
+interface FormData {
+  vehicle_id: string;
+  inspector_id: string;
+  inspection_date: Date;
+  all_cabinets_latches: ChecklistItem;
+  cigarette_lighter: ChecklistItem;
+  all_interior_lights: ChecklistItem;
+  passenger_seat: ChecklistItem;
+  fire_extinguisher: ChecklistItem;
+  functional_camera: ChecklistItem;
+  cabin_curtains: ChecklistItem;
+  all_outside_lights: ChecklistItem;
+  windshield_wipers: ChecklistItem;
+  tires: ChecklistItem;
+  chains: ChecklistItem;
+  safety_triangles: ChecklistItem;
+  engine_oil: ChecklistItem;
+  vehicle_water: ChecklistItem;
+  battery: ChecklistItem;
+  overall_condition: string;
+  additional_notes: string;
+  interior_photo_url: string;
+  exterior_photo_url: string;
+  inspector_signature: string;
+}
+
 const NewChecklist = () => {
   const navigate = useNavigate();
   const { profile } = useAuth();
@@ -42,19 +75,28 @@ const NewChecklist = () => {
   const [inspectorSearch, setInspectorSearch] = useState('');
   const [loading, setLoading] = useState(true);
   
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     // Identificação
     vehicle_id: '',
     inspector_id: profile?.role === 'inspector' ? profile.id : '',
-    inspection_date: new Date().toISOString().split('T')[0],
+    inspection_date: new Date(),
     
-    // Itens do checklist
-    all_interior_lights: false,
-    passenger_seat: false,
-    fire_extinguisher: false,
-    all_outside_lights: false,
-    all_cabinets_latches: 'working', // working, repaired, missing
-    cigarette_lighter: 'working', // working, repaired, missing
+    // Novos itens do checklist com status e observações
+    all_cabinets_latches: { status: 'funcionando', observation: '' },
+    cigarette_lighter: { status: 'funcionando', observation: '' },
+    all_interior_lights: { status: 'funcionando', observation: '' },
+    passenger_seat: { status: 'funcionando', observation: '' },
+    fire_extinguisher: { status: 'funcionando', observation: '' },
+    functional_camera: { status: 'funcionando', observation: '' },
+    cabin_curtains: { status: 'funcionando', observation: '' },
+    all_outside_lights: { status: 'funcionando', observation: '' },
+    windshield_wipers: { status: 'funcionando', observation: '' },
+    tires: { status: 'funcionando', observation: '' },
+    chains: { status: 'funcionando', observation: '' },
+    safety_triangles: { status: 'funcionando', observation: '' },
+    engine_oil: { status: 'funcionando', observation: '' },
+    vehicle_water: { status: 'funcionando', observation: '' },
+    battery: { status: 'funcionando', observation: '' },
     
     // Observações e fotos
     overall_condition: '',
@@ -157,25 +199,28 @@ const NewChecklist = () => {
     }
 
     try {
+      // Preparar dados do checklist para salvar
+      const checklistData = {
+        vehicle_id: formData.vehicle_id,
+        inspector_id: formData.inspector_id,
+        inspection_date: format(formData.inspection_date, 'yyyy-MM-dd'),
+        all_interior_lights: formData.all_interior_lights.status === 'funcionando',
+        passenger_seat: formData.passenger_seat.status === 'funcionando',
+        fire_extinguisher: formData.fire_extinguisher.status === 'funcionando',
+        all_outside_lights: formData.all_outside_lights.status === 'funcionando',
+        all_cabinets_latches: formData.all_cabinets_latches.status,
+        cigarette_lighter: formData.cigarette_lighter.status,
+        overall_condition: formData.overall_condition,
+        additional_notes: formData.additional_notes,
+        interior_photo_url: formData.interior_photo_url,
+        exterior_photo_url: formData.exterior_photo_url,
+        inspector_signature: formData.inspector_signature,
+        status: 'completed'
+      };
+
       const { error } = await supabase
         .from('checklists')
-        .insert({
-          vehicle_id: formData.vehicle_id,
-          inspector_id: formData.inspector_id,
-          inspection_date: formData.inspection_date,
-          all_interior_lights: formData.all_interior_lights,
-          passenger_seat: formData.passenger_seat,
-          fire_extinguisher: formData.fire_extinguisher,
-          all_outside_lights: formData.all_outside_lights,
-          all_cabinets_latches: formData.all_cabinets_latches,
-          cigarette_lighter: formData.cigarette_lighter,
-          overall_condition: formData.overall_condition,
-          additional_notes: formData.additional_notes,
-          interior_photo_url: formData.interior_photo_url,
-          exterior_photo_url: formData.exterior_photo_url,
-          inspector_signature: formData.inspector_signature,
-          status: 'completed'
-        });
+        .insert(checklistData);
 
       if (error) throw error;
 
@@ -227,39 +272,39 @@ const NewChecklist = () => {
         <div className="flex items-center gap-4">
           <Button
             variant="outline"
-            size="sm"
+            size="lg"
             onClick={() => navigate('/')}
-            className="gap-2"
+            className="gap-2 h-12 px-6"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-5 w-5" />
             Voltar
           </Button>
-          <div className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-primary" />
-            <h1 className="text-2xl font-bold">Novo Checklist de Inspeção</h1>
+          <div className="flex items-center gap-3">
+            <FileText className="h-6 w-6 text-primary" />
+            <h1 className="text-3xl font-bold">Novo Checklist de Inspeção</h1>
           </div>
         </div>
 
-        <div className="grid gap-6">
+        <div className="grid gap-8">
           {/* Seção de Identificação */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Identificação do Inspetor e Veículo</CardTitle>
+          <Card className="shadow-warm">
+            <CardHeader className="bg-gradient-secondary text-foreground rounded-t-lg">
+              <CardTitle className="text-xl">Identificação do Inspetor e Veículo</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-4">
-                  <h3 className="font-semibold">Identificação do Inspetor</h3>
+            <CardContent className="space-y-6 p-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-6">
+                  <h3 className="font-semibold text-lg">Identificação do Inspetor</h3>
                   {profile?.role === 'admin' && (
-                    <div className="space-y-2">
-                      <Label>Inspetor *</Label>
+                    <div className="space-y-3">
+                      <Label className="text-base font-semibold">Inspetor *</Label>
                       <Popover open={inspectorSearchOpen} onOpenChange={setInspectorSearchOpen}>
                         <PopoverTrigger asChild>
                           <Button
                             variant="outline"
                             role="combobox"
                             aria-expanded={inspectorSearchOpen}
-                            className="w-full justify-between"
+                            className="w-full justify-between h-12 text-base"
                           >
                             {formData.inspector_id ? (
                               (() => {
@@ -314,32 +359,53 @@ const NewChecklist = () => {
                     </div>
                   )}
                   {profile?.role === 'inspector' && (
-                    <div className="p-3 bg-muted rounded-lg">
-                      <p className="font-medium">{profile.first_name} {profile.last_name}</p>
+                    <div className="p-4 bg-muted rounded-lg">
+                      <p className="font-medium text-base">{profile.first_name} {profile.last_name}</p>
                       <p className="text-sm text-muted-foreground">Inspetor</p>
                     </div>
                   )}
-                  <div className="space-y-2">
-                    <Label htmlFor="inspection_date">Data da Inspeção *</Label>
-                    <Input
-                      id="inspection_date"
-                      type="date"
-                      value={formData.inspection_date}
-                      onChange={(e) => setFormData(prev => ({...prev, inspection_date: e.target.value}))}
-                    />
+                  <div className="space-y-3">
+                    <Label className="text-base font-semibold">Data da Inspeção *</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal h-12 text-base",
+                            !formData.inspection_date && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-5 w-5" />
+                          {formData.inspection_date ? (
+                            format(formData.inspection_date, "PPP", { locale: ptBR })
+                          ) : (
+                            <span>Selecione uma data</span>
+                          )}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={formData.inspection_date}
+                          onSelect={(date) => date && setFormData(prev => ({...prev, inspection_date: date}))}
+                          initialFocus
+                          className="pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  <h3 className="font-semibold">Identificação do Veículo</h3>
-                  <div className="space-y-2">
-                    <Label>Veículo *</Label>
+                <div className="space-y-6">
+                  <h3 className="font-semibold text-lg">Identificação do Veículo</h3>
+                  <div className="space-y-3">
+                    <Label className="text-base font-semibold">Veículo *</Label>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
                           role="combobox"
-                          className="w-full justify-between"
+                          className="w-full justify-between h-12 text-base"
                         >
                           {formData.vehicle_id ? (
                             (() => {
@@ -387,12 +453,12 @@ const NewChecklist = () => {
                     </Popover>
                   </div>
                   {formData.vehicle_id && (
-                    <div className="p-3 bg-muted rounded-lg">
+                    <div className="p-4 bg-muted rounded-lg">
                       {(() => {
                         const selectedVehicle = vehicles.find(v => v.id === formData.vehicle_id);
                         return selectedVehicle ? (
                           <>
-                            <p className="font-medium">Caminhão {selectedVehicle.truck_number}</p>
+                            <p className="font-medium text-base">Caminhão {selectedVehicle.truck_number}</p>
                             <p className="text-sm">Cliente: {selectedVehicle.customer_name}</p>
                             {selectedVehicle.customer_phone && (
                               <p className="text-sm">Telefone: {selectedVehicle.customer_phone}</p>
@@ -408,189 +474,220 @@ const NewChecklist = () => {
           </Card>
 
           {/* Seção do Checklist */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Itens de Inspeção</CardTitle>
+          <Card className="shadow-warm">
+            <CardHeader className="bg-gradient-primary text-white rounded-t-lg">
+              <CardTitle className="text-xl">Itens de Inspeção</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Itens de Verificação Simples */}
-              <div className="space-y-4">
-                <h3 className="font-semibold">Verificações Básicas</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="all_interior_lights"
-                      checked={formData.all_interior_lights}
-                      onCheckedChange={(checked) => setFormData(prev => ({...prev, all_interior_lights: checked as boolean}))}
-                    />
-                    <Label htmlFor="all_interior_lights">Todas as luzes internas</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="passenger_seat"
-                      checked={formData.passenger_seat}
-                      onCheckedChange={(checked) => setFormData(prev => ({...prev, passenger_seat: checked as boolean}))}
-                    />
-                    <Label htmlFor="passenger_seat">Assento do passageiro</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="fire_extinguisher"
-                      checked={formData.fire_extinguisher}
-                      onCheckedChange={(checked) => setFormData(prev => ({...prev, fire_extinguisher: checked as boolean}))}
-                    />
-                    <Label htmlFor="fire_extinguisher">Extintor de incêndio</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="all_outside_lights"
-                      checked={formData.all_outside_lights}
-                      onCheckedChange={(checked) => setFormData(prev => ({...prev, all_outside_lights: checked as boolean}))}
-                    />
-                    <Label htmlFor="all_outside_lights">Todas as luzes externas</Label>
+            <CardContent className="space-y-8 p-8">
+              {/* Renderizar itens do checklist */}
+              {[
+                { key: 'all_cabinets_latches', label: 'Todos os gabinetes/trincos' },
+                { key: 'cigarette_lighter', label: 'Acendedor de cigarros' },
+                { key: 'all_interior_lights', label: 'Todas as luzes internas' },
+                { key: 'passenger_seat', label: 'Assento do passageiro' },
+                { key: 'fire_extinguisher', label: 'Extintor de incêndio' },
+                { key: 'functional_camera', label: 'Câmera funcional' },
+                { key: 'cabin_curtains', label: 'Cortinas da cabine/área de dormir' },
+                { key: 'all_outside_lights', label: 'Todas as luzes externas' },
+                { key: 'windshield_wipers', label: 'Palhetas do limpador de para-brisa' },
+                { key: 'tires', label: 'Pneus' },
+                { key: 'chains', label: 'Correntes' },
+                { key: 'safety_triangles', label: 'Triângulos de segurança' },
+                { key: 'engine_oil', label: 'Óleo motor' },
+                { key: 'vehicle_water', label: 'Água do veículo' },
+                { key: 'battery', label: 'Bateria' }
+              ].map((item, index) => (
+                <div key={item.key} className="bg-muted/30 p-6 rounded-lg border border-border hover-lift">
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+                    {/* Nome do item */}
+                    <div className="lg:col-span-4">
+                      <Label className="text-base font-semibold text-foreground">
+                        {index + 1}. {item.label}
+                      </Label>
+                    </div>
+                    
+                    {/* Status options */}
+                    <div className="lg:col-span-6">
+                      <RadioGroup
+                        value={(formData[item.key as keyof FormData] as ChecklistItem)?.status || 'funcionando'}
+                        onValueChange={(value) => 
+                          setFormData(prev => ({
+                            ...prev,
+                            [item.key]: { 
+                              ...(prev[item.key as keyof FormData] as ChecklistItem), 
+                              status: value 
+                            }
+                          }))
+                        }
+                        className="flex flex-row gap-6"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem 
+                            value="funcionando" 
+                            id={`${item.key}_funcionando`}
+                            className="border-2 border-success w-5 h-5"
+                          />
+                          <Label htmlFor={`${item.key}_funcionando`} className="text-success font-medium">
+                            Funcionando
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem 
+                            value="revisao" 
+                            id={`${item.key}_revisao`}
+                            className="border-2 border-warning w-5 h-5"
+                          />
+                          <Label htmlFor={`${item.key}_revisao`} className="text-warning font-medium">
+                            Revisão
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem 
+                            value="ausente" 
+                            id={`${item.key}_ausente`}
+                            className="border-2 border-destructive w-5 h-5"
+                          />
+                          <Label htmlFor={`${item.key}_ausente`} className="text-destructive font-medium">
+                            Ausente
+                          </Label>
+                        </div>
+                      </RadioGroup>
+                    </div>
+                    
+                    {/* Observação */}
+                    <div className="lg:col-span-2">
+                      <Input
+                        placeholder="Observação..."
+                        value={(formData[item.key as keyof FormData] as ChecklistItem)?.observation || ''}
+                        onChange={(e) => 
+                          setFormData(prev => ({
+                            ...prev,
+                            [item.key]: { 
+                              ...(prev[item.key as keyof FormData] as ChecklistItem), 
+                              observation: e.target.value 
+                            }
+                          }))
+                        }
+                        className="h-10"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-
-              {/* Itens com Opções de Status */}
-              <div className="space-y-4">
-                <h3 className="font-semibold">Verificações Detalhadas</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-3">
-                    <Label>Todos os gabinetes/trincos</Label>
-                    <RadioGroup 
-                      value={formData.all_cabinets_latches} 
-                      onValueChange={(value) => setFormData(prev => ({...prev, all_cabinets_latches: value}))}
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="working" id="cabinets_working" />
-                        <Label htmlFor="cabinets_working">Funcionando</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="repaired" id="cabinets_repaired" />
-                        <Label htmlFor="cabinets_repaired">Reparado</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="missing" id="cabinets_missing" />
-                        <Label htmlFor="cabinets_missing">Ausente</Label>
-                      </div>
-                    </RadioGroup>
-                  </div>
-
-                  <div className="space-y-3">
-                    <Label>Acendedor de cigarro</Label>
-                    <RadioGroup 
-                      value={formData.cigarette_lighter} 
-                      onValueChange={(value) => setFormData(prev => ({...prev, cigarette_lighter: value}))}
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="working" id="lighter_working" />
-                        <Label htmlFor="lighter_working">Funcionando</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="repaired" id="lighter_repaired" />
-                        <Label htmlFor="lighter_repaired">Reparado</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="missing" id="lighter_missing" />
-                        <Label htmlFor="lighter_missing">Ausente</Label>
-                      </div>
-                    </RadioGroup>
-                  </div>
-                </div>
-              </div>
+              ))}
             </CardContent>
           </Card>
 
           {/* Seção de Mídia e Observações */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Fotos e Observações</CardTitle>
+          <Card className="shadow-warm">
+            <CardHeader className="bg-gradient-secondary text-foreground rounded-t-lg">
+              <CardTitle className="text-xl">Fotos e Observações</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6 p-8">
+              {/* Upload de Fotos */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-3">
-                  <Label>Foto do Interior</Label>
-                  <div 
-                    className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center cursor-pointer hover:border-muted-foreground/50 transition-colors"
-                    onClick={() => handleFileUpload('interior_photo_url')}
-                  >
-                    <Camera className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">Clique para adicionar foto do interior</p>
-                    <p className="text-xs text-muted-foreground mt-1">ou arraste e solte aqui</p>
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-lg">Foto do Interior</h3>
+                  <div className="border-2 border-dashed border-primary/30 rounded-lg p-8 text-center hover-lift warm-glow">
+                    <Camera className="h-12 w-12 mx-auto mb-4 text-primary" />
+                    <p className="text-sm text-muted-foreground mb-4">Clique para adicionar foto do interior</p>
+                    <Button 
+                      variant="outline" 
+                      size="lg"
+                      onClick={() => handleFileUpload('interior_photo_url')}
+                      className="gap-2 h-12 px-6"
+                    >
+                      <Upload className="h-5 w-5" />
+                      Enviar Foto
+                    </Button>
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  <Label>Foto do Exterior</Label>
-                  <div 
-                    className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center cursor-pointer hover:border-muted-foreground/50 transition-colors"
-                    onClick={() => handleFileUpload('exterior_photo_url')}
-                  >
-                    <Camera className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">Clique para adicionar foto do exterior</p>
-                    <p className="text-xs text-muted-foreground mt-1">ou arraste e solte aqui</p>
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-lg">Foto do Exterior</h3>
+                  <div className="border-2 border-dashed border-primary/30 rounded-lg p-8 text-center hover-lift warm-glow">
+                    <Camera className="h-12 w-12 mx-auto mb-4 text-primary" />
+                    <p className="text-sm text-muted-foreground mb-4">Clique para adicionar foto do exterior</p>
+                    <Button 
+                      variant="outline" 
+                      size="lg"
+                      onClick={() => handleFileUpload('exterior_photo_url')}
+                      className="gap-2 h-12 px-6"
+                    >
+                      <Upload className="h-5 w-5" />
+                      Enviar Foto
+                    </Button>
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="overall_condition">Condição Geral do Caminhão</Label>
+              {/* Observações */}
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <Label htmlFor="overall_condition" className="text-base font-semibold">
+                    Condição Geral do Veículo
+                  </Label>
                   <Textarea
                     id="overall_condition"
+                    placeholder="Descreva a condição geral do veículo..."
                     value={formData.overall_condition}
                     onChange={(e) => setFormData(prev => ({...prev, overall_condition: e.target.value}))}
-                    placeholder="Descreva a condição geral do veículo..."
-                    rows={3}
+                    rows={4}
+                    className="min-h-[100px] text-base"
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="additional_notes">Notas Adicionais</Label>
+                <div className="space-y-3">
+                  <Label htmlFor="additional_notes" className="text-base font-semibold">
+                    Observações Adicionais
+                  </Label>
                   <Textarea
                     id="additional_notes"
+                    placeholder="Observações adicionais, problemas encontrados, etc..."
                     value={formData.additional_notes}
                     onChange={(e) => setFormData(prev => ({...prev, additional_notes: e.target.value}))}
-                    placeholder="Observações extras, problemas encontrados, recomendações..."
-                    rows={4}
+                    rows={5}
+                    className="min-h-[120px] text-base"
                   />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Seção Final */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Finalização</CardTitle>
+          {/* Seção de Finalização */}
+          <Card className="shadow-warm">
+            <CardHeader className="bg-gradient-warm text-white rounded-t-lg">
+              <CardTitle className="text-xl">Finalização</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="inspector_signature">Assinatura do Inspetor</Label>
+            <CardContent className="space-y-6 p-8">
+              <div className="space-y-3">
+                <Label htmlFor="inspector_signature" className="text-base font-semibold">
+                  Assinatura do Inspetor
+                </Label>
                 <Input
                   id="inspector_signature"
+                  placeholder="Digite seu nome para confirmar a inspeção"
                   value={formData.inspector_signature}
                   onChange={(e) => setFormData(prev => ({...prev, inspector_signature: e.target.value}))}
-                  placeholder="Digite seu nome completo como assinatura"
+                  className="h-12 text-base"
                 />
               </div>
 
-              <div className="flex gap-4 pt-4">
-                <Button
-                  onClick={handleSubmit}
-                  className="flex-1 gap-2"
-                  disabled={!formData.vehicle_id || !formData.inspector_id}
-                >
-                  <Save className="h-4 w-4" />
-                  Salvar Checklist
-                </Button>
-                <Button
-                  variant="outline"
+              <div className="flex gap-6 pt-6">
+                <Button 
+                  variant="outline" 
+                  size="lg"
                   onClick={() => navigate('/')}
-                  className="flex-1"
+                  className="flex-1 h-14 text-base font-semibold"
                 >
                   Cancelar
+                </Button>
+                <Button 
+                  size="lg"
+                  onClick={handleSubmit}
+                  className="flex-1 gap-3 h-14 text-base font-semibold warm-glow"
+                >
+                  <Save className="h-5 w-5" />
+                  Salvar Checklist
                 </Button>
               </div>
             </CardContent>
