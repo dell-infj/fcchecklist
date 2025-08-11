@@ -267,21 +267,21 @@ const NewChecklist = () => {
 
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-4xl mx-auto space-y-6 px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
           <Button
             variant="outline"
             size="lg"
             onClick={() => navigate('/')}
-            className="gap-2 h-12 px-6"
+            className="gap-2 h-12 px-6 w-full sm:w-auto"
           >
             <ArrowLeft className="h-5 w-5" />
             Voltar
           </Button>
           <div className="flex items-center gap-3">
             <FileText className="h-6 w-6 text-primary" />
-            <h1 className="text-3xl font-bold">Novo Checklist de Inspeção</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold">Novo Checklist de Inspeção</h1>
           </div>
         </div>
 
@@ -291,8 +291,8 @@ const NewChecklist = () => {
             <CardHeader className="bg-gradient-secondary text-foreground rounded-t-lg">
               <CardTitle className="text-xl">Identificação do Inspetor e Veículo</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6 p-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <CardContent className="space-y-6 p-4 sm:p-6 lg:p-8">
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
                 <div className="space-y-6">
                   <h3 className="font-semibold text-lg">Identificação do Inspetor</h3>
                   {profile?.role === 'admin' && (
@@ -304,7 +304,7 @@ const NewChecklist = () => {
                             variant="outline"
                             role="combobox"
                             aria-expanded={inspectorSearchOpen}
-                            className="w-full justify-between h-12 text-base"
+                            className="w-full justify-between h-12 text-sm sm:text-base px-3"
                           >
                             {formData.inspector_id ? (
                               (() => {
@@ -497,8 +497,85 @@ const NewChecklist = () => {
                 { key: 'vehicle_water', label: 'Água do veículo' },
                 { key: 'battery', label: 'Bateria' }
               ].map((item, index) => (
-                <div key={item.key} className="bg-muted/30 p-6 rounded-lg border border-border hover-lift">
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+                <div key={item.key} className="bg-muted/30 p-4 md:p-6 rounded-lg border border-border hover-lift">
+                  {/* Mobile Layout */}
+                  <div className="block lg:hidden space-y-4">
+                    {/* Nome do item */}
+                    <div>
+                      <Label className="text-base font-semibold text-foreground">
+                        {index + 1}. {item.label}
+                      </Label>
+                    </div>
+                    
+                    {/* Status options - Mobile Stack */}
+                    <div>
+                      <RadioGroup
+                        value={(formData[item.key as keyof FormData] as ChecklistItem)?.status || 'funcionando'}
+                        onValueChange={(value) => 
+                          setFormData(prev => ({
+                            ...prev,
+                            [item.key]: { 
+                              ...(prev[item.key as keyof FormData] as ChecklistItem), 
+                              status: value 
+                            }
+                          }))
+                        }
+                        className="grid grid-cols-3 gap-2"
+                      >
+                        <div className="flex items-center space-x-2 p-2 rounded border">
+                          <RadioGroupItem 
+                            value="funcionando" 
+                            id={`${item.key}_funcionando_mobile`}
+                            className="border-2 border-success w-4 h-4"
+                          />
+                          <Label htmlFor={`${item.key}_funcionando_mobile`} className="text-success font-medium text-sm">
+                            Funcionando
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2 p-2 rounded border">
+                          <RadioGroupItem 
+                            value="revisao" 
+                            id={`${item.key}_revisao_mobile`}
+                            className="border-2 border-warning w-4 h-4"
+                          />
+                          <Label htmlFor={`${item.key}_revisao_mobile`} className="text-warning font-medium text-sm">
+                            Revisão
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2 p-2 rounded border">
+                          <RadioGroupItem 
+                            value="ausente" 
+                            id={`${item.key}_ausente_mobile`}
+                            className="border-2 border-destructive w-4 h-4"
+                          />
+                          <Label htmlFor={`${item.key}_ausente_mobile`} className="text-destructive font-medium text-sm">
+                            Ausente
+                          </Label>
+                        </div>
+                      </RadioGroup>
+                    </div>
+                    
+                    {/* Observação - Mobile */}
+                    <div>
+                      <Input
+                        placeholder="Observação..."
+                        value={(formData[item.key as keyof FormData] as ChecklistItem)?.observation || ''}
+                        onChange={(e) => 
+                          setFormData(prev => ({
+                            ...prev,
+                            [item.key]: { 
+                              ...(prev[item.key as keyof FormData] as ChecklistItem), 
+                              observation: e.target.value 
+                            }
+                          }))
+                        }
+                        className="h-12 text-base"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Desktop Layout */}
+                  <div className="hidden lg:grid lg:grid-cols-12 gap-4 items-center">
                     {/* Nome do item */}
                     <div className="lg:col-span-4">
                       <Label className="text-base font-semibold text-foreground">
@@ -672,19 +749,19 @@ const NewChecklist = () => {
                 />
               </div>
 
-              <div className="flex gap-6 pt-6">
+              <div className="flex flex-col sm:flex-row gap-4 pt-6">
                 <Button 
                   variant="outline" 
                   size="lg"
                   onClick={() => navigate('/')}
-                  className="flex-1 h-14 text-base font-semibold"
+                  className="w-full sm:flex-1 h-14 text-base font-semibold"
                 >
                   Cancelar
                 </Button>
                 <Button 
                   size="lg"
                   onClick={handleSubmit}
-                  className="flex-1 gap-3 h-14 text-base font-semibold warm-glow"
+                  className="w-full sm:flex-1 gap-3 h-14 text-base font-semibold warm-glow"
                 >
                   <Save className="h-5 w-5" />
                   Salvar Checklist
