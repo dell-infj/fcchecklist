@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -9,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Edit, FileText, Download } from 'lucide-react';
+import { Edit, FileText, Download, ArrowLeft, Home } from 'lucide-react';
 
 interface Vehicle {
   id: string;
@@ -30,6 +31,7 @@ interface Vehicle {
 export default function VehicleManagement() {
   const { user, profile } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
@@ -176,6 +178,24 @@ export default function VehicleManagement() {
   return (
     <div className="container mx-auto p-6">
       <div className="mb-6">
+        <div className="flex items-center gap-4 mb-4">
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/')} 
+            className="gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Voltar à Dashboard
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/')} 
+            className="gap-2"
+          >
+            <Home className="w-4 h-4" />
+            Início
+          </Button>
+        </div>
         <h1 className="text-3xl font-bold">Gerenciamento de Veículos</h1>
         <p className="text-muted-foreground">Visualize e edite informações dos veículos cadastrados</p>
       </div>
