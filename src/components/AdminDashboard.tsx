@@ -206,20 +206,20 @@ export default function AdminDashboard() {
   };
 
   const handleAddVehicle = async () => {
-    if (!newVehicle.vehicle_category || !newVehicle.owner_unique_id || !newVehicle.license_plate || !newVehicle.model) {
+    if (!newVehicle.vehicle_category || !newVehicle.license_plate || !newVehicle.model) {
       toast({
         title: "Erro",
-        description: "Por favor, preencha todos os campos obrigatórios: Categoria, Proprietário, Placa e Modelo",
+        description: "Por favor, preencha todos os campos obrigatórios: Categoria, Placa e Modelo",
         variant: "destructive"
       });
       return;
     }
 
     try {
-      // Usar any para contornar temporariamente o problema de tipos
+      // Usar o ID da empresa atual como proprietário
       const vehicleData: any = {
         vehicle_category: newVehicle.vehicle_category,
-        owner_unique_id: newVehicle.owner_unique_id,
+        owner_unique_id: profile?.unique_id || '',
         license_plate: newVehicle.license_plate,
         model: newVehicle.model,
         year: newVehicle.year,
@@ -352,40 +352,23 @@ export default function AdminDashboard() {
                 <DialogTitle>Cadastrar Novo Veículo</DialogTitle>
               </DialogHeader>
               <div className="grid gap-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="vehicle_category">Categoria *</Label>
-                    <Select value={newVehicle.vehicle_category} onValueChange={(value) => setNewVehicle(prev => ({ ...prev, vehicle_category: value }))}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione a categoria" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="carro">Carro</SelectItem>
-                        <SelectItem value="caminhao">Caminhão</SelectItem>
-                        <SelectItem value="moto">Moto</SelectItem>
-                        <SelectItem value="retroescavadeira">Retroescavadeira</SelectItem>
-                        <SelectItem value="passageiro">Passageiro</SelectItem>
-                        <SelectItem value="onibus">Ônibus</SelectItem>
-                        <SelectItem value="trator">Trator</SelectItem>
-                        <SelectItem value="outros">Outros</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="owner_unique_id">Proprietário (ID Único) *</Label>
-                    <Select value={newVehicle.owner_unique_id} onValueChange={(value) => setNewVehicle(prev => ({ ...prev, owner_unique_id: value }))}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o proprietário" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availableCompanies.map((company, index) => (
-                          <SelectItem key={`company-${index}-${company}`} value={company}>
-                            {company}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div>
+                  <Label htmlFor="vehicle_category">Categoria *</Label>
+                  <Select value={newVehicle.vehicle_category} onValueChange={(value) => setNewVehicle(prev => ({ ...prev, vehicle_category: value }))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione a categoria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="carro">Carro</SelectItem>
+                      <SelectItem value="caminhao">Caminhão</SelectItem>
+                      <SelectItem value="moto">Moto</SelectItem>
+                      <SelectItem value="retroescavadeira">Retroescavadeira</SelectItem>
+                      <SelectItem value="passageiro">Passageiro</SelectItem>
+                      <SelectItem value="onibus">Ônibus</SelectItem>
+                      <SelectItem value="trator">Trator</SelectItem>
+                      <SelectItem value="outros">Outros</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
