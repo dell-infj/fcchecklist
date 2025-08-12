@@ -1,6 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import Layout from '@/components/Layout';
 import AdminDashboard from '@/components/AdminDashboard';
 import InspectorDashboard from '@/components/InspectorDashboard';
@@ -8,6 +11,7 @@ import InspectorDashboard from '@/components/InspectorDashboard';
 const Index = () => {
   const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
+  const [showInspectorView, setShowInspectorView] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -35,7 +39,31 @@ const Index = () => {
 
   return (
     <Layout>
-      {profile.role === 'admin' ? <AdminDashboard /> : <InspectorDashboard />}
+      {profile?.role === 'admin' ? (
+        <div className="space-y-6">
+          {/* Toggle para administradores */}
+          <div className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg">
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="view-toggle"
+                checked={showInspectorView}
+                onCheckedChange={setShowInspectorView}
+              />
+              <Label htmlFor="view-toggle" className="font-medium">
+                {showInspectorView ? 'Visualização do Inspetor' : 'Visualização do Administrador'}
+              </Label>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Alternar entre visualizações
+            </p>
+          </div>
+          
+          {/* Renderizar dashboard baseado na seleção */}
+          {showInspectorView ? <InspectorDashboard /> : <AdminDashboard />}
+        </div>
+      ) : (
+        <InspectorDashboard />
+      )}
     </Layout>
   );
 };
