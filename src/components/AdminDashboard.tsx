@@ -76,7 +76,8 @@ export default function AdminDashboard() {
   const fetchAvailableCompanies = async () => {
     if (!profile) return;
     
-    const companies = [profile.unique_id, ...(profile.company_ids || [])].filter(Boolean);
+    // Usar Set para remover duplicatas
+    const companies = [...new Set([profile.unique_id, ...(profile.company_ids || [])].filter(Boolean))];
     setAvailableCompanies(companies);
   };
 
