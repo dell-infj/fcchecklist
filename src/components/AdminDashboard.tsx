@@ -378,8 +378,8 @@ export default function AdminDashboard() {
                         <SelectValue placeholder="Selecione o proprietário" />
                       </SelectTrigger>
                       <SelectContent>
-                        {availableCompanies.map((company) => (
-                          <SelectItem key={company} value={company}>
+                        {availableCompanies.map((company, index) => (
+                          <SelectItem key={`company-${index}-${company}`} value={company}>
                             {company}
                           </SelectItem>
                         ))}
