@@ -50,7 +50,8 @@ export default function VehicleManagement() {
 
   const fetchVehicles = async () => {
     try {
-      const { data, error } = await supabase
+      // Usar any temporariamente para contornar problemas de tipo
+      const { data, error }: any = await supabase
         .from('vehicles')
         .select('*')
         .order('created_at', { ascending: false });
@@ -102,7 +103,8 @@ export default function VehicleManagement() {
         .from('crlv-pdfs')
         .getPublicUrl(fileName);
 
-      const { error: updateError } = await supabase
+      // Usar any temporariamente para contornar problemas de tipo  
+      const { error: updateError }: any = await supabase
         .from('vehicles')
         .update({ crlv_pdf_url: data.publicUrl })
         .eq('id', vehicleId);
@@ -131,7 +133,8 @@ export default function VehicleManagement() {
     if (!editingVehicle) return;
 
     try {
-      const { error } = await supabase
+      // Usar any temporariamente para contornar problemas de tipo
+      const { error }: any = await supabase
         .from('vehicles')
         .update({
           vehicle_category: editingVehicle.vehicle_category,

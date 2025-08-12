@@ -206,9 +206,9 @@ export type Database = {
           owner_unique_id: string
           renavam: string | null
           status: string
-          truck_number: string
           unique_id: string | null
           updated_at: string
+          vehicle_category: string
           year: number | null
         }
         Insert: {
@@ -223,9 +223,9 @@ export type Database = {
           owner_unique_id: string
           renavam?: string | null
           status?: string
-          truck_number: string
           unique_id?: string | null
           updated_at?: string
+          vehicle_category: string
           year?: number | null
         }
         Update: {
@@ -240,9 +240,9 @@ export type Database = {
           owner_unique_id?: string
           renavam?: string | null
           status?: string
-          truck_number?: string
           unique_id?: string | null
           updated_at?: string
+          vehicle_category?: string
           year?: number | null
         }
         Relationships: []

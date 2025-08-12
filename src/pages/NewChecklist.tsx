@@ -97,8 +97,8 @@ const NewChecklist = () => {
 
   const loadData = async () => {
     try {
-      // Carregar veículos
-      const { data: vehicleData } = await supabase
+      // Carregar veículos - usar any temporariamente
+      const { data: vehicleData }: any = await supabase
         .from('vehicles')
         .select('id, vehicle_category, owner_unique_id, license_plate, model')
         .eq('status', 'active')

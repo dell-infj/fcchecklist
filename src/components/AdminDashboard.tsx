@@ -148,7 +148,8 @@ export default function AdminDashboard() {
     }
 
     try {
-      const vehicleData = {
+      // Usar any para contornar temporariamente o problema de tipos
+      const vehicleData: any = {
         vehicle_category: newVehicle.vehicle_category,
         owner_unique_id: newVehicle.owner_unique_id,
         license_plate: newVehicle.license_plate,
