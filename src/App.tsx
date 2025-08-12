@@ -12,6 +12,7 @@ import NewChecklist from "./pages/NewChecklist";
 import Reports from "./pages/Reports";
 import ChecklistEditor from "./pages/ChecklistEditor";
 import VehicleManagement from "./pages/VehicleManagement";
+import ChecklistView from "./pages/ChecklistView";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,8 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/checklist/new" element={<NewChecklist />} />
+            <Route path="/checklist/view/:id" element={<ChecklistView />} />
+            <Route path="/checklist/edit/:id" element={<NewChecklist />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/checklist-editor" element={<ChecklistEditor />} />
             <Route path="/vehicles" element={<VehicleManagement />} />

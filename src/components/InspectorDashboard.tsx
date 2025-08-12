@@ -107,30 +107,13 @@ const InspectorDashboard = () => {
 
   const startNewInspection = async (vehicleId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('checklists')
-        .insert({
-          vehicle_id: vehicleId,
-          inspector_id: profile?.id,
-          status: 'draft'
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      toast({
-        title: "Nova inspeção iniciada",
-        description: "Checklist criado com sucesso!"
-      });
-
-      // Reload data to show the new checklist
-      loadInspectorData();
+      // Navegar diretamente para a página de novo checklist com o veículo selecionado
+      navigate(`/checklist/new?vehicle=${vehicleId}`);
     } catch (error) {
-      console.error('Error creating checklist:', error);
+      console.error('Error starting inspection:', error);
       toast({
         title: "Erro",
-        description: "Erro ao criar nova inspeção",
+        description: "Erro ao iniciar nova inspeção",
         variant: "destructive"
       });
     }
@@ -291,15 +274,24 @@ const InspectorDashboard = () => {
                   <ClipboardList className="h-4 w-4" />
                   Ver Todas
                 </Button>
-                <Button 
-                  size="sm" 
-                  variant="default" 
-                  className="gap-2 w-full h-10"
-                  onClick={() => navigate('/checklist/new')}
-                >
-                  <Plus className="h-4 w-4" />
-                  Nova Inspeção
-                </Button>
+                 <Button 
+                   size="sm" 
+                   variant="default" 
+                   className="gap-2 w-full h-10"
+                   onClick={() => navigate('/checklist/new')}
+                 >
+                   <Plus className="h-4 w-4" />
+                   Nova Inspeção
+                 </Button>
+                 <Button 
+                   size="sm" 
+                   variant="outline" 
+                   className="gap-2 w-full h-10"
+                   onClick={() => navigate('/vehicles')}
+                 >
+                   <Truck className="h-4 w-4" />
+                   Ver Veículos
+                 </Button>
               </div>
             )}
           </div>
@@ -340,11 +332,24 @@ const InspectorDashboard = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     {getStatusBadge(checklist.status)}
-                    {checklist.status === 'draft' && (
-                      <Button size="sm" variant="outline">
-                        Continuar
-                      </Button>
-                    )}
+                     {checklist.status === 'draft' && (
+                       <Button 
+                         size="sm" 
+                         variant="outline"
+                         onClick={() => navigate(`/checklist/edit/${checklist.id}`)}
+                       >
+                         Continuar
+                       </Button>
+                     )}
+                     {checklist.status === 'completed' && (
+                       <Button 
+                         size="sm" 
+                         variant="outline"
+                         onClick={() => navigate(`/checklist/view/${checklist.id}`)}
+                       >
+                         Ver Relatório
+                       </Button>
+                     )}
                   </div>
                 </div>
               ))}

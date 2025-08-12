@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -63,6 +63,13 @@ const NewChecklist = () => {
   const navigate = useNavigate();
   const { profile } = useAuth();
   const { toast } = useToast();
+  const { id } = useParams<{ id: string }>();
+  const location = useLocation();
+  
+  // Get vehicle ID from URL params
+  const urlParams = new URLSearchParams(location.search);
+  const preselectedVehicleId = urlParams.get('vehicle');
+  const isEditing = !!id;
   
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [inspectors, setInspectors] = useState<Inspector[]>([]);
@@ -74,7 +81,7 @@ const NewChecklist = () => {
   
   const [formData, setFormData] = useState<FormData>({
     // Identificação
-    vehicle_id: '',
+    vehicle_id: preselectedVehicleId || '',
     inspector_id: profile?.role === 'inspector' ? profile.id : '',
     inspection_date: new Date(),
     vehicle_mileage: '',
@@ -89,7 +96,10 @@ const NewChecklist = () => {
 
   useEffect(() => {
     loadData();
-  }, []);
+    if (isEditing && id) {
+      loadExistingChecklist();
+    }
+  }, [id, isEditing]);
 
   useEffect(() => {
     // Filter inspectors based on search
@@ -105,6 +115,44 @@ const NewChecklist = () => {
       setFilteredInspectors(inspectors);
     }
   }, [inspectorSearch, inspectors]);
+
+  const loadExistingChecklist = async () => {
+    try {
+      const { data, error }: any = await supabase
+        .from('checklists')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) throw error;
+
+      setFormData({
+        vehicle_id: data.vehicle_id,
+        inspector_id: data.inspector_id,
+        inspection_date: new Date(data.inspection_date),
+        vehicle_mileage: data.vehicle_mileage || '',
+        overall_condition: data.overall_condition || '',
+        additional_notes: data.additional_notes || '',
+        interior_photo_url: data.interior_photo_url || '',
+        exterior_photo_url: data.exterior_photo_url || '',
+        inspector_signature: data.inspector_signature || '',
+        // Mapear campos do banco para formData
+        todas_as_luzes_internas_funcionando: { status: data.all_interior_lights ? 'funcionando' : 'nao_funcionando' },
+        banco_do_passageiro: { status: data.passenger_seat ? 'funcionando' : 'nao_funcionando' },
+        extintor_de_incendio: { status: data.fire_extinguisher ? 'funcionando' : 'nao_funcionando' },
+        todas_as_luzes_externas_funcionando: { status: data.all_outside_lights ? 'funcionando' : 'nao_funcionando' },
+        fechaduras_de_todos_os_armarios: { status: data.all_cabinets_latches || 'nao_informado' },
+        acendedor_de_cigarro: { status: data.cigarette_lighter || 'nao_informado' }
+      });
+    } catch (error) {
+      console.error('Error loading existing checklist:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao carregar checklist existente",
+        variant: "destructive"
+      });
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -229,13 +277,30 @@ const NewChecklist = () => {
       });
 
       // Salvar checklist no banco
-      const { data: savedChecklist, error: checklistError } = await supabase
-        .from('checklists')
-        .insert(checklistData)
-        .select('*')
-        .single();
+      let savedChecklist;
+      if (isEditing && id) {
+        // Atualizar checklist existente
+        const { data, error: checklistError } = await supabase
+          .from('checklists')
+          .update(checklistData)
+          .eq('id', id)
+          .select('*')
+          .single();
+        
+        if (checklistError) throw checklistError;
+        savedChecklist = data;
+      } else {
+        // Criar novo checklist
+        const { data, error: checklistError } = await supabase
+          .from('checklists')
+          .insert(checklistData)
+          .select('*')
+          .single();
+        
+        if (checklistError) throw checklistError;
+        savedChecklist = data;
+      }
 
-      if (checklistError) throw checklistError;
 
       // Preparar dados para o PDF
       const selectedVehicle = vehicles.find(v => v.id === formData.vehicle_id);
@@ -296,7 +361,7 @@ const NewChecklist = () => {
 
       toast({
         title: "Sucesso!",
-        description: "Checklist salvo e PDF gerado com sucesso"
+        description: isEditing ? "Checklist atualizado com sucesso!" : "Checklist salvo e PDF gerado com sucesso"
       });
 
       navigate('/');
@@ -344,7 +409,9 @@ const NewChecklist = () => {
           </Button>
           <div className="flex items-center gap-3">
             <FileText className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-bold">Novo Checklist de Inspeção</h1>
+            <h1 className="text-xl font-bold">
+              {isEditing ? 'Editar Checklist de Inspeção' : 'Novo Checklist de Inspeção'}
+            </h1>
           </div>
         </div>
 

@@ -59,7 +59,7 @@ const Reports = () => {
         .from('checklists')
         .select(`
           *,
-          vehicles (truck_number, customer_name),
+          vehicles (vehicle_category, license_plate, model, owner_unique_id),
           profiles (first_name, last_name)
         `)
         .gte('inspection_date', fromDate)
