@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ClipboardList, Truck, CheckCircle, Clock, Plus } from 'lucide-react';
+import { ClipboardList, Truck, CheckCircle, Clock, Plus, Download } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -21,9 +21,11 @@ interface MyChecklist {
   id: string;
   status: string;
   inspection_date: string;
+  pdf_url?: string;
   vehicle: {
     vehicle_category: string;
     owner_unique_id: string;
+    license_plate?: string;
   };
 }
 
@@ -64,9 +66,11 @@ const InspectorDashboard = () => {
           id,
           status,
           inspection_date,
+          pdf_url,
           vehicles (
             vehicle_category,
-            owner_unique_id
+            owner_unique_id,
+            license_plate
           )
         `)
         .eq('inspector_id', profile?.id)
@@ -86,9 +90,11 @@ const InspectorDashboard = () => {
         id: item.id,
         status: item.status,
         inspection_date: item.inspection_date,
+        pdf_url: item.pdf_url,
         vehicle: {
           vehicle_category: item.vehicles?.vehicle_category || '',
-          owner_unique_id: item.vehicles?.owner_unique_id || ''
+          owner_unique_id: item.vehicles?.owner_unique_id || '',
+          license_plate: item.vehicles?.license_plate || ''
         }
       })) || []);
       setStats({ pending, completed, todayCompleted });
@@ -102,6 +108,46 @@ const InspectorDashboard = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const downloadChecklistPDF = async (checklist: MyChecklist) => {
+    if (!checklist.pdf_url) {
+      toast({
+        title: "PDF não disponível",
+        description: "O PDF deste checklist não está disponível",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.storage
+        .from('checklist-pdfs')
+        .download(checklist.pdf_url);
+
+      if (error) throw error;
+
+      const url = URL.createObjectURL(data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `checklist_${checklist.vehicle.license_plate || 'sem_placa'}_${checklist.inspection_date}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "Sucesso",
+        description: "PDF baixado com sucesso!"
+      });
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao baixar PDF",
+        variant: "destructive"
+      });
     }
   };
 
@@ -322,6 +368,7 @@ const InspectorDashboard = () => {
                   <div>
                     <p className="font-medium">
                       {checklist.vehicle.vehicle_category}
+                      {checklist.vehicle.license_plate && ` - ${checklist.vehicle.license_plate}`}
                     </p>
                     <p className="text-sm text-muted-foreground">
                       {checklist.vehicle.owner_unique_id}
@@ -332,24 +379,41 @@ const InspectorDashboard = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     {getStatusBadge(checklist.status)}
-                     {checklist.status === 'draft' && (
-                       <Button 
-                         size="sm" 
-                         variant="outline"
-                         onClick={() => navigate(`/checklist/edit/${checklist.id}`)}
-                       >
-                         Continuar
-                       </Button>
-                     )}
-                     {checklist.status === 'completed' && (
-                       <Button 
-                         size="sm" 
-                         variant="outline"
-                         onClick={() => navigate(`/checklist/view/${checklist.id}`)}
-                       >
-                         Ver Relatório
-                       </Button>
-                     )}
+                    <div className="flex flex-col gap-1">
+                      {checklist.status === 'draft' && (
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => navigate(`/checklist/edit/${checklist.id}`)}
+                          className="w-full"
+                        >
+                          Continuar
+                        </Button>
+                      )}
+                      {checklist.status === 'completed' && (
+                        <>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => navigate(`/checklist/view/${checklist.id}`)}
+                            className="w-full"
+                          >
+                            Ver Relatório
+                          </Button>
+                          {checklist.pdf_url && (
+                            <Button 
+                              size="sm" 
+                              variant="secondary"
+                              onClick={() => downloadChecklistPDF(checklist)}
+                              className="w-full gap-1"
+                            >
+                              <Download className="h-3 w-3" />
+                              PDF
+                            </Button>
+                          )}
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
