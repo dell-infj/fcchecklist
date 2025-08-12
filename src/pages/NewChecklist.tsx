@@ -145,7 +145,7 @@ const NewChecklist = () => {
       setVehicles(vehicleData || []);
       setInspectors(inspectorData);
       setFilteredInspectors(inspectorData);
-      setChecklistItems(checklistData || []);
+      setChecklistItems((checklistData || []) as ChecklistItem[]);
     } catch (error) {
       console.error('Error loading data:', error);
       // Fallback: load without emails
@@ -286,7 +286,7 @@ const NewChecklist = () => {
             .from('checklists')
             .update({ 
               pdf_url: `checklist-pdfs/${profile?.unique_id}/${savedChecklist.id}/${pdfFileName}` 
-            })
+            } as any)
             .eq('id', savedChecklist.id);
         }
 

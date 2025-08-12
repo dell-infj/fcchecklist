@@ -70,6 +70,7 @@ export type Database = {
           interior_photo_url: string | null
           overall_condition: string | null
           passenger_seat: boolean | null
+          pdf_url: string | null
           status: string
           unique_id: string | null
           updated_at: string
@@ -91,6 +92,7 @@ export type Database = {
           interior_photo_url?: string | null
           overall_condition?: string | null
           passenger_seat?: boolean | null
+          pdf_url?: string | null
           status?: string
           unique_id?: string | null
           updated_at?: string
@@ -112,6 +114,7 @@ export type Database = {
           interior_photo_url?: string | null
           overall_condition?: string | null
           passenger_seat?: boolean | null
+          pdf_url?: string | null
           status?: string
           unique_id?: string | null
           updated_at?: string
