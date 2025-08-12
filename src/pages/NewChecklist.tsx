@@ -22,9 +22,10 @@ import ImageCapture from '@/components/ImageCapture';
 
 interface Vehicle {
   id: string;
-  truck_number: string;
-  customer_name: string;
-  customer_phone?: string;
+  vehicle_category: string;
+  owner_unique_id: string;
+  license_plate?: string;
+  model?: string;
 }
 
 interface Inspector {
@@ -99,9 +100,9 @@ const NewChecklist = () => {
       // Carregar veículos
       const { data: vehicleData } = await supabase
         .from('vehicles')
-        .select('id, truck_number, customer_name, customer_phone')
+        .select('id, vehicle_category, owner_unique_id, license_plate, model')
         .eq('status', 'active')
-        .order('truck_number');
+        .order('vehicle_category');
 
       // Carregar inspetores (apenas admins podem ver todos)
       let inspectorData = [];
@@ -393,7 +394,7 @@ const NewChecklist = () => {
                           {formData.vehicle_id ? (
                             (() => {
                               const selected = vehicles.find(v => v.id === formData.vehicle_id);
-                              return selected ? `Caminhão ${selected.truck_number} - ${selected.customer_name}` : "Selecionar veículo...";
+                              return selected ? `${selected.vehicle_category} - ${selected.license_plate || 'Sem placa'} - ${selected.owner_unique_id}` : "Selecionar veículo...";
                             })()
                           ) : (
                             "Selecionar veículo..."
@@ -409,7 +410,7 @@ const NewChecklist = () => {
                             {vehicles.map((vehicle) => (
                               <CommandItem
                                 key={vehicle.id}
-                                value={`${vehicle.truck_number} ${vehicle.customer_name}`}
+                                value={`${vehicle.vehicle_category} ${vehicle.license_plate} ${vehicle.owner_unique_id}`}
                                 onSelect={() => {
                                   setFormData(prev => ({...prev, vehicle_id: vehicle.id}));
                                 }}
@@ -422,10 +423,10 @@ const NewChecklist = () => {
                                 />
                                 <div className="flex flex-col">
                                   <span className="font-medium">
-                                    Caminhão {vehicle.truck_number}
+                                    {vehicle.vehicle_category} - {vehicle.license_plate || 'Sem placa'}
                                   </span>
                                   <span className="text-sm text-muted-foreground">
-                                    {vehicle.customer_name}
+                                    {vehicle.owner_unique_id} {vehicle.model && `- ${vehicle.model}`}
                                   </span>
                                 </div>
                               </CommandItem>
@@ -451,10 +452,10 @@ const NewChecklist = () => {
                         const selectedVehicle = vehicles.find(v => v.id === formData.vehicle_id);
                         return selectedVehicle ? (
                           <>
-                            <p className="font-medium text-base">Caminhão {selectedVehicle.truck_number}</p>
-                            <p className="text-sm">Cliente: {selectedVehicle.customer_name}</p>
-                            {selectedVehicle.customer_phone && (
-                              <p className="text-sm">Telefone: {selectedVehicle.customer_phone}</p>
+                            <p className="font-medium text-base">{selectedVehicle.vehicle_category} - {selectedVehicle.license_plate}</p>
+                            <p className="text-sm">Proprietário: {selectedVehicle.owner_unique_id}</p>
+                            {selectedVehicle.model && (
+                              <p className="text-sm">Modelo: {selectedVehicle.model}</p>
                             )}
                           </>
                         ) : null;

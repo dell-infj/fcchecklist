@@ -195,12 +195,16 @@ export type Database = {
       }
       vehicles: {
         Row: {
+          chassis: string | null
           created_at: string
-          customer_name: string
-          customer_phone: string | null
+          crlv_pdf_url: string | null
+          crv_number: string | null
+          fuel_type: string | null
           id: string
           license_plate: string | null
           model: string | null
+          owner_unique_id: string
+          renavam: string | null
           status: string
           truck_number: string
           unique_id: string | null
@@ -208,12 +212,16 @@ export type Database = {
           year: number | null
         }
         Insert: {
+          chassis?: string | null
           created_at?: string
-          customer_name: string
-          customer_phone?: string | null
+          crlv_pdf_url?: string | null
+          crv_number?: string | null
+          fuel_type?: string | null
           id?: string
           license_plate?: string | null
           model?: string | null
+          owner_unique_id: string
+          renavam?: string | null
           status?: string
           truck_number: string
           unique_id?: string | null
@@ -221,12 +229,16 @@ export type Database = {
           year?: number | null
         }
         Update: {
+          chassis?: string | null
           created_at?: string
-          customer_name?: string
-          customer_phone?: string | null
+          crlv_pdf_url?: string | null
+          crv_number?: string | null
+          fuel_type?: string | null
           id?: string
           license_plate?: string | null
           model?: string | null
+          owner_unique_id?: string
+          renavam?: string | null
           status?: string
           truck_number?: string
           unique_id?: string | null

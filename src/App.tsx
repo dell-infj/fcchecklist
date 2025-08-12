@@ -11,6 +11,7 @@ import Profile from "./pages/Profile";
 import NewChecklist from "./pages/NewChecklist";
 import Reports from "./pages/Reports";
 import ChecklistEditor from "./pages/ChecklistEditor";
+import VehicleManagement from "./pages/VehicleManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/checklist/new" element={<NewChecklist />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/checklist-editor" element={<ChecklistEditor />} />
+            <Route path="/vehicles" element={<VehicleManagement />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

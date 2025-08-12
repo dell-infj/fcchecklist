@@ -10,9 +10,9 @@ import { useToast } from '@/hooks/use-toast';
 
 interface Vehicle {
   id: string;
-  truck_number: string;
-  customer_name: string;
-  customer_phone?: string;
+  vehicle_category: string;
+  owner_unique_id: string;
+  license_plate?: string;
   model?: string;
   status: string;
 }
@@ -22,8 +22,8 @@ interface MyChecklist {
   status: string;
   inspection_date: string;
   vehicle: {
-    truck_number: string;
-    customer_name: string;
+    vehicle_category: string;
+    owner_unique_id: string;
   };
 }
 
@@ -51,9 +51,9 @@ const InspectorDashboard = () => {
       // Get all active vehicles
       const { data: vehicleData } = await supabase
         .from('vehicles')
-        .select('*')
+        .select('id, vehicle_category, owner_unique_id, license_plate, model, status')
         .eq('status', 'active')
-        .order('truck_number');
+        .order('vehicle_category');
 
       // Get my checklists
       const { data: checklistData } = await supabase
@@ -63,8 +63,8 @@ const InspectorDashboard = () => {
           status,
           inspection_date,
           vehicles (
-            truck_number,
-            customer_name
+            vehicle_category,
+            owner_unique_id
           )
         `)
         .eq('inspector_id', profile?.id)
@@ -85,8 +85,8 @@ const InspectorDashboard = () => {
         status: item.status,
         inspection_date: item.inspection_date,
         vehicle: {
-          truck_number: item.vehicles?.truck_number || '',
-          customer_name: item.vehicles?.customer_name || ''
+          vehicle_category: item.vehicles?.vehicle_category || '',
+          owner_unique_id: item.vehicles?.owner_unique_id || ''
         }
       })) || []);
       setStats({ pending, completed, todayCompleted });
@@ -238,10 +238,10 @@ const InspectorDashboard = () => {
                     <div className="flex items-center justify-between">
                       <div>
                         <h3 className="font-semibold">
-                          Caminhão {vehicle.truck_number}
+                          {vehicle.vehicle_category} - {vehicle.license_plate || 'Sem placa'}
                         </h3>
                         <p className="text-sm text-muted-foreground">
-                          {vehicle.customer_name}
+                          {vehicle.owner_unique_id}
                         </p>
                         {vehicle.model && (
                           <p className="text-xs text-muted-foreground">
@@ -327,10 +327,10 @@ const InspectorDashboard = () => {
                 <div key={checklist.id} className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg">
                   <div>
                     <p className="font-medium">
-                      Caminhão {checklist.vehicle.truck_number}
+                      {checklist.vehicle.vehicle_category}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {checklist.vehicle.customer_name}
+                      {checklist.vehicle.owner_unique_id}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {new Date(checklist.inspection_date).toLocaleDateString('pt-BR')}
