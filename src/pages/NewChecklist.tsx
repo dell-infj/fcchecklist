@@ -188,10 +188,6 @@ const NewChecklist = () => {
     }
 
     try {
-      console.log('Debug - Profile:', profile);
-      console.log('Debug - formData.inspector_id:', formData.inspector_id);
-      console.log('Debug - formData.vehicle_id:', formData.vehicle_id);
-      
       // Preparar dados do checklist para salvar
       const checklistData = {
         vehicle_id: formData.vehicle_id,
@@ -205,8 +201,6 @@ const NewChecklist = () => {
         status: 'completed',
         unique_id: profile?.unique_id
       };
-
-      console.log('Debug - checklistData before insert:', checklistData);
 
       // Adicionar dados dinâmicos do checklist
       Object.keys(formData).forEach(key => {
