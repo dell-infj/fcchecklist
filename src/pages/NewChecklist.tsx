@@ -20,12 +20,22 @@ import SignatureCanvas from '@/components/SignatureCanvas';
 import DynamicChecklistForm from '@/components/DynamicChecklistForm';
 import ImageCapture from '@/components/ImageCapture';
 
+interface ChecklistItem {
+  id: string;
+  name: string;
+  description?: string;
+  category: 'interior' | 'exterior' | 'safety' | 'mechanical';
+  required: boolean;
+  item_order: number;
+}
+
 interface Vehicle {
   id: string;
   vehicle_category: string;
   owner_unique_id: string;
   license_plate?: string;
   model?: string;
+  year?: number;
 }
 
 interface Inspector {
@@ -59,6 +69,7 @@ const NewChecklist = () => {
   const [filteredInspectors, setFilteredInspectors] = useState<Inspector[]>([]);
   const [inspectorSearchOpen, setInspectorSearchOpen] = useState(false);
   const [inspectorSearch, setInspectorSearch] = useState('');
+  const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
   const [loading, setLoading] = useState(true);
   
   const [formData, setFormData] = useState<FormData>({
@@ -100,9 +111,16 @@ const NewChecklist = () => {
       // Carregar veículos - usar any temporariamente
       const { data: vehicleData }: any = await supabase
         .from('vehicles')
-        .select('id, vehicle_category, owner_unique_id, license_plate, model')
+        .select('id, vehicle_category, owner_unique_id, license_plate, model, year')
         .eq('status', 'active')
         .order('vehicle_category');
+
+      // Carregar checklist items
+      const { data: checklistData } = await supabase
+        .from('checklist_items')
+        .select('*')
+        .eq('active', true)
+        .order('item_order');
 
       // Carregar inspetores (apenas admins podem ver todos)
       let inspectorData = [];
@@ -127,6 +145,7 @@ const NewChecklist = () => {
       setVehicles(vehicleData || []);
       setInspectors(inspectorData);
       setFilteredInspectors(inspectorData);
+      setChecklistItems(checklistData || []);
     } catch (error) {
       console.error('Error loading data:', error);
       // Fallback: load without emails
@@ -209,15 +228,75 @@ const NewChecklist = () => {
         }
       });
 
-      const { error } = await supabase
+      // Salvar checklist no banco
+      const { data: savedChecklist, error: checklistError } = await supabase
         .from('checklists')
-        .insert(checklistData);
+        .insert(checklistData)
+        .select('*')
+        .single();
 
-      if (error) throw error;
+      if (checklistError) throw checklistError;
+
+      // Preparar dados para o PDF
+      const selectedVehicle = vehicles.find(v => v.id === formData.vehicle_id);
+      const selectedInspector = inspectors.find(i => i.id === formData.inspector_id);
+      
+      if (selectedVehicle && selectedInspector) {
+        const { generateChecklistPDF, downloadPDF, getPDFBlob } = await import('@/lib/pdfGenerator');
+        
+        const pdfData = {
+          vehicleInfo: {
+            model: selectedVehicle.model || 'Não informado',
+            license_plate: selectedVehicle.license_plate || 'Não informado',
+            year: selectedVehicle.year || 0,
+            vehicle_category: selectedVehicle.vehicle_category
+          },
+          inspectorInfo: {
+            first_name: selectedInspector.first_name,
+            last_name: selectedInspector.last_name
+          },
+          inspection_date: formData.inspection_date,
+          vehicle_mileage: formData.vehicle_mileage,
+          overall_condition: formData.overall_condition || 'Não informado',
+          additional_notes: formData.additional_notes || '',
+          checklistItems: formData,
+          checklist_items: checklistItems
+        };
+
+        // Gerar PDF
+        const pdfDoc = generateChecklistPDF(pdfData);
+        const pdfBlob = getPDFBlob(pdfDoc);
+        
+        // Criar nome do arquivo
+        const pdfFileName = `checklist_${selectedVehicle.license_plate}_${format(formData.inspection_date, 'ddMMyyyy')}.pdf`;
+        
+        // Upload do PDF para o Supabase Storage
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('checklist-pdfs')
+          .upload(`${profile?.unique_id}/${savedChecklist.id}/${pdfFileName}`, pdfBlob, {
+            contentType: 'application/pdf',
+            upsert: true
+          });
+
+        if (uploadError) {
+          console.error('Error uploading PDF:', uploadError);
+        } else {
+          // Atualizar checklist com URL do PDF
+          await supabase
+            .from('checklists')
+            .update({ 
+              pdf_url: `checklist-pdfs/${profile?.unique_id}/${savedChecklist.id}/${pdfFileName}` 
+            })
+            .eq('id', savedChecklist.id);
+        }
+
+        // Download do PDF (abre "Salvar como")
+        downloadPDF(pdfDoc, pdfFileName);
+      }
 
       toast({
         title: "Sucesso!",
-        description: "Checklist salvo com sucesso"
+        description: "Checklist salvo e PDF gerado com sucesso"
       });
 
       navigate('/');
