@@ -233,7 +233,10 @@ export default function AdminDashboard() {
           </CardHeader>
         </Card>
 
-        <Card className="cursor-pointer hover:bg-accent transition-colors">
+        <Card 
+          className="cursor-pointer hover:bg-accent transition-colors"
+          onClick={() => navigate('/checklists')}
+        >
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileText className="w-5 h-5" />
