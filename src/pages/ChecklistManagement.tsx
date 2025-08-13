@@ -38,6 +38,9 @@ interface ChecklistItem {
   created_at: string;
   overall_condition: string | null;
   additional_notes: string | null;
+  interior_photo_url: string | null;
+  exterior_photo_url: string | null;
+  inspector_signature: string | null;
   vehicle: {
     license_plate: string;
     vehicle_category: string;
@@ -81,6 +84,9 @@ export default function ChecklistManagement() {
           created_at,
           overall_condition,
           additional_notes,
+          interior_photo_url,
+          exterior_photo_url,
+          inspector_signature,
           all_interior_lights,
           passenger_seat,
           fire_extinguisher,
@@ -110,6 +116,9 @@ export default function ChecklistManagement() {
         created_at: item.created_at,
         overall_condition: item.overall_condition,
         additional_notes: item.additional_notes,
+        interior_photo_url: item.interior_photo_url,
+        exterior_photo_url: item.exterior_photo_url,
+        inspector_signature: item.inspector_signature,
         all_interior_lights: item.all_interior_lights,
         passenger_seat: item.passenger_seat,
         fire_extinguisher: item.fire_extinguisher,
@@ -169,6 +178,9 @@ export default function ChecklistManagement() {
         vehicle_mileage: "Não informado",
         overall_condition: checklist.overall_condition || "Não informado",
         additional_notes: checklist.additional_notes || "",
+        interior_photo_url: checklist.interior_photo_url,
+        exterior_photo_url: checklist.exterior_photo_url,
+        inspector_signature: checklist.inspector_signature,
         checklistItems: {
           // Mapear campos booleanos para formato esperado
           all_interior_lights: { 
@@ -200,12 +212,12 @@ export default function ChecklistManagement() {
         ]
       };
 
-      // Gerar PDF
-      const doc = generateChecklistPDF(pdfData);
+      // Gerar PDF (agora é assíncrono)
+      const doc = await generateChecklistPDF(pdfData);
       
       // Fazer download
       const filename = `checklist_${checklist.vehicle.license_plate}_${checklist.inspection_date}.pdf`;
-      downloadPDF(doc, filename);
+      await downloadPDF(doc, filename);
 
       toast({
         title: "Sucesso",

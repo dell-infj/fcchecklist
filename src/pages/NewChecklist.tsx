@@ -324,12 +324,15 @@ const NewChecklist = () => {
           vehicle_mileage: formData.vehicle_mileage,
           overall_condition: formData.overall_condition || 'Não informado',
           additional_notes: formData.additional_notes || '',
+          interior_photo_url: formData.interior_photo_url,
+          exterior_photo_url: formData.exterior_photo_url,
+          inspector_signature: formData.inspector_signature,
           checklistItems: formData,
           checklist_items: checklistItems
         };
 
         // Gerar PDF
-        const pdfDoc = generateChecklistPDF(pdfData);
+        const pdfDoc = await generateChecklistPDF(pdfData);
         const pdfBlob = getPDFBlob(pdfDoc);
         
         // Criar nome do arquivo
@@ -356,7 +359,7 @@ const NewChecklist = () => {
         }
 
         // Download do PDF (abre "Salvar como")
-        downloadPDF(pdfDoc, pdfFileName);
+        await downloadPDF(pdfDoc, pdfFileName);
       }
 
       toast({

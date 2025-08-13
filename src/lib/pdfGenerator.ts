@@ -17,6 +17,9 @@ interface ChecklistPDFData {
   vehicle_mileage: string;
   overall_condition: string;
   additional_notes: string;
+  interior_photo_url?: string | null;
+  exterior_photo_url?: string | null;
+  inspector_signature?: string | null;
   checklistItems: Record<string, { status: string; observation?: string }>;
   checklist_items: Array<{
     name: string;
@@ -26,7 +29,7 @@ interface ChecklistPDFData {
   }>;
 }
 
-export const generateChecklistPDF = (data: ChecklistPDFData): jsPDF => {
+export const generateChecklistPDF = async (data: ChecklistPDFData): Promise<jsPDF> => {
   const doc = new jsPDF();
   let yPosition = 20;
   const pageHeight = doc.internal.pageSize.height;
@@ -37,6 +40,67 @@ export const generateChecklistPDF = (data: ChecklistPDFData): jsPDF => {
     if (yPosition + requiredSpace > pageHeight - marginBottom) {
       doc.addPage();
       yPosition = 20;
+    }
+  };
+
+  // Função para adicionar imagem ao PDF
+  const addImageToPDF = async (imageUrl: string, title: string, maxWidth: number = 160) => {
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      
+      return new Promise<void>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            const result = e.target?.result as string;
+            
+            // Criar uma imagem para obter dimensões
+            const img = new Image();
+            img.onload = function(this: HTMLImageElement) {
+              const imgWidth = this.width;
+              const imgHeight = this.height;
+              
+              // Calcular dimensões proporcionais
+              const aspectRatio = imgWidth / imgHeight;
+              let width = maxWidth;
+              let height = width / aspectRatio;
+              
+              // Se a altura for muito grande, ajustar baseado na altura
+              if (height > 100) {
+                height = 100;
+                width = height * aspectRatio;
+              }
+              
+              checkPageBreak(height + 20);
+              doc.setFont('helvetica', 'bold');
+              doc.text(title, 20, yPosition);
+              yPosition += 10;
+              
+              doc.addImage(result, 'JPEG', 20, yPosition, width, height);
+              yPosition += height + 10;
+              
+              resolve();
+            };
+            img.onerror = () => reject(new Error('Failed to load image'));
+            img.src = result;
+          } catch (error) {
+            reject(error);
+          }
+        };
+        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      console.error('Error adding image to PDF:', error);
+      // Se falhar, apenas adicionar texto indicando que a imagem não pôde ser carregada
+      checkPageBreak(15);
+      doc.setFont('helvetica', 'bold');
+      doc.text(title, 20, yPosition);
+      yPosition += 8;
+      doc.setFont('helvetica', 'normal');
+      doc.text('(Imagem não disponível)', 20, yPosition);
+      yPosition += 10;
     }
   };
 
@@ -151,6 +215,22 @@ export const generateChecklistPDF = (data: ChecklistPDFData): jsPDF => {
     yPosition += 10;
   }
 
+  // Fotos da Inspeção
+  if (data.interior_photo_url || data.exterior_photo_url) {
+    checkPageBreak(20);
+    doc.setFont('helvetica', 'bold');
+    doc.text('FOTOS DA INSPEÇÃO', 20, yPosition);
+    yPosition += 10;
+
+    if (data.interior_photo_url) {
+      await addImageToPDF(data.interior_photo_url, 'Foto Interior:', 140);
+    }
+
+    if (data.exterior_photo_url) {
+      await addImageToPDF(data.exterior_photo_url, 'Foto Exterior:', 140);
+    }
+  }
+
   // Observações Adicionais
   if (data.additional_notes && data.additional_notes.trim()) {
     checkPageBreak(30);
@@ -168,6 +248,31 @@ export const generateChecklistPDF = (data: ChecklistPDFData): jsPDF => {
     yPosition += 10;
   }
 
+  // Assinatura do Inspetor
+  if (data.inspector_signature) {
+    checkPageBreak(80);
+    doc.setFont('helvetica', 'bold');
+    doc.text('ASSINATURA DO INSPETOR', 20, yPosition);
+    yPosition += 10;
+
+    try {
+      // Adicionar assinatura como imagem
+      await addImageToPDF(data.inspector_signature, '', 120);
+    } catch (error) {
+      console.error('Error adding signature:', error);
+      doc.setFont('helvetica', 'normal');
+      doc.text('(Assinatura não disponível)', 20, yPosition);
+      yPosition += 10;
+    }
+
+    // Nome do inspetor
+    doc.setFont('helvetica', 'normal');
+    doc.text(`${data.inspectorInfo.first_name} ${data.inspectorInfo.last_name}`, 20, yPosition);
+    yPosition += 6;
+    doc.text('Inspetor Responsável', 20, yPosition);
+    yPosition += 15;
+  }
+
   // Rodapé
   checkPageBreak(30);
   yPosition = Math.max(yPosition, pageHeight - 40);
@@ -178,7 +283,7 @@ export const generateChecklistPDF = (data: ChecklistPDFData): jsPDF => {
   return doc;
 };
 
-export const downloadPDF = (doc: jsPDF, filename: string) => {
+export const downloadPDF = async (doc: jsPDF, filename: string) => {
   // Para web - abre a caixa de diálogo "Salvar como"
   doc.save(filename);
 };
