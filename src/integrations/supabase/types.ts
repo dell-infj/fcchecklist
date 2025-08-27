@@ -263,6 +263,15 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_user_profile_data: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          profile_company_ids: string[]
+          profile_id: string
+          profile_role: string
+          profile_unique_id: string
+        }[]
+      }
       is_valid_email: {
         Args: { email_address: string }
         Returns: boolean
