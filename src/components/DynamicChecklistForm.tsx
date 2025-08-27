@@ -234,7 +234,7 @@ const DynamicChecklistForm: React.FC<DynamicChecklistFormProps> = ({ formData, s
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="funcionando" id={`${item.id}-funcionando`} />
                       <Label htmlFor={`${item.id}-funcionando`} className="text-green-600 font-medium">
-                        Funcionando
+                        Sim
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
