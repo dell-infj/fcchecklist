@@ -6,7 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Plus, Edit, Trash2, Save, Settings, ArrowUp, ArrowDown } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ArrowLeft, Plus, Edit, Trash2, Save, Settings, ArrowUp, ArrowDown, Car, Truck, Construction } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -107,12 +108,19 @@ const ItemForm = React.memo(({
   );
 });
 
+const vehicleCategories = [
+  { value: 'CARRO', label: 'Veículos Leves (Carro/Moto)', icon: Car },
+  { value: 'CAMINHAO', label: 'Caminhão/Caminhão-Munck', icon: Truck },
+  { value: 'RETROESCAVADEIRA', label: 'Retroescavadeira', icon: Construction }
+];
+
 const ChecklistEditor = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { profile } = useAuth();
   const [items, setItems] = useState<ChecklistItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedVehicleCategory, setSelectedVehicleCategory] = useState<string>('CARRO');
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -133,7 +141,7 @@ const ChecklistEditor = () => {
 
   useEffect(() => {
     loadChecklistItems();
-  }, []);
+  }, [selectedVehicleCategory]);
 
   const loadChecklistItems = async () => {
     try {
@@ -141,6 +149,7 @@ const ChecklistEditor = () => {
         .from('checklist_items')
         .select('*')
         .eq('active', true)
+        .eq('unique_id', selectedVehicleCategory)
         .order('item_order');
 
       if (error) throw error;
@@ -227,7 +236,7 @@ const ChecklistEditor = () => {
           category: formData.category,
           required: formData.required,
           item_order: items.length + 1,
-          unique_id: profile?.unique_id
+          unique_id: selectedVehicleCategory
         })
         .select()
         .single();
@@ -411,6 +420,34 @@ const ChecklistEditor = () => {
           </div>
         </div>
 
+        {/* Vehicle Category Selector */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Categoria de Veículo</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Selecione a categoria de veículo para editar os itens de checklist específicos
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {vehicleCategories.map(category => {
+                const IconComponent = category.icon;
+                return (
+                  <Button
+                    key={category.value}
+                    variant={selectedVehicleCategory === category.value ? "default" : "outline"}
+                    className="h-auto p-4 flex flex-col items-center gap-2"
+                    onClick={() => setSelectedVehicleCategory(category.value)}
+                  >
+                    <IconComponent className="w-8 h-8" />
+                    <span className="text-sm font-medium text-center">{category.label}</span>
+                  </Button>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-3">
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
@@ -477,10 +514,17 @@ const ChecklistEditor = () => {
         {/* Items List */}
         <Card className="shadow-warm">
           <CardHeader>
-            <CardTitle>Itens do Checklist</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Use os botões de seta para reordenar os itens. Use as ações para editar ou remover.
-            </p>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Itens do Checklist</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Use os botões de seta para reordenar os itens. Use as ações para editar ou remover.
+                </p>
+              </div>
+              <Badge variant="outline">
+                {vehicleCategories.find(c => c.value === selectedVehicleCategory)?.label}
+              </Badge>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">

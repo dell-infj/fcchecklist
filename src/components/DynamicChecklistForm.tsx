@@ -39,9 +39,9 @@ const DynamicChecklistForm: React.FC<DynamicChecklistFormProps> = ({ formData, s
 
   const loadChecklistItems = async () => {
     try {
-      // Mapear categoria de veículo para unique_id
-      const getVehicleTypeId = (category: string) => {
-        switch (category?.toLowerCase()) {
+      // Mapear categorias de veículo para unique_id
+      const getUniqueIdByCategory = (category: string) => {
+        switch(category?.toLowerCase()) {
           case 'caminhao':
           case 'caminhão':
             return 'CAMINHAO';
@@ -51,17 +51,17 @@ const DynamicChecklistForm: React.FC<DynamicChecklistFormProps> = ({ formData, s
           case 'retroescavadeira':
             return 'RETROESCAVADEIRA';
           default:
-            return 'CARRO'; // Default para carro
+            return 'CARRO'; // Default para carro se não especificado
         }
       };
 
-      const vehicleTypeId = getVehicleTypeId(vehicleCategory || '');
+      const uniqueId = getUniqueIdByCategory(vehicleCategory || '');
 
       const { data, error } = await supabase
         .from('checklist_items')
         .select('*')
         .eq('active', true)
-        .eq('unique_id', vehicleTypeId)
+        .eq('unique_id', uniqueId)
         .order('item_order');
 
       if (error) throw error;
@@ -132,6 +132,23 @@ const DynamicChecklistForm: React.FC<DynamicChecklistFormProps> = ({ formData, s
     return formData[fieldKey]?.[field] || (field === 'status' ? 'funcionando' : '');
   };
 
+  // Função para obter o nome legível da categoria do veículo
+  const getVehicleCategoryDisplayName = (category: string) => {
+    switch(category?.toLowerCase()) {
+      case 'caminhao':
+      case 'caminhão':
+        return 'Caminhão/Caminhão-Munck';
+      case 'carro':
+        return 'Veículos Leves (Carro)';
+      case 'moto':
+        return 'Veículos Leves (Moto)';
+      case 'retroescavadeira':
+        return 'Retroescavadeira';
+      default:
+        return 'Veículos Leves (Carro)';
+    }
+  };
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -158,80 +175,100 @@ const DynamicChecklistForm: React.FC<DynamicChecklistFormProps> = ({ formData, s
 
   return (
     <div className="space-y-8">
-      {Object.entries(groupedItems).map(([category, items]) => (
-        <div key={category} className="space-y-4">
-          <div className="flex items-center gap-2">
-            <h3 className="text-lg font-semibold">
-              {getCategoryInfo(category).label}
-            </h3>
-            <Badge 
-              variant="outline" 
-              className={getCategoryInfo(category).color}
-            >
-              {items.length} {items.length === 1 ? 'item' : 'itens'}
-            </Badge>
-          </div>
-
-          <div className="space-y-6">
-            {items.map((item) => (
-              <div key={item.id} className="space-y-3 p-4 border rounded-lg bg-background">
-                <div className="flex items-start gap-2">
-                  <Label className="text-base font-medium flex-1">
-                    {item.name}
-                    {item.required && (
-                      <Badge variant="default" className="ml-2 bg-success text-white text-xs">
-                        Obrigatório
-                      </Badge>
-                    )}
-                  </Label>
-                </div>
-                
-                {item.description && (
-                  <p className="text-sm text-muted-foreground">{item.description}</p>
-                )}
-
-                <RadioGroup
-                  value={getFormValue(item.name, 'status')}
-                  onValueChange={(value) => updateFormData(item.name, 'status', value)}
-                  className="flex gap-6"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="funcionando" id={`${item.id}-funcionando`} />
-                    <Label htmlFor={`${item.id}-funcionando`} className="text-green-600 font-medium">
-                      Funcionando
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="revisao" id={`${item.id}-revisao`} />
-                    <Label htmlFor={`${item.id}-revisao`} className="text-yellow-600 font-medium">
-                      Revisão
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="ausente" id={`${item.id}-ausente`} />
-                    <Label htmlFor={`${item.id}-ausente`} className="text-red-600 font-medium">
-                      Ausente
-                    </Label>
-                  </div>
-                </RadioGroup>
-
-                <div className="space-y-2">
-                  <Label htmlFor={`${item.id}-observation`} className="text-sm font-medium">
-                    Observações
-                  </Label>
-                  <Input
-                    id={`${item.id}-observation`}
-                    value={getFormValue(item.name, 'observation')}
-                    onChange={(e) => updateFormData(item.name, 'observation', e.target.value)}
-                    placeholder="Observações adicionais..."
-                    className="w-full"
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
+      {/* Mostrar informação sobre a categoria do veículo */}
+      {vehicleCategory && (
+        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+          <h2 className="text-lg font-semibold text-blue-900 mb-2">
+            Checklist para: {getVehicleCategoryDisplayName(vehicleCategory)}
+          </h2>
+          <p className="text-blue-700 text-sm">
+            Os itens abaixo foram selecionados específicamente para esta categoria de veículo.
+          </p>
         </div>
-      ))}
+      )}
+
+      {checklistItems.length === 0 ? (
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">
+            Nenhum item de checklist encontrado para esta categoria de veículo.
+          </p>
+        </div>
+      ) : (
+        Object.entries(groupedItems).map(([category, items]) => (
+          <div key={category} className="space-y-4">
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-semibold">
+                {getCategoryInfo(category).label}
+              </h3>
+              <Badge 
+                variant="outline" 
+                className={getCategoryInfo(category).color}
+              >
+                {items.length} {items.length === 1 ? 'item' : 'itens'}
+              </Badge>
+            </div>
+
+            <div className="space-y-6">
+              {items.map((item) => (
+                <div key={item.id} className="space-y-3 p-4 border rounded-lg bg-background">
+                  <div className="flex items-start gap-2">
+                    <Label className="text-base font-medium flex-1">
+                      {item.name}
+                      {item.required && (
+                        <Badge variant="default" className="ml-2 bg-success text-white text-xs">
+                          Obrigatório
+                        </Badge>
+                      )}
+                    </Label>
+                  </div>
+                  
+                  {item.description && (
+                    <p className="text-sm text-muted-foreground">{item.description}</p>
+                  )}
+
+                  <RadioGroup
+                    value={getFormValue(item.name, 'status')}
+                    onValueChange={(value) => updateFormData(item.name, 'status', value)}
+                    className="flex gap-6"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="funcionando" id={`${item.id}-funcionando`} />
+                      <Label htmlFor={`${item.id}-funcionando`} className="text-green-600 font-medium">
+                        Funcionando
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="revisao" id={`${item.id}-revisao`} />
+                      <Label htmlFor={`${item.id}-revisao`} className="text-yellow-600 font-medium">
+                        Revisão
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="ausente" id={`${item.id}-ausente`} />
+                      <Label htmlFor={`${item.id}-ausente`} className="text-red-600 font-medium">
+                        Ausente
+                      </Label>
+                    </div>
+                  </RadioGroup>
+
+                  <div className="space-y-2">
+                    <Label htmlFor={`${item.id}-observation`} className="text-sm font-medium">
+                      Observações
+                    </Label>
+                    <Input
+                      id={`${item.id}-observation`}
+                      value={getFormValue(item.name, 'observation')}
+                      onChange={(e) => updateFormData(item.name, 'observation', e.target.value)}
+                      placeholder="Observações adicionais..."
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))
+      )}
     </div>
   );
 };
