@@ -18,9 +18,10 @@ interface ChecklistItem {
 interface DynamicChecklistFormProps {
   formData: Record<string, { status: string; observation: string }>;
   setFormData: (updater: (prev: any) => any) => void;
+  vehicleCategory?: string;
 }
 
-const DynamicChecklistForm: React.FC<DynamicChecklistFormProps> = ({ formData, setFormData }) => {
+const DynamicChecklistForm: React.FC<DynamicChecklistFormProps> = ({ formData, setFormData, vehicleCategory }) => {
   const { toast } = useToast();
   const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,14 +35,33 @@ const DynamicChecklistForm: React.FC<DynamicChecklistFormProps> = ({ formData, s
 
   useEffect(() => {
     loadChecklistItems();
-  }, []);
+  }, [vehicleCategory]);
 
   const loadChecklistItems = async () => {
     try {
+      // Mapear categoria de veículo para unique_id
+      const getVehicleTypeId = (category: string) => {
+        switch (category?.toLowerCase()) {
+          case 'caminhao':
+          case 'caminhão':
+            return 'CAMINHAO';
+          case 'carro':
+          case 'moto':
+            return 'CARRO';
+          case 'retroescavadeira':
+            return 'RETROESCAVADEIRA';
+          default:
+            return 'CARRO'; // Default para carro
+        }
+      };
+
+      const vehicleTypeId = getVehicleTypeId(vehicleCategory || '');
+
       const { data, error } = await supabase
         .from('checklist_items')
         .select('*')
         .eq('active', true)
+        .eq('unique_id', vehicleTypeId)
         .order('item_order');
 
       if (error) throw error;

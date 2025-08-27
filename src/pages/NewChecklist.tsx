@@ -625,6 +625,10 @@ const NewChecklist = () => {
               <DynamicChecklistForm 
                 formData={formData}
                 setFormData={setFormData}
+                vehicleCategory={(() => {
+                  const selectedVehicle = vehicles.find(v => v.id === formData.vehicle_id);
+                  return selectedVehicle?.vehicle_category || '';
+                })()}
               />
             </CardContent>
           </Card>
