@@ -14,6 +14,7 @@ import ChecklistEditor from "./pages/ChecklistEditor";
 import VehicleManagement from "./pages/VehicleManagement";
 import ChecklistView from "./pages/ChecklistView";
 import ChecklistManagement from "./pages/ChecklistManagement";
+import InspectorManagement from "./pages/InspectorManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/checklist-editor" element={<ChecklistEditor />} />
             <Route path="/vehicles" element={<VehicleManagement />} />
             <Route path="/checklists" element={<ChecklistManagement />} />
+            <Route path="/inspectors" element={<InspectorManagement />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

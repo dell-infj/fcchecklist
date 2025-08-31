@@ -141,6 +141,15 @@ export default function AdminDashboard() {
             <Button 
               variant="outline" 
               size="sm"
+              onClick={() => navigate('/inspectors')}
+              className="gap-2"
+            >
+              <Users className="w-4 h-4" />
+              <span className="hidden lg:inline">Inspetores</span>
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
               onClick={() => navigate('/checklist/new')}
               className="gap-2"
             >
@@ -180,6 +189,14 @@ export default function AdminDashboard() {
         
         {/* Botões mobile - visíveis apenas no mobile */}
         <div className="md:hidden flex flex-col gap-2">
+          <Button 
+            variant="outline" 
+            className="w-full h-12 gap-2"
+            onClick={() => navigate('/inspectors')}
+          >
+            <Users className="h-4 w-4" />
+            Gerenciar Inspetores
+          </Button>
           <Button 
             variant="outline" 
             className="w-full h-12 gap-2"
@@ -248,7 +265,10 @@ export default function AdminDashboard() {
           </CardHeader>
         </Card>
 
-        <Card className="cursor-pointer hover:bg-accent transition-colors">
+        <Card 
+          className="cursor-pointer hover:bg-accent transition-colors"
+          onClick={() => navigate('/inspectors')}
+        >
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="w-5 h-5" />
