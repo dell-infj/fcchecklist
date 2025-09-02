@@ -13,6 +13,12 @@ interface ChecklistPDFData {
     first_name: string;
     last_name: string;
   };
+  companyInfo?: {
+    name: string;
+    cnpj: string;
+    email: string;
+    address: string;
+  };
   inspection_date: Date;
   vehicle_mileage: string;
   overall_condition: string;
@@ -31,15 +37,27 @@ interface ChecklistPDFData {
 
 export const generateChecklistPDF = async (data: ChecklistPDFData): Promise<jsPDF> => {
   const doc = new jsPDF();
-  let yPosition = 20;
+  let yPosition = 15;
   const pageHeight = doc.internal.pageSize.height;
   const marginBottom = 20;
+
+  // Função para filtrar itens por categoria do veículo
+  const getRelevantCategories = (vehicleCategory: string): string[] => {
+    const categoryMap: Record<string, string[]> = {
+      'carro': ['interior', 'exterior', 'safety', 'mechanical'],
+      'moto': ['exterior', 'safety', 'mechanical'],
+      'caminhao': ['interior', 'exterior', 'safety', 'mechanical', 'cargo'],
+      'onibus': ['interior', 'exterior', 'safety', 'mechanical', 'passenger'],
+      'van': ['interior', 'exterior', 'safety', 'mechanical']
+    };
+    return categoryMap[vehicleCategory.toLowerCase()] || ['interior', 'exterior', 'safety', 'mechanical'];
+  };
 
   // Função para adicionar quebra de página se necessário
   const checkPageBreak = (requiredSpace: number) => {
     if (yPosition + requiredSpace > pageHeight - marginBottom) {
       doc.addPage();
-      yPosition = 20;
+      yPosition = 15;
     }
   };
 
@@ -104,20 +122,30 @@ export const generateChecklistPDF = async (data: ChecklistPDFData): Promise<jsPD
     }
   };
 
-  // Cabeçalho - Logo da empresa (espaço reservado)
-  doc.setFontSize(10);
-  doc.text('FC GESTÃO EMPRESARIAL LTDA', 20, yPosition);
-  yPosition += 5;
-  doc.text('CNPJ: 000.000.000/0001-00', 20, yPosition);
-  yPosition += 5;
-  doc.text('Email: contato@fcgestao.com.br', 20, yPosition);
-  yPosition += 15;
+  // Cabeçalho compacto com dados da empresa
+  const companyData = data.companyInfo || {
+    name: 'FC GESTÃO EMPRESARIAL LTDA',
+    cnpj: '05.873.924/0001-80',
+    email: 'contato@fcgestao.com.br',
+    address: 'Rua princesa imperial, 220 - Realengo - RJ'
+  };
+  
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'bold');
+  doc.text(companyData.name, 20, yPosition);
+  yPosition += 4;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.text(`CNPJ: ${companyData.cnpj} | Email: ${companyData.email}`, 20, yPosition);
+  yPosition += 3;
+  doc.text(companyData.address, 20, yPosition);
+  yPosition += 10;
 
   // Título principal
-  doc.setFontSize(16);
+  doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
   doc.text('CHECKLIST DE INSPEÇÃO VEICULAR', 105, yPosition, { align: 'center' });
-  yPosition += 15;
+  yPosition += 12;
 
   // Seção de informações gerais
   checkPageBreak(60);
@@ -181,15 +209,23 @@ export const generateChecklistPDF = async (data: ChecklistPDFData): Promise<jsPD
   doc.line(20, yPosition - 2, 190, yPosition - 2);
   yPosition += 5;
 
-  // Agrupar todos os itens por categoria
+  // Filtrar categorias relevantes para o tipo de veículo
+  const relevantCategories = getRelevantCategories(data.vehicleInfo.vehicle_category);
+  
+  // Agrupar apenas categorias relevantes
   const categories = {
     interior: 'ITENS INTERNOS',
     exterior: 'ITENS EXTERNOS', 
     safety: 'ITENS DE SEGURANÇA',
-    mechanical: 'ITENS MECÂNICOS'
+    mechanical: 'ITENS MECÂNICOS',
+    cargo: 'ITENS DE CARGA',
+    passenger: 'ITENS DE PASSAGEIROS'
   };
 
   Object.entries(categories).forEach(([categoryKey, categoryTitle]) => {
+    // Verificar se a categoria é relevante para o tipo de veículo
+    if (!relevantCategories.includes(categoryKey)) return;
+    
     const categoryItems = data.checklist_items.filter(item => item.category === categoryKey);
     
     if (categoryItems.length > 0) {
@@ -390,7 +426,7 @@ export const generateChecklistPDF = async (data: ChecklistPDFData): Promise<jsPD
   yPosition = Math.max(yPosition, pageHeight - 40);
   doc.setFontSize(8);
   doc.setTextColor(100, 100, 100);
-  doc.text('FC GESTÃO EMPRESARIAL LTDA - CNPJ: 000.000.000/0001-00', 105, yPosition, { align: 'center' });
+  doc.text(`${companyData.name} - CNPJ: ${companyData.cnpj}`, 105, yPosition, { align: 'center' });
   doc.text(`Relatório gerado em: ${format(new Date(), 'dd/MM/yyyy HH:mm', { locale: ptBR })}`, 105, yPosition + 6, { align: 'center' });
   doc.setTextColor(0, 0, 0);
 

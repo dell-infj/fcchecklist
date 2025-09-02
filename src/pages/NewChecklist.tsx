@@ -320,6 +320,12 @@ const NewChecklist = () => {
             first_name: selectedInspector.first_name,
             last_name: selectedInspector.last_name
           },
+          companyInfo: {
+            name: profile?.company_name || 'FC GESTÃO EMPRESARIAL LTDA',
+            cnpj: profile?.cnpj || '05.873.924/0001-80',
+            email: 'contato@fcgestao.com.br',
+            address: profile?.address || 'Rua princesa imperial, 220 - Realengo - RJ'
+          },
           inspection_date: formData.inspection_date,
           vehicle_mileage: formData.vehicle_mileage,
           overall_condition: formData.overall_condition || 'Não informado',
