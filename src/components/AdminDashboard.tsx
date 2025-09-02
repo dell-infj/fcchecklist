@@ -203,6 +203,10 @@ export default function AdminDashboard() {
               <Users className="mr-2 h-4 w-4" />
               Lista de Inspetores
             </CommandItem>
+            <CommandItem onSelect={() => { navigate('/checklists'); setOpenCommand(null); }}>
+              <ClipboardList className="mr-2 h-4 w-4" />
+              Histórico
+            </CommandItem>
           </CommandGroup>
         </CommandList>
       </CommandDialog>
