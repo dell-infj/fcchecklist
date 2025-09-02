@@ -182,7 +182,7 @@ export default function AdminDashboard() {
               <Car className="mr-2 h-4 w-4" />
               Painel Veículos
             </CommandItem>
-            <CommandItem onSelect={() => { /* TODO: Open vehicle form */; setOpenCommand(null); }}>
+            <CommandItem onSelect={() => { navigate('/vehicles'); setOpenCommand(null); }}>
               <Plus className="mr-2 h-4 w-4" />
               Cadastrar Veículo
             </CommandItem>
