@@ -622,122 +622,143 @@ const NewChecklist = () => {
             </CardContent>
           </Card>
 
-          {/* Seção do Checklist */}
-          <Card className="shadow-warm">
-            <CardHeader className="bg-gradient-primary text-white rounded-t-lg">
-              <CardTitle className="text-lg">Itens de Inspeção</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6 p-4">
-              <DynamicChecklistForm 
-                formData={formData}
-                setFormData={setFormData}
-                vehicleCategory={(() => {
-                  const selectedVehicle = vehicles.find(v => v.id === formData.vehicle_id);
-                  return selectedVehicle?.vehicle_category || '';
-                })()}
-              />
-            </CardContent>
-          </Card>
+          {/* Seção do Checklist - apenas quando veículo selecionado */}
+          {formData.vehicle_id && (
+            <>
+              <Card className="shadow-warm">
+                <CardHeader className="bg-gradient-primary text-white rounded-t-lg">
+                  <CardTitle className="text-lg">Itens de Inspeção</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6 p-4">
+                  <DynamicChecklistForm 
+                    formData={formData}
+                    setFormData={setFormData}
+                    vehicleCategory={(() => {
+                      const selectedVehicle = vehicles.find(v => v.id === formData.vehicle_id);
+                      return selectedVehicle?.vehicle_category || '';
+                    })()}
+                  />
+                </CardContent>
+              </Card>
 
-          {/* Seção de Mídia e Observações */}
-          <Card className="shadow-warm">
-            <CardHeader className="bg-gradient-secondary text-foreground rounded-t-lg">
-              <CardTitle className="text-lg">Fotos e Observações</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 p-4">
-              {/* Upload de Fotos */}
-              <div className="grid grid-cols-1 gap-4">
-                <div className="space-y-3">
-                  <h3 className="font-semibold text-base">Foto do Interior</h3>
-                  <ImageCapture
-                    value={formData.interior_photo_url}
-                    onImageCapture={(imageData) => 
-                      setFormData(prev => ({...prev, interior_photo_url: imageData}))
+              {/* Seção de Mídia e Observações */}
+              <Card className="shadow-warm">
+                <CardHeader className="bg-gradient-secondary text-foreground rounded-t-lg">
+                  <CardTitle className="text-lg">Fotos e Observações</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4 p-4">
+                  {/* Upload de Fotos */}
+                  <div className="grid grid-cols-1 gap-4">
+                    <div className="space-y-3">
+                      <h3 className="font-semibold text-base">Foto do Interior</h3>
+                      <ImageCapture
+                        value={formData.interior_photo_url}
+                        onImageCapture={(imageData) => 
+                          setFormData(prev => ({...prev, interior_photo_url: imageData}))
+                        }
+                        placeholder="Clique para adicionar foto do interior"
+                        className="hover-lift warm-glow"
+                      />
+                    </div>
+
+                    <div className="space-y-3">
+                      <h3 className="font-semibold text-base">Foto do Exterior</h3>
+                      <ImageCapture
+                        value={formData.exterior_photo_url}
+                        onImageCapture={(imageData) => 
+                          setFormData(prev => ({...prev, exterior_photo_url: imageData}))
+                        }
+                        placeholder="Clique para adicionar foto do exterior"
+                        className="hover-lift warm-glow"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Observações */}
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="overall_condition" className="text-sm font-semibold">
+                        Condição Geral do Veículo
+                      </Label>
+                      <Textarea
+                        id="overall_condition"
+                        placeholder="Descreva a condição geral do veículo..."
+                        value={formData.overall_condition}
+                        onChange={(e) => setFormData(prev => ({...prev, overall_condition: e.target.value}))}
+                        rows={3}
+                        className="min-h-[80px] text-sm"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="additional_notes" className="text-sm font-semibold">
+                        Observações Adicionais
+                      </Label>
+                      <Textarea
+                        id="additional_notes"
+                        placeholder="Observações adicionais, problemas encontrados, etc..."
+                        value={formData.additional_notes}
+                        onChange={(e) => setFormData(prev => ({...prev, additional_notes: e.target.value}))}
+                        rows={4}
+                        className="min-h-[100px] text-sm"
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Seção de Finalização */}
+              <Card className="shadow-warm">
+                <CardHeader className="bg-gradient-warm text-white rounded-t-lg">
+                  <CardTitle className="text-lg">Finalização</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4 p-4">
+                  <SignatureCanvas
+                    value={formData.inspector_signature}
+                    onSignatureChange={(signature) => 
+                      setFormData(prev => ({...prev, inspector_signature: signature}))
                     }
-                    placeholder="Clique para adicionar foto do interior"
-                    className="hover-lift warm-glow"
                   />
-                </div>
 
+                  <div className="flex flex-col gap-3 pt-4">
+                    <Button 
+                      variant="outline" 
+                      size="lg"
+                      onClick={() => navigate('/')}
+                      className="w-full h-12 text-sm font-semibold"
+                    >
+                      Cancelar
+                    </Button>
+                    <Button 
+                      size="lg"
+                      onClick={handleSubmit}
+                      className="w-full gap-2 h-12 text-sm font-semibold warm-glow"
+                    >
+                      <Save className="h-4 w-4" />
+                      Salvar Checklist
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          )}
+
+          {/* Mensagem quando nenhum veículo está selecionado */}
+          {!formData.vehicle_id && (
+            <Card className="shadow-warm">
+              <CardContent className="p-8 text-center">
                 <div className="space-y-3">
-                  <h3 className="font-semibold text-base">Foto do Exterior</h3>
-                  <ImageCapture
-                    value={formData.exterior_photo_url}
-                    onImageCapture={(imageData) => 
-                      setFormData(prev => ({...prev, exterior_photo_url: imageData}))
-                    }
-                    placeholder="Clique para adicionar foto do exterior"
-                    className="hover-lift warm-glow"
-                  />
+                  <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center">
+                    <FileText className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-lg font-semibold">Selecione um veículo</h3>
+                  <p className="text-muted-foreground">
+                    Primeiro selecione um veículo para ver os itens de inspeção específicos para essa categoria.
+                  </p>
                 </div>
-              </div>
-
-              {/* Observações */}
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="overall_condition" className="text-sm font-semibold">
-                    Condição Geral do Veículo
-                  </Label>
-                  <Textarea
-                    id="overall_condition"
-                    placeholder="Descreva a condição geral do veículo..."
-                    value={formData.overall_condition}
-                    onChange={(e) => setFormData(prev => ({...prev, overall_condition: e.target.value}))}
-                    rows={3}
-                    className="min-h-[80px] text-sm"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="additional_notes" className="text-sm font-semibold">
-                    Observações Adicionais
-                  </Label>
-                  <Textarea
-                    id="additional_notes"
-                    placeholder="Observações adicionais, problemas encontrados, etc..."
-                    value={formData.additional_notes}
-                    onChange={(e) => setFormData(prev => ({...prev, additional_notes: e.target.value}))}
-                    rows={4}
-                    className="min-h-[100px] text-sm"
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Seção de Finalização */}
-          <Card className="shadow-warm">
-            <CardHeader className="bg-gradient-warm text-white rounded-t-lg">
-              <CardTitle className="text-lg">Finalização</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 p-4">
-              <SignatureCanvas
-                value={formData.inspector_signature}
-                onSignatureChange={(signature) => 
-                  setFormData(prev => ({...prev, inspector_signature: signature}))
-                }
-              />
-
-              <div className="flex flex-col gap-3 pt-4">
-                <Button 
-                  variant="outline" 
-                  size="lg"
-                  onClick={() => navigate('/')}
-                  className="w-full h-12 text-sm font-semibold"
-                >
-                  Cancelar
-                </Button>
-                <Button 
-                  size="lg"
-                  onClick={handleSubmit}
-                  className="w-full gap-2 h-12 text-sm font-semibold warm-glow"
-                >
-                  <Save className="h-4 w-4" />
-                  Salvar Checklist
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </Layout>
