@@ -4,17 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Car, Users, FileText, BarChart3, Edit, ClipboardList, UserCheck, ChartBar, Plus } from 'lucide-react';
+import { Car, Users, FileText, BarChart3, Edit, ClipboardList, UserCheck, ChartBar } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import {
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
 
 interface RecentChecklist {
   id: string;
@@ -53,7 +45,6 @@ export default function AdminDashboard() {
   });
   
   const [recentChecklists, setRecentChecklists] = useState<RecentChecklist[]>([]);
-  const [commandOpen, setCommandOpen] = useState(false);
   
 
   useEffect(() => {
@@ -159,10 +150,10 @@ export default function AdminDashboard() {
             <Button 
               variant="outline" 
               size="sm"
-              onClick={() => setCommandOpen(true)}
-              className="gap-2 relative"
+              onClick={() => navigate('/checklist/new')}
+              className="gap-2"
             >
-              <Plus className="w-4 h-4" />
+              <UserCheck className="w-4 h-4" />
               <span className="hidden lg:inline">Inspetor</span>
             </Button>
             <Button 
@@ -208,10 +199,10 @@ export default function AdminDashboard() {
           </Button>
           <Button 
             variant="outline" 
-            className="w-full h-12 gap-2 relative"
-            onClick={() => setCommandOpen(true)}
+            className="w-full h-12 gap-2"
+            onClick={() => navigate('/checklist/new')}
           >
-            <Plus className="h-4 w-4" />
+            <UserCheck className="h-4 w-4" />
             Painel Inspetor
           </Button>
           <Button 
@@ -313,37 +304,6 @@ export default function AdminDashboard() {
           </CardHeader>
         </Card>
       </div>
-
-      {/* Command Dialog for Inspector Actions */}
-      <CommandDialog open={commandOpen} onOpenChange={setCommandOpen}>
-        <CommandInput placeholder="Pesquisar ações..." />
-        <CommandList>
-          <CommandEmpty>Nenhuma ação encontrada.</CommandEmpty>
-          <CommandGroup heading="Ações do Inspetor">
-            <CommandItem onSelect={() => {
-              navigate('/checklist/new');
-              setCommandOpen(false);
-            }}>
-              <UserCheck className="mr-2 h-4 w-4" />
-              <span>Nova Inspeção</span>
-            </CommandItem>
-            <CommandItem onSelect={() => {
-              navigate('/checklists');
-              setCommandOpen(false);
-            }}>
-              <ClipboardList className="mr-2 h-4 w-4" />
-              <span>Meus Checklists</span>
-            </CommandItem>
-            <CommandItem onSelect={() => {
-              navigate('/vehicles');
-              setCommandOpen(false);
-            }}>
-              <Car className="mr-2 h-4 w-4" />
-              <span>Veículos</span>
-            </CommandItem>
-          </CommandGroup>
-        </CommandList>
-      </CommandDialog>
 
       {/* Recent Checklists */}
       <Card>
