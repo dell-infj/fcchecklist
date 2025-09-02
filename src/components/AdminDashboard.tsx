@@ -1,10 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Car, Users, FileText, BarChart3, Edit, ClipboardList, UserCheck, ChartBar } from 'lucide-react';
+import { 
+  CommandDialog,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+} from '@/components/ui/command';
+import { Car, Users, FileText, BarChart3, ClipboardList, Plus } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -36,15 +43,8 @@ export default function AdminDashboard() {
   const { toast } = useToast();
   const navigate = useNavigate();
   
-  const [stats, setStats] = useState<DashboardStats>({
-    vehicles: 0,
-    checklists: 0,
-    inspectors: 0,
-    completedToday: 0,
-    activeInspections: 0
-  });
-  
   const [recentChecklists, setRecentChecklists] = useState<RecentChecklist[]>([]);
+  const [openCommand, setOpenCommand] = useState<'vehicles' | 'inspection' | 'reports' | null>(null);
   
 
   useEffect(() => {
@@ -53,12 +53,6 @@ export default function AdminDashboard() {
 
   const fetchData = async () => {
     try {
-      const [vehiclesData, checklistsData, profilesData] = await Promise.all([
-        supabase.from('vehicles').select('*').order('created_at', { ascending: false }),
-        supabase.from('checklists').select('*').order('created_at', { ascending: false }),
-        supabase.from('profiles').select('*').eq('role', 'inspector')
-      ]);
-
       // Get recent checklists with related data - usar any temporariamente
       const { data: recentData }: any = await supabase
         .from('checklists')
@@ -79,19 +73,6 @@ export default function AdminDashboard() {
         .order('created_at', { ascending: false })
         .limit(5);
 
-      const today = new Date().toISOString().split('T')[0];
-      const stats = {
-        vehicles: vehiclesData.data?.length || 0,
-        checklists: checklistsData.data?.length || 0,
-        inspectors: profilesData.data?.length || 0,
-        completedToday: checklistsData.data?.filter(c => 
-          c.status === 'completed' && 
-          c.inspection_date === today
-        ).length || 0,
-        activeInspections: checklistsData.data?.filter(c => c.status === 'draft').length || 0
-      };
-
-      setStats(stats);
       setRecentChecklists(recentData?.map((item: any) => ({
         id: item.id,
         status: item.status,
@@ -128,182 +109,120 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6 px-4">
-      {/* Header com botões de navegação */}
-      <div className="flex flex-col gap-4">
-        <div className="flex justify-between items-start">
-          <div>
-            <h2 className="text-xl font-bold">Dashboard Administrativo</h2>
-            <p className="text-muted-foreground text-sm">Visão geral da frota e inspeções</p>
-          </div>
-          
-          {/* Botões de navegação - ícones pequenos no desktop */}
-          <div className="hidden md:flex gap-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => navigate('/inspectors')}
-              className="gap-2"
-            >
-              <Users className="w-4 h-4" />
-              <span className="hidden lg:inline">Inspetores</span>
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => navigate('/checklist/new')}
-              className="gap-2"
-            >
-              <UserCheck className="w-4 h-4" />
-              <span className="hidden lg:inline">Inspetor</span>
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => navigate('/vehicles')}
-              className="gap-2"
-            >
-              <Car className="w-4 h-4" />
-              <span className="hidden lg:inline">Gerenciar Veículos</span>
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => navigate('/reports')}
-              className="gap-2"
-            >
-              <ChartBar className="w-4 h-4" />
-              <span className="hidden lg:inline">Relatórios</span>
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => navigate('/checklist-editor')}
-              className="gap-2"
-            >
-              <Edit className="w-4 h-4" />
-              <span className="hidden lg:inline">Editor</span>
-            </Button>
-          </div>
-        </div>
-        
-        
-        {/* Botões mobile - visíveis apenas no mobile */}
-        <div className="md:hidden flex flex-col gap-2">
-          <Button 
-            variant="outline" 
-            className="w-full h-12 gap-2"
-            onClick={() => navigate('/inspectors')}
-          >
-            <Users className="h-4 w-4" />
-            Gerenciar Inspetores
-          </Button>
-          <Button 
-            variant="outline" 
-            className="w-full h-12 gap-2"
-            onClick={() => navigate('/checklist/new')}
-          >
-            <UserCheck className="h-4 w-4" />
-            Painel Inspetor
-          </Button>
-          <Button 
-            variant="outline" 
-            className="w-full h-12 gap-2"
-            onClick={() => navigate('/vehicles')}
-          >
-            <Car className="h-4 w-4" />
-            Gerenciar Veículos
-          </Button>
-          <Button 
-            variant="outline" 
-            className="w-full h-12 gap-2"
-            onClick={() => navigate('/reports')}
-          >
-            <ChartBar className="h-4 w-4" />
-            Relatórios
-          </Button>
-          <Button 
-            variant="outline" 
-            className="w-full h-12 gap-2"
-            onClick={() => navigate('/checklist-editor')}
-          >
-            <Edit className="h-4 w-4" />
-            Editor de Checklist
-          </Button>
-        </div>
-
+      {/* Header */}
+      <div>
+        <h2 className="text-xl font-bold">Dashboard Administrativo</h2>
+        <p className="text-muted-foreground text-sm">Visão geral da frota e inspeções</p>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+      {/* Main Action Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card 
           className="cursor-pointer hover:bg-accent transition-colors"
-          onClick={() => navigate('/vehicles')}
+          onClick={() => setOpenCommand('vehicles')}
         >
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Car className="w-5 h-5" />
-              Veículos
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Car className="w-8 h-8" />
+                <span>Veículos</span>
+              </div>
+              <Plus className="w-6 h-6 text-muted-foreground" />
             </CardTitle>
             <CardDescription>
-              {stats.vehicles} veículos cadastrados
-            </CardDescription>
-          </CardHeader>
-        </Card>
-
-        <Card 
-          className="cursor-pointer hover:bg-accent transition-colors"
-          onClick={() => navigate('/checklists')}
-        >
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="w-5 h-5" />
-              Checklists
-            </CardTitle>
-            <CardDescription>
-              {stats.checklists} inspeções registradas
+              Gerenciar frota de veículos
             </CardDescription>
           </CardHeader>
         </Card>
 
         <Card 
           className="cursor-pointer hover:bg-accent transition-colors"
-          onClick={() => navigate('/inspectors')}
+          onClick={() => setOpenCommand('inspection')}
         >
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="w-5 h-5" />
-              Inspetores
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <FileText className="w-8 h-8" />
+                <span>Inspeção</span>
+              </div>
+              <Plus className="w-6 h-6 text-muted-foreground" />
             </CardTitle>
             <CardDescription>
-              {stats.inspectors} inspetores ativos
+              Criar e gerenciar inspeções
             </CardDescription>
           </CardHeader>
         </Card>
 
-        <Card className="cursor-pointer hover:bg-accent transition-colors">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="w-5 h-5" />
-              Concluídas Hoje
+        <Card 
+          className="cursor-pointer hover:bg-accent transition-colors"
+          onClick={() => setOpenCommand('reports')}
+        >
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <BarChart3 className="w-8 h-8" />
+                <span>Relatórios</span>
+              </div>
+              <Plus className="w-6 h-6 text-muted-foreground" />
             </CardTitle>
             <CardDescription>
-              {stats.completedToday} inspeções concluídas
-            </CardDescription>
-          </CardHeader>
-        </Card>
-
-        <Card className="cursor-pointer hover:bg-accent transition-colors">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ClipboardList className="w-5 h-5" />
-              Em Andamento
-            </CardTitle>
-            <CardDescription>
-              {stats.activeInspections} inspeções ativas
+              Histórico e análises
             </CardDescription>
           </CardHeader>
         </Card>
       </div>
+
+      {/* Command Dialogs */}
+      <CommandDialog open={openCommand === 'vehicles'} onOpenChange={() => setOpenCommand(null)}>
+        <CommandInput placeholder="Digite um comando..." />
+        <CommandList>
+          <CommandEmpty>Nenhum resultado encontrado.</CommandEmpty>
+          <CommandGroup heading="Veículos">
+            <CommandItem onSelect={() => { navigate('/vehicles'); setOpenCommand(null); }}>
+              <Car className="mr-2 h-4 w-4" />
+              Painel Veículos
+            </CommandItem>
+            <CommandItem onSelect={() => { /* TODO: Open vehicle form */; setOpenCommand(null); }}>
+              <Plus className="mr-2 h-4 w-4" />
+              Cadastrar Veículo
+            </CommandItem>
+          </CommandGroup>
+        </CommandList>
+      </CommandDialog>
+
+      <CommandDialog open={openCommand === 'inspection'} onOpenChange={() => setOpenCommand(null)}>
+        <CommandInput placeholder="Digite um comando..." />
+        <CommandList>
+          <CommandEmpty>Nenhum resultado encontrado.</CommandEmpty>
+          <CommandGroup heading="Inspeção">
+            <CommandItem onSelect={() => { navigate('/checklist/new'); setOpenCommand(null); }}>
+              <FileText className="mr-2 h-4 w-4" />
+              Nova Inspeção
+            </CommandItem>
+            <CommandItem onSelect={() => { navigate('/inspectors'); setOpenCommand(null); }}>
+              <Users className="mr-2 h-4 w-4" />
+              Lista de Inspetores
+            </CommandItem>
+          </CommandGroup>
+        </CommandList>
+      </CommandDialog>
+
+      <CommandDialog open={openCommand === 'reports'} onOpenChange={() => setOpenCommand(null)}>
+        <CommandInput placeholder="Digite um comando..." />
+        <CommandList>
+          <CommandEmpty>Nenhum resultado encontrado.</CommandEmpty>
+          <CommandGroup heading="Relatórios">
+            <CommandItem onSelect={() => { navigate('/reports'); setOpenCommand(null); }}>
+              <BarChart3 className="mr-2 h-4 w-4" />
+              Histórico
+            </CommandItem>
+            <CommandItem onSelect={() => { navigate('/checklist-editor'); setOpenCommand(null); }}>
+              <ClipboardList className="mr-2 h-4 w-4" />
+              Editor
+            </CommandItem>
+          </CommandGroup>
+        </CommandList>
+      </CommandDialog>
 
       {/* Recent Checklists */}
       <Card>
