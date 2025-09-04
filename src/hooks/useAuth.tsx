@@ -83,7 +83,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signInInspector = async (uniqueId: string, username: string, password: string) => {
     try {
       // Construct the email based on the pattern used during signup
-      const tempEmail = `${username.toLowerCase()}.${uniqueId.toLowerCase()}@inspector.local`;
+      const cleanUsername = username.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const cleanUniqueId = uniqueId.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const tempEmail = `${cleanUsername}.${cleanUniqueId}@inspector.com`;
 
       console.log('Attempting inspector login with email:', tempEmail);
 

@@ -84,8 +84,10 @@ export default function InspectorManagement() {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       // Create a unique but valid email for the inspector
-      // Using a format that looks like a real email but is unique per inspector
-      const tempEmail = `${values.username.toLowerCase()}.${profile?.unique_id?.toLowerCase()}@inspector.local`;
+      // Using a format that Supabase Auth will accept
+      const cleanUsername = values.username.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const cleanUniqueId = profile?.unique_id?.toLowerCase().replace(/[^a-z0-9]/g, '') || 'company';
+      const tempEmail = `${cleanUsername}.${cleanUniqueId}@inspector.com`;
       
       console.log('Creating inspector with email:', tempEmail);
       
