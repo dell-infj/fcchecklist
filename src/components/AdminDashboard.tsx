@@ -527,13 +527,24 @@ export default function AdminDashboard() {
       {/* Recent Checklists */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ClipboardList className="w-5 h-5" />
-            Checklists Recentes
-          </CardTitle>
-          <CardDescription>
-            Últimas inspeções registradas no sistema
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <ClipboardList className="w-5 h-5" />
+                Checklists Recentes
+              </CardTitle>
+              <CardDescription>
+                Últimas inspeções registradas no sistema
+              </CardDescription>
+            </div>
+            <Button 
+              onClick={() => navigate('/checklist/new')}
+              className="flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Nova Inspeção
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {recentChecklists.length === 0 ? (
