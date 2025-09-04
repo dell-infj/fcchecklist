@@ -23,6 +23,7 @@ interface AuthContextType {
   profile: Profile | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signInInspector: (uniqueId: string, username: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, firstName: string, lastName: string, role?: string, companyName?: string, uniqueId?: string, adminUniqueId?: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
@@ -79,6 +80,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
+  const signInInspector = async (uniqueId: string, username: string, password: string) => {
+    try {
+      // Construct the temporary email based on the pattern used during signup
+      const tempEmail = `${username}.${uniqueId}@inspector.temp`;
+
+      // Try to sign in with the constructed email and password
+      const { error } = await supabase.auth.signInWithPassword({
+        email: tempEmail,
+        password,
+      });
+
+      if (error) {
+        return { error: { message: 'Credenciais inválidas' } };
+      }
+
+      return { error: null };
+    } catch (error: any) {
+      return { error: { message: 'Erro ao fazer login' } };
+    }
+  };
+
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -130,6 +152,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       profile,
       loading,
       signIn,
+      signInInspector,
       signUp,
       signOut
     }}>

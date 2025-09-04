@@ -14,7 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import fleetHeroImage from '@/assets/fleet-hero.jpg';
 
 const Auth = () => {
-  const { signIn, signUp, user } = useAuth();
+  const { signIn, signInInspector, signUp, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -47,14 +47,22 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
     
-    const { error } = await signIn(loginForm.email, loginForm.password);
+    let result;
     
-    if (error) {
+    if (loginForm.userType === 'inspector') {
+      // Use inspector login with uniqueId, username, and password
+      result = await signInInspector(loginForm.uniqueId, loginForm.username, loginForm.password);
+    } else {
+      // Use regular email/password login for admins
+      result = await signIn(loginForm.email, loginForm.password);
+    }
+    
+    if (result.error) {
       toast({
         title: "Erro no login",
-        description: error.message === "Invalid login credentials" 
-          ? "Email ou senha incorretos" 
-          : "Erro ao fazer login. Tente novamente.",
+        description: result.error.message === "Invalid login credentials" 
+          ? "Credenciais incorretas" 
+          : result.error.message || "Erro ao fazer login. Tente novamente.",
         variant: "destructive"
       });
     } else {

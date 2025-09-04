@@ -153,6 +153,7 @@ export type Database = {
           unique_id: string | null
           updated_at: string
           user_id: string
+          username: string | null
         }
         Insert: {
           address?: string | null
@@ -169,6 +170,7 @@ export type Database = {
           unique_id?: string | null
           updated_at?: string
           user_id: string
+          username?: string | null
         }
         Update: {
           address?: string | null
@@ -185,6 +187,7 @@ export type Database = {
           unique_id?: string | null
           updated_at?: string
           user_id?: string
+          username?: string | null
         }
         Relationships: [
           {

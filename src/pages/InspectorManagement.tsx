@@ -20,7 +20,7 @@ import Layout from '@/components/Layout';
 const formSchema = z.object({
   firstName: z.string().min(2, { message: "Nome deve ter pelo menos 2 caracteres" }),
   lastName: z.string().min(2, { message: "Sobrenome deve ter pelo menos 2 caracteres" }),
-  email: z.string().email({ message: "Email inválido" }),
+  username: z.string().min(3, { message: "Nome de usuário deve ter pelo menos 3 caracteres" }),
   password: z.string().min(6, { message: "Senha deve ter pelo menos 6 caracteres" }),
 });
 
@@ -29,7 +29,7 @@ interface Inspector {
   user_id: string;
   first_name: string;
   last_name: string;
-  email?: string;
+  username?: string;
   phone?: string;
   unique_id?: string;
   created_at: string;
@@ -48,7 +48,7 @@ export default function InspectorManagement() {
     defaultValues: {
       firstName: "",
       lastName: "",
-      email: "",
+      username: "",
       password: "",
     },
   });
@@ -83,8 +83,11 @@ export default function InspectorManagement() {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      // Create a temporary email for the inspector using username + unique_id
+      const tempEmail = `${values.username}.${profile?.unique_id}@inspector.temp`;
+      
       const { error } = await supabase.auth.signUp({
-        email: values.email,
+        email: tempEmail,
         password: values.password,
         options: {
           emailRedirectTo: `${window.location.origin}/`,
@@ -92,6 +95,7 @@ export default function InspectorManagement() {
             first_name: values.firstName,
             last_name: values.lastName,
             role: 'inspector',
+            username: values.username,
             unique_id: profile?.unique_id,
             admin_unique_id: profile?.unique_id
           }
@@ -218,12 +222,12 @@ export default function InspectorManagement() {
                     />
                     <FormField
                       control={form.control}
-                      name="email"
+                      name="username"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Email</FormLabel>
+                          <FormLabel>Nome de Usuário</FormLabel>
                           <FormControl>
-                            <Input type="email" placeholder="Digite o email" {...field} />
+                            <Input placeholder="Digite o nome de usuário" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -309,9 +313,9 @@ export default function InspectorManagement() {
                         </p>
                         <Badge variant="secondary">Inspetor</Badge>
                       </div>
-                      {inspector.phone && (
+                      {inspector.username && (
                         <p className="text-sm text-muted-foreground flex items-center gap-1">
-                          <span>Telefone: {inspector.phone}</span>
+                          <span>Usuário: {inspector.username}</span>
                         </p>
                       )}
                       <p className="text-xs text-muted-foreground">
