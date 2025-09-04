@@ -83,6 +83,9 @@ export default function InspectorManagement() {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      // Save current admin session
+      const currentSession = await supabase.auth.getSession();
+      
       // Create a unique but valid email for the inspector
       // Using a format that Supabase Auth will accept
       const cleanUsername = values.username.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -108,6 +111,14 @@ export default function InspectorManagement() {
       });
 
       if (error) throw error;
+
+      // Immediately sign out the new inspector and restore admin session
+      await supabase.auth.signOut();
+      
+      // Restore admin session if it existed
+      if (currentSession.data.session) {
+        await supabase.auth.setSession(currentSession.data.session);
+      }
 
       toast({
         title: "Sucesso",
