@@ -19,7 +19,8 @@ const Auth = () => {
   
   const [loginForm, setLoginForm] = useState({
     email: '',
-    password: ''
+    password: '',
+    userType: 'inspector'
   });
   
   const [signupForm, setSignupForm] = useState({
@@ -27,10 +28,8 @@ const Auth = () => {
     password: '',
     firstName: '',
     lastName: '',
-    role: 'inspector',
     companyName: '',
-    uniqueId: '',
-    adminUniqueId: ''
+    uniqueId: ''
   });
 
   const [loading, setLoading] = useState(false);
@@ -75,10 +74,10 @@ const Auth = () => {
       signupForm.password, 
       signupForm.firstName, 
       signupForm.lastName, 
-      signupForm.role,
-      signupForm.role === 'admin' ? signupForm.companyName : undefined,
-      signupForm.role === 'admin' ? signupForm.uniqueId : undefined,
-      signupForm.role === 'inspector' ? signupForm.adminUniqueId : undefined
+      'admin',
+      signupForm.companyName,
+      signupForm.uniqueId,
+      undefined
     );
     
     if (error) {
@@ -181,6 +180,24 @@ const Auth = () => {
                   </CardHeader>
                   <CardContent>
                     <form onSubmit={handleLogin} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="user-type">Tipo de Usuário</Label>
+                        <Select 
+                          value={loginForm.userType} 
+                          onValueChange={(value) => setLoginForm(prev => ({
+                            ...prev,
+                            userType: value
+                          }))}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o tipo de usuário" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="inspector">Inspetor</SelectItem>
+                            <SelectItem value="admin">Gestor</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                       <div className="space-y-2">
                         <Label htmlFor="login-email">Email</Label>
                         <Input
@@ -288,84 +305,41 @@ const Auth = () => {
                           required
                         />
                       </div>
+                      
                       <div className="space-y-2">
-                        <Label htmlFor="role">Perfil</Label>
-                        <Select 
-                          value={signupForm.role} 
-                          onValueChange={(value) => setSignupForm(prev => ({
+                        <Label htmlFor="company-name">Nome da Empresa</Label>
+                        <Input
+                          id="company-name"
+                          placeholder="Transportadora ABC Ltda"
+                          value={signupForm.companyName}
+                          onChange={(e) => setSignupForm(prev => ({
                             ...prev,
-                            role: value
+                            companyName: e.target.value
                           }))}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione o perfil" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="inspector">Inspetor</SelectItem>
-                            <SelectItem value="admin">Administrador</SelectItem>
-                          </SelectContent>
-                        </Select>
+                          required
+                        />
                       </div>
-                      
-                      {/* Campos para administradores */}
-                      {signupForm.role === 'admin' && (
-                        <>
-                          <div className="space-y-2">
-                            <Label htmlFor="company-name">Nome da Empresa</Label>
-                            <Input
-                              id="company-name"
-                              placeholder="Transportadora ABC Ltda"
-                              value={signupForm.companyName}
-                              onChange={(e) => setSignupForm(prev => ({
-                                ...prev,
-                                companyName: e.target.value
-                              }))}
-                              required
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="unique-id">ID Único da Empresa</Label>
-                            <Input
-                              id="unique-id"
-                              placeholder="ABCTRANS2024"
-                              value={signupForm.uniqueId}
-                              onChange={(e) => setSignupForm(prev => ({
-                                ...prev,
-                                uniqueId: e.target.value.toUpperCase()
-                              }))}
-                              required
-                            />
-                            <p className="text-sm text-muted-foreground">
-                              Este ID será usado pelos inspetores para se vincularem à sua empresa
-                            </p>
-                          </div>
-                        </>
-                      )}
-                      
-                      {/* Campo para inspetores */}
-                      {signupForm.role === 'inspector' && (
-                        <div className="space-y-2">
-                          <Label htmlFor="admin-unique-id">ID Único do Administrador</Label>
-                          <Input
-                            id="admin-unique-id"
-                            placeholder="Digite o ID único fornecido pelo administrador"
-                            value={signupForm.adminUniqueId}
-                            onChange={(e) => setSignupForm(prev => ({
-                              ...prev,
-                              adminUniqueId: e.target.value.toUpperCase()
-                            }))}
-                            required
-                          />
-                          <p className="text-sm text-muted-foreground">
-                            Solicite o ID único ao administrador da sua empresa
-                          </p>
-                        </div>
-                      )}
+                      <div className="space-y-2">
+                        <Label htmlFor="unique-id">ID Único da Empresa</Label>
+                        <Input
+                          id="unique-id"
+                          placeholder="ABCTRANS2024"
+                          value={signupForm.uniqueId}
+                          onChange={(e) => setSignupForm(prev => ({
+                            ...prev,
+                            uniqueId: e.target.value.toUpperCase()
+                          }))}
+                          required
+                        />
+                        <p className="text-sm text-muted-foreground">
+                          Este ID será usado pelos inspetores para se vincularem à sua empresa
+                        </p>
+                      </div>
                       
                       <Button 
                         type="submit" 
                         className="w-full" 
-                        disabled={loading || (signupForm.role === 'inspector' && !signupForm.adminUniqueId) || (signupForm.role === 'admin' && (!signupForm.companyName || !signupForm.uniqueId))}
+                        disabled={loading || !signupForm.companyName || !signupForm.uniqueId}
                       >
                         {loading ? 'Criando conta...' : 'Criar Conta'}
                       </Button>
