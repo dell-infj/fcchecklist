@@ -27,14 +27,37 @@ export const PDFPreviewFloatingButton: React.FC<PDFPreviewFloatingButtonProps> =
   const [isOpen, setIsOpen] = useState(false);
 
   const handlePreview = () => {
-    if (!formData.vehicle_id || !formData.inspector_id) {
+    // Verificar se o veículo foi selecionado
+    if (!formData.vehicle_id) {
       toast({
         title: "Informações incompletas",
-        description: "Selecione um veículo e inspetor para visualizar o preview",
+        description: "Selecione um veículo para visualizar o preview",
         variant: "destructive"
       });
       return;
     }
+
+    // Se o usuário for inspetor, identificar automaticamente
+    const currentInspectorId = formData.inspector_id || 
+      (profile?.role === 'inspector' ? 
+        inspectors.find(inspector => 
+          inspector.email === profile.user_id || 
+          inspector.id === profile.id ||
+          inspector.first_name === profile.first_name && inspector.last_name === profile.last_name
+        )?.id : null);
+
+    // Verificar se tem inspetor (selecionado ou identificado automaticamente)
+    if (!currentInspectorId) {
+      toast({
+        title: "Informações incompletas",
+        description: profile?.role === 'inspector' ? 
+          "Não foi possível identificar o inspetor automaticamente" :
+          "Selecione um inspetor para visualizar o preview",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsOpen(true);
   };
 
