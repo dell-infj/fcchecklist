@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Truck, Shield, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,7 +21,8 @@ const Auth = () => {
   const [loginForm, setLoginForm] = useState({
     email: '',
     password: '',
-    userType: 'inspector'
+    userType: 'inspector',
+    uniqueId: ''
   });
   
   const [signupForm, setSignupForm] = useState({
@@ -180,24 +182,62 @@ const Auth = () => {
                   </CardHeader>
                   <CardContent>
                     <form onSubmit={handleLogin} className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="user-type">Tipo de Usuário</Label>
-                        <Select 
+                      <div className="space-y-3">
+                        <Label>Tipo de Usuário</Label>
+                        <RadioGroup 
                           value={loginForm.userType} 
                           onValueChange={(value) => setLoginForm(prev => ({
                             ...prev,
-                            userType: value
+                            userType: value,
+                            uniqueId: ''
                           }))}
+                          className="grid grid-cols-2 gap-4"
                         >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione o tipo de usuário" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="inspector">Inspetor</SelectItem>
-                            <SelectItem value="admin">Gestor</SelectItem>
-                          </SelectContent>
-                        </Select>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="inspector" id="inspector" />
+                            <Label 
+                              htmlFor="inspector" 
+                              className="flex-1 p-3 rounded-lg border cursor-pointer hover:bg-accent transition-colors"
+                            >
+                              <div className="flex items-center gap-2">
+                                <User className="w-4 h-4" />
+                                <span>Inspetor</span>
+                              </div>
+                            </Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="admin" id="admin" />
+                            <Label 
+                              htmlFor="admin" 
+                              className="flex-1 p-3 rounded-lg border cursor-pointer hover:bg-accent transition-colors"
+                            >
+                              <div className="flex items-center gap-2">
+                                <Shield className="w-4 h-4" />
+                                <span>Gestor</span>
+                              </div>
+                            </Label>
+                          </div>
+                        </RadioGroup>
                       </div>
+                      
+                      {loginForm.userType === 'inspector' && (
+                        <div className="space-y-2">
+                          <Label htmlFor="unique-id">ID Único da Empresa</Label>
+                          <Input
+                            id="unique-id"
+                            placeholder="Digite o ID único da empresa"
+                            value={loginForm.uniqueId}
+                            onChange={(e) => setLoginForm(prev => ({
+                              ...prev,
+                              uniqueId: e.target.value.toUpperCase()
+                            }))}
+                            required
+                          />
+                          <p className="text-sm text-muted-foreground">
+                            Solicite o ID único ao administrador da sua empresa
+                          </p>
+                        </div>
+                      )}
                       <div className="space-y-2">
                         <Label htmlFor="login-email">Email</Label>
                         <Input
@@ -229,7 +269,7 @@ const Auth = () => {
                       <Button 
                         type="submit" 
                         className="w-full" 
-                        disabled={loading}
+                        disabled={loading || (loginForm.userType === 'inspector' && !loginForm.uniqueId)}
                       >
                         {loading ? 'Entrando...' : 'Entrar'}
                       </Button>
