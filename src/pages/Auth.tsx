@@ -22,7 +22,8 @@ const Auth = () => {
     email: '',
     password: '',
     userType: 'inspector',
-    uniqueId: ''
+    uniqueId: '',
+    username: ''
   });
   
   const [signupForm, setSignupForm] = useState({
@@ -220,38 +221,54 @@ const Auth = () => {
                         </RadioGroup>
                       </div>
                       
-                      {loginForm.userType === 'inspector' && (
+                      {loginForm.userType === 'inspector' ? (
+                        <>
+                          <div className="space-y-2">
+                            <Label htmlFor="unique-id">ID Único da Empresa</Label>
+                            <Input
+                              id="unique-id"
+                              placeholder="Digite o ID único da empresa"
+                              value={loginForm.uniqueId}
+                              onChange={(e) => setLoginForm(prev => ({
+                                ...prev,
+                                uniqueId: e.target.value.toUpperCase()
+                              }))}
+                              required
+                            />
+                            <p className="text-sm text-muted-foreground">
+                              Solicite o ID único ao administrador da sua empresa
+                            </p>
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="username">Login do Usuário</Label>
+                            <Input
+                              id="username"
+                              placeholder="Digite seu login de usuário"
+                              value={loginForm.username}
+                              onChange={(e) => setLoginForm(prev => ({
+                                ...prev,
+                                username: e.target.value
+                              }))}
+                              required
+                            />
+                          </div>
+                        </>
+                      ) : (
                         <div className="space-y-2">
-                          <Label htmlFor="unique-id">ID Único da Empresa</Label>
+                          <Label htmlFor="login-email">Email</Label>
                           <Input
-                            id="unique-id"
-                            placeholder="Digite o ID único da empresa"
-                            value={loginForm.uniqueId}
+                            id="login-email"
+                            type="email"
+                            placeholder="seu.email@empresa.com"
+                            value={loginForm.email}
                             onChange={(e) => setLoginForm(prev => ({
                               ...prev,
-                              uniqueId: e.target.value.toUpperCase()
+                              email: e.target.value
                             }))}
                             required
                           />
-                          <p className="text-sm text-muted-foreground">
-                            Solicite o ID único ao administrador da sua empresa
-                          </p>
                         </div>
                       )}
-                      <div className="space-y-2">
-                        <Label htmlFor="login-email">Email</Label>
-                        <Input
-                          id="login-email"
-                          type="email"
-                          placeholder="seu.email@empresa.com"
-                          value={loginForm.email}
-                          onChange={(e) => setLoginForm(prev => ({
-                            ...prev,
-                            email: e.target.value
-                          }))}
-                          required
-                        />
-                      </div>
                       <div className="space-y-2">
                         <Label htmlFor="login-password">Senha</Label>
                         <Input
@@ -269,7 +286,7 @@ const Auth = () => {
                       <Button 
                         type="submit" 
                         className="w-full" 
-                        disabled={loading || (loginForm.userType === 'inspector' && !loginForm.uniqueId)}
+                        disabled={loading || (loginForm.userType === 'inspector' && (!loginForm.uniqueId || !loginForm.username)) || (loginForm.userType === 'admin' && !loginForm.email)}
                       >
                         {loading ? 'Entrando...' : 'Entrar'}
                       </Button>
