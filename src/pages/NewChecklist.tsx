@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils';
 import Layout from '@/components/Layout';
 import SignatureCanvas from '@/components/SignatureCanvas';
 import DynamicChecklistForm from '@/components/DynamicChecklistForm';
+import { PDFPreviewFloatingButton } from '@/components/PDFPreviewFloatingButton';
 import ImageCapture from '@/components/ImageCapture';
 
 interface ChecklistItem {
@@ -760,6 +761,15 @@ const NewChecklist = () => {
             </Card>
           )}
         </div>
+        
+        {/* PDF Preview Floating Button */}
+        <PDFPreviewFloatingButton
+          formData={formData}
+          vehicles={vehicles}
+          inspectors={inspectors}
+          checklistItems={checklistItems}
+          profile={profile}
+        />
       </div>
     </Layout>
   );
