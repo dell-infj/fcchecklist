@@ -82,8 +82,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signInInspector = async (uniqueId: string, username: string, password: string) => {
     try {
-      // Construct the temporary email based on the pattern used during signup
-      const tempEmail = `${username}.${uniqueId}@inspector.temp`;
+      // Construct the email based on the pattern used during signup
+      const tempEmail = `${username.toLowerCase()}.${uniqueId.toLowerCase()}@inspector.local`;
+
+      console.log('Attempting inspector login with email:', tempEmail);
 
       // Try to sign in with the constructed email and password
       const { error } = await supabase.auth.signInWithPassword({
@@ -92,11 +94,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
 
       if (error) {
+        console.error('Inspector login error:', error);
         return { error: { message: 'Credenciais inválidas' } };
       }
 
       return { error: null };
     } catch (error: any) {
+      console.error('Inspector login exception:', error);
       return { error: { message: 'Erro ao fazer login' } };
     }
   };

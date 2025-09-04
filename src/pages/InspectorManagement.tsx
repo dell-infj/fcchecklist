@@ -83,8 +83,11 @@ export default function InspectorManagement() {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      // Create a temporary email for the inspector using username + unique_id
-      const tempEmail = `${values.username}.${profile?.unique_id}@inspector.temp`;
+      // Create a unique but valid email for the inspector
+      // Using a format that looks like a real email but is unique per inspector
+      const tempEmail = `${values.username.toLowerCase()}.${profile?.unique_id?.toLowerCase()}@inspector.local`;
+      
+      console.log('Creating inspector with email:', tempEmail);
       
       const { error } = await supabase.auth.signUp({
         email: tempEmail,
