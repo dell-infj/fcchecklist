@@ -49,6 +49,14 @@ export const PDFPreviewFloatingButton: React.FC<PDFPreviewFloatingButtonProps> =
         throw new Error('Veículo ou inspetor não encontrado');
       }
 
+      // Filtrar apenas os campos que são checklist items do formData
+      const checklistItemsData: Record<string, any> = {};
+      Object.keys(formData).forEach(key => {
+        if (typeof formData[key] === 'object' && formData[key] !== null && 'status' in formData[key]) {
+          checklistItemsData[key] = formData[key];
+        }
+      });
+
       const pdfData = {
         vehicleInfo: {
           model: selectedVehicle.model || 'Não informado',
@@ -70,21 +78,22 @@ export const PDFPreviewFloatingButton: React.FC<PDFPreviewFloatingButtonProps> =
         vehicle_mileage: formData.vehicle_mileage || '',
         overall_condition: formData.overall_condition || 'Não informado',
         additional_notes: formData.additional_notes || '',
-        interior_photo_url: formData.interior_photo_url || '',
-        exterior_photo_url: formData.exterior_photo_url || '',
-        inspector_signature: formData.inspector_signature || '',
-        checklistItems: formData,
-        checklist_items: checklistItems
+        interior_photo_url: formData.interior_photo_url || null,
+        exterior_photo_url: formData.exterior_photo_url || null,
+        inspector_signature: formData.inspector_signature || null,
+        checklistItems: checklistItemsData,
+        checklist_items: checklistItems || []
       };
 
+      console.log('PDF Data:', pdfData); // Debug log
       const pdfDoc = await generateChecklistPDF(pdfData);
       const pdfDataUri = pdfDoc.output('datauristring');
       setPdfUrl(pdfDataUri);
     } catch (error) {
       console.error('Error generating PDF preview:', error);
       toast({
-        title: "Erro",
-        description: "Erro ao gerar preview do PDF",
+        title: "Erro ao gerar PDF",
+        description: error instanceof Error ? error.message : "Erro desconhecido ao gerar preview do PDF",
         variant: "destructive"
       });
       setIsOpen(false);
