@@ -1,8 +1,6 @@
 import React from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Button } from '@/components/ui/button';
-import { Printer, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface ChecklistPreviewProps {
@@ -66,29 +64,6 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
     }
   };
 
-  const handlePrint = () => {
-    window.print();
-    toast({
-      title: "Imprimindo checklist",
-      description: "Use as opções do navegador para salvar como PDF"
-    });
-  };
-
-  const handleDownloadPDF = async () => {
-    try {
-      // Implementar usando html2canvas + jsPDF se necessário
-      toast({
-        title: "Use a impressão",
-        description: "Use Ctrl+P ou o botão Imprimir para gerar o PDF"
-      });
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Erro ao gerar PDF. Use a função de impressão.",
-        variant: "destructive"
-      });
-    }
-  };
 
   if (!selectedVehicle || !selectedInspector) {
     return (
@@ -105,13 +80,6 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
 
   return (
     <div className="max-w-4xl mx-auto bg-background">
-      {/* Print Actions - Hidden in print */}
-      <div className="print:hidden mb-6 flex gap-2 justify-center">
-        <Button onClick={handlePrint} className="flex items-center gap-2">
-          <Printer className="h-4 w-4" />
-          Imprimir / Salvar PDF
-        </Button>
-      </div>
 
       {/* Document Content */}
       <div className="p-8 bg-white text-black print:p-4 print:text-black">
