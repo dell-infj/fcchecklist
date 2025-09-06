@@ -23,15 +23,20 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
   const selectedVehicle = vehicles.find(v => v.id === formData.vehicle_id);
   const selectedInspector = inspectors.find(i => i.id === formData.inspector_id);
 
-  const getRelevantCategories = (vehicleCategory: string): string[] => {
-    const categoryMap: Record<string, string[]> = {
-      'carro': ['interior', 'exterior', 'safety', 'mechanical'],
-      'moto': ['exterior', 'safety', 'mechanical'],
-      'caminhao': ['interior', 'exterior', 'safety', 'mechanical', 'cargo'],
-      'onibus': ['interior', 'exterior', 'safety', 'mechanical', 'passenger'],
-      'van': ['interior', 'exterior', 'safety', 'mechanical']
-    };
-    return categoryMap[vehicleCategory?.toLowerCase()] || ['interior', 'exterior', 'safety', 'mechanical'];
+  // Mapear categorias de veículo para unique_id (mesma lógica do DynamicChecklistForm)
+  const getUniqueIdByCategory = (category: string) => {
+    switch(category?.toLowerCase()) {
+      case 'caminhao':
+      case 'caminhão':
+        return 'CAMINHAO';
+      case 'carro':
+      case 'moto':
+        return 'CARRO';
+      case 'retroescavadeira':
+        return 'RETROESCAVADEIRA';
+      default:
+        return 'CARRO'; // Default para carro se não especificado
+    }
   };
 
   const getCategoryTitle = (category: string): string => {
@@ -89,9 +94,10 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
     );
   }
 
-  const relevantCategories = getRelevantCategories(selectedVehicle.vehicle_category);
+  // Filtrar itens baseado no unique_id da categoria do veículo
+  const vehicleUniqueId = getUniqueIdByCategory(selectedVehicle.vehicle_category);
   const filteredChecklistItems = checklistItems.filter(item => 
-    relevantCategories.includes(item.category)
+    item.unique_id === vehicleUniqueId
   );
 
   return (
@@ -151,10 +157,15 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
         </div>
 
         {/* Checklist Items by Category */}
-        {relevantCategories.map((category) => {
-          const categoryItems = filteredChecklistItems.filter(item => item.category === category);
-          
-          if (categoryItems.length === 0) return null;
+        {Object.entries(
+          filteredChecklistItems.reduce((acc, item) => {
+            if (!acc[item.category]) {
+              acc[item.category] = [];
+            }
+            acc[item.category].push(item);
+            return acc;
+          }, {} as Record<string, any[]>)
+        ).map(([category, categoryItems]) => {
 
           return (
             <div key={category} className="mb-8 no-page-break">
@@ -162,7 +173,7 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
                 {getCategoryTitle(category)}
               </h3>
               <div className="space-y-3">
-                {categoryItems.map((item) => {
+                {(categoryItems as any[]).map((item) => {
                   const fieldKey = getFieldKey(item.name);
                   const itemData = formData[fieldKey] || {};
                   const status = itemData.status || 'not_checked';
