@@ -264,11 +264,11 @@ const ChecklistView = () => {
         <div className="flex flex-col gap-4">
           <Button
             variant="outline"
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/checklists')}
             className="gap-2 w-fit"
           >
             <ArrowLeft className="h-4 w-4" />
-            Voltar
+            Voltar ao Histórico
           </Button>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
