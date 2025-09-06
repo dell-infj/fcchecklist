@@ -159,11 +159,56 @@ const ChecklistView = () => {
     }
   };
 
-  const getItemStatusText = (value: boolean | string) => {
+  const getItemStatusLabel = (value: boolean | string) => {
     if (typeof value === 'boolean') {
-      return value ? 'Funcionando' : 'Não funcionando';
+      return value ? 'SIM' : 'NÃO';
     }
-    return value || 'Não informado';
+    if (!value) return 'Não verificado';
+    const v = String(value).toLowerCase();
+    switch (v) {
+      case 'funcionando':
+      case 'sim':
+      case 'ok':
+        return 'SIM';
+      case 'revisao':
+      case 'revisão':
+        return 'REVISÃO';
+      case 'ausente':
+        return 'AUSENTE';
+      case 'not_ok':
+      case 'nao':
+      case 'não':
+        return 'NÃO';
+      case 'not_applicable':
+        return 'N/A';
+      default:
+        return value as string;
+    }
+  };
+
+  const getItemBadgeVariant = (value: boolean | string): 'default' | 'secondary' | 'destructive' | 'outline' => {
+    if (typeof value === 'boolean') {
+      return value ? 'default' : 'destructive';
+    }
+    const v = String(value).toLowerCase();
+    switch (v) {
+      case 'funcionando':
+      case 'sim':
+      case 'ok':
+        return 'default';
+      case 'revisao':
+      case 'revisão':
+        return 'secondary';
+      case 'ausente':
+      case 'not_ok':
+      case 'nao':
+      case 'não':
+        return 'destructive';
+      case 'not_applicable':
+        return 'outline';
+      default:
+        return 'secondary';
+    }
   };
 
   if (loading) {
@@ -258,40 +303,40 @@ const ChecklistView = () => {
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span>Luzes Internas:</span>
-                  <Badge variant={checklist.all_interior_lights ? "default" : "destructive"}>
-                    {getItemStatusText(checklist.all_interior_lights)}
+                  <Badge variant={getItemBadgeVariant(checklist.all_interior_lights)}>
+                    {getItemStatusLabel(checklist.all_interior_lights)}
                   </Badge>
                 </div>
                 <div className="flex justify-between">
                   <span>Banco do Passageiro:</span>
-                  <Badge variant={checklist.passenger_seat ? "default" : "destructive"}>
-                    {getItemStatusText(checklist.passenger_seat)}
+                  <Badge variant={getItemBadgeVariant(checklist.passenger_seat)}>
+                    {getItemStatusLabel(checklist.passenger_seat)}
                   </Badge>
                 </div>
                 <div className="flex justify-between">
                   <span>Extintor de Incêndio:</span>
-                  <Badge variant={checklist.fire_extinguisher ? "default" : "destructive"}>
-                    {getItemStatusText(checklist.fire_extinguisher)}
+                  <Badge variant={getItemBadgeVariant(checklist.fire_extinguisher)}>
+                    {getItemStatusLabel(checklist.fire_extinguisher)}
                   </Badge>
                 </div>
               </div>
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span>Luzes Externas:</span>
-                  <Badge variant={checklist.all_outside_lights ? "default" : "destructive"}>
-                    {getItemStatusText(checklist.all_outside_lights)}
+                  <Badge variant={getItemBadgeVariant(checklist.all_outside_lights)}>
+                    {getItemStatusLabel(checklist.all_outside_lights)}
                   </Badge>
                 </div>
                 <div className="flex justify-between">
                   <span>Fechaduras dos Armários:</span>
-                  <Badge variant="secondary">
-                    {getItemStatusText(checklist.all_cabinets_latches)}
+                  <Badge variant={getItemBadgeVariant(checklist.all_cabinets_latches)}>
+                    {getItemStatusLabel(checklist.all_cabinets_latches)}
                   </Badge>
                 </div>
                 <div className="flex justify-between">
                   <span>Acendedor de Cigarro:</span>
-                  <Badge variant="secondary">
-                    {getItemStatusText(checklist.cigarette_lighter)}
+                  <Badge variant={getItemBadgeVariant(checklist.cigarette_lighter)}>
+                    {getItemStatusLabel(checklist.cigarette_lighter)}
                   </Badge>
                 </div>
               </div>
