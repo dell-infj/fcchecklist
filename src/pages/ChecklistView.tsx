@@ -9,6 +9,15 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import Layout from '@/components/Layout';
 
+interface ChecklistItem {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  required: boolean;
+  item_order: number;
+}
+
 interface ChecklistDetail {
   id: string;
   status: string;
@@ -25,6 +34,7 @@ interface ChecklistDetail {
   all_outside_lights: boolean;
   all_cabinets_latches: string;
   cigarette_lighter: string;
+  [key: string]: any; // Para acessar os campos dinâmicos dos itens
   vehicle: {
     vehicle_category: string;
     license_plate: string;
@@ -44,6 +54,7 @@ const ChecklistView = () => {
   const { profile } = useAuth();
   const { toast } = useToast();
   const [checklist, setChecklist] = useState<ChecklistDetail | null>(null);
+  const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -75,22 +86,19 @@ const ChecklistView = () => {
 
       if (error) throw error;
 
+      // Carregar os itens de checklist baseados na categoria do veículo
+      const { data: itemsData, error: itemsError } = await supabase
+        .from('checklist_items')
+        .select('*')
+        .eq('category', data.vehicles.vehicle_category)
+        .eq('active', true)
+        .order('item_order');
+
+      if (itemsError) throw itemsError;
+
+      setChecklistItems(itemsData || []);
       setChecklist({
-        id: data.id,
-        status: data.status,
-        inspection_date: data.inspection_date,
-        overall_condition: data.overall_condition || '',
-        additional_notes: data.additional_notes || '',
-        interior_photo_url: data.interior_photo_url || '',
-        exterior_photo_url: data.exterior_photo_url || '',
-        inspector_signature: data.inspector_signature || '',
-        pdf_url: data.pdf_url || '',
-        all_interior_lights: data.all_interior_lights || false,
-        passenger_seat: data.passenger_seat || false,
-        fire_extinguisher: data.fire_extinguisher || false,
-        all_outside_lights: data.all_outside_lights || false,
-        all_cabinets_latches: data.all_cabinets_latches || '',
-        cigarette_lighter: data.cigarette_lighter || '',
+        ...data,
         vehicle: data.vehicles,
         inspector: data.profiles
       });
@@ -211,6 +219,17 @@ const ChecklistView = () => {
     }
   };
 
+  // Função para normalizar nomes de campos (igual ao DynamicChecklistForm)
+  const getFieldKey = (itemName: string) => {
+    return itemName
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]/g, '_')
+      .replace(/_+/g, '_')
+      .replace(/^_|_$/g, '');
+  };
+
   if (loading) {
     return (
       <Layout>
@@ -296,51 +315,36 @@ const ChecklistView = () => {
         {/* Itens de Inspeção */}
         <Card>
           <CardHeader>
-            <CardTitle>Itens Verificados</CardTitle>
+            <CardTitle>Itens Verificados ({checklistItems.length} itens)</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span>Luzes Internas:</span>
-                  <Badge variant={getItemBadgeVariant(checklist.all_interior_lights)}>
-                    {getItemStatusLabel(checklist.all_interior_lights)}
-                  </Badge>
-                </div>
-                <div className="flex justify-between">
-                  <span>Banco do Passageiro:</span>
-                  <Badge variant={getItemBadgeVariant(checklist.passenger_seat)}>
-                    {getItemStatusLabel(checklist.passenger_seat)}
-                  </Badge>
-                </div>
-                <div className="flex justify-between">
-                  <span>Extintor de Incêndio:</span>
-                  <Badge variant={getItemBadgeVariant(checklist.fire_extinguisher)}>
-                    {getItemStatusLabel(checklist.fire_extinguisher)}
-                  </Badge>
-                </div>
+            {checklistItems.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {checklistItems.map((item, index) => {
+                  const fieldKey = getFieldKey(item.name);
+                  const value = checklist[fieldKey];
+                  const isFirstColumn = index % 2 === 0;
+                  
+                  return (
+                    <div key={item.id} className={`space-y-3 ${!isFirstColumn ? 'md:pl-4' : ''}`}>
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1 pr-2">
+                          <span className="font-medium">{item.name}:</span>
+                          {item.description && (
+                            <p className="text-sm text-muted-foreground mt-1">{item.description}</p>
+                          )}
+                        </div>
+                        <Badge variant={getItemBadgeVariant(value)} className="shrink-0">
+                          {getItemStatusLabel(value)}
+                        </Badge>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span>Luzes Externas:</span>
-                  <Badge variant={getItemBadgeVariant(checklist.all_outside_lights)}>
-                    {getItemStatusLabel(checklist.all_outside_lights)}
-                  </Badge>
-                </div>
-                <div className="flex justify-between">
-                  <span>Fechaduras dos Armários:</span>
-                  <Badge variant={getItemBadgeVariant(checklist.all_cabinets_latches)}>
-                    {getItemStatusLabel(checklist.all_cabinets_latches)}
-                  </Badge>
-                </div>
-                <div className="flex justify-between">
-                  <span>Acendedor de Cigarro:</span>
-                  <Badge variant={getItemBadgeVariant(checklist.cigarette_lighter)}>
-                    {getItemStatusLabel(checklist.cigarette_lighter)}
-                  </Badge>
-                </div>
-              </div>
-            </div>
+            ) : (
+              <p className="text-muted-foreground">Nenhum item de checklist encontrado para esta categoria de veículo.</p>
+            )}
           </CardContent>
         </Card>
 
