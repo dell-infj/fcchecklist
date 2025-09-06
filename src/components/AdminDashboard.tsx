@@ -537,20 +537,38 @@ export default function AdminDashboard() {
                 Últimas inspeções registradas no sistema
               </CardDescription>
             </div>
-            <Button 
-              onClick={() => navigate('/checklist/new')}
-              className="flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              Nova Inspeção
-            </Button>
+            {recentChecklists.length > 0 && (
+              <Button 
+                onClick={() => navigate('/checklist/new')}
+                className="flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Nova Inspeção
+              </Button>
+            )}
           </div>
         </CardHeader>
         <CardContent>
           {recentChecklists.length === 0 ? (
-            <p className="text-muted-foreground text-center py-6">
-              Nenhum checklist encontrado
-            </p>
+            <div className="flex flex-col items-center justify-center py-12 space-y-4">
+              <div className="text-center space-y-2">
+                <ClipboardList className="w-16 h-16 mx-auto text-muted-foreground" />
+                <p className="text-lg font-medium text-muted-foreground">
+                  Nenhum checklist encontrado
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Comece criando sua primeira inspeção
+                </p>
+              </div>
+              <Button 
+                onClick={() => navigate('/checklist/new')}
+                className="flex items-center gap-2 px-8 py-3 text-lg"
+                size="lg"
+              >
+                <Plus className="w-5 h-5" />
+                Nova Inspeção
+              </Button>
+            </div>
           ) : (
             <div className="space-y-4">
               {recentChecklists.map((checklist) => (
