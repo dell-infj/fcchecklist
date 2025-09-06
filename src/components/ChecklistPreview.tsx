@@ -48,6 +48,9 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
 
   const getStatusColor = (status: string): string => {
     switch (status) {
+      case 'funcionando': return 'text-green-600 bg-green-50';
+      case 'revisao': return 'text-yellow-600 bg-yellow-50';
+      case 'ausente': return 'text-red-600 bg-red-50';
       case 'ok': return 'text-green-600 bg-green-50';
       case 'not_ok': return 'text-red-600 bg-red-50';
       case 'not_applicable': return 'text-gray-600 bg-gray-50';
@@ -57,6 +60,9 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
 
   const getStatusText = (status: string): string => {
     switch (status) {
+      case 'funcionando': return 'SIM';
+      case 'revisao': return 'REVISÃO';
+      case 'ausente': return 'AUSENTE';
       case 'ok': return 'OK';
       case 'not_ok': return 'NÃO OK';
       case 'not_applicable': return 'N/A';
@@ -64,6 +70,16 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
     }
   };
 
+  // Função para gerar uma chave consistente para o campo do formulário (mesma do DynamicChecklistForm)
+  const getFieldKey = (itemName: string) => {
+    return itemName
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+      .replace(/[^\w\s]/g, '') // Remove caracteres especiais
+      .replace(/\s+/g, '_') // Substitui espaços por underscore
+      .replace(/^_+|_+$/g, ''); // Remove underscores do início e fim
+  };
 
   if (!selectedVehicle || !selectedInspector) {
     return (
@@ -80,7 +96,6 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
 
   return (
     <div className="max-w-4xl mx-auto bg-background">
-
       {/* Document Content */}
       <div className="p-8 bg-white text-black print:p-4 print:text-black">
         <style dangerouslySetInnerHTML={{
@@ -148,7 +163,8 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
               </h3>
               <div className="space-y-3">
                 {categoryItems.map((item) => {
-                  const itemData = formData[item.name] || {};
+                  const fieldKey = getFieldKey(item.name);
+                  const itemData = formData[fieldKey] || {};
                   const status = itemData.status || 'not_checked';
                   const observation = itemData.observation || '';
 
