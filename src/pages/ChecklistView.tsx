@@ -87,10 +87,12 @@ const ChecklistView = () => {
       if (error) throw error;
 
       // Carregar os itens de checklist baseados na categoria do veículo
+      // Note: unique_id nos checklist_items corresponde à categoria do veículo em maiúscula
+      const vehicleCategory = data.vehicles.vehicle_category.toUpperCase();
       const { data: itemsData, error: itemsError } = await supabase
         .from('checklist_items')
         .select('*')
-        .eq('category', data.vehicles.vehicle_category)
+        .eq('unique_id', vehicleCategory)
         .eq('active', true)
         .order('item_order');
 
