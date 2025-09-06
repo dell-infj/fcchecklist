@@ -59,6 +59,7 @@ export type Database = {
           all_cabinets_latches: string | null
           all_interior_lights: boolean | null
           all_outside_lights: boolean | null
+          checklist_data: Json | null
           cigarette_lighter: string | null
           created_at: string
           exterior_photo_url: string | null
@@ -81,6 +82,7 @@ export type Database = {
           all_cabinets_latches?: string | null
           all_interior_lights?: boolean | null
           all_outside_lights?: boolean | null
+          checklist_data?: Json | null
           cigarette_lighter?: string | null
           created_at?: string
           exterior_photo_url?: string | null
@@ -103,6 +105,7 @@ export type Database = {
           all_cabinets_latches?: string | null
           all_interior_lights?: boolean | null
           all_outside_lights?: boolean | null
+          checklist_data?: Json | null
           cigarette_lighter?: string | null
           created_at?: string
           exterior_photo_url?: string | null

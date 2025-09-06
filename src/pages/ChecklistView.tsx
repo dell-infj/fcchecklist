@@ -34,6 +34,7 @@ interface ChecklistDetail {
   all_outside_lights: boolean;
   all_cabinets_latches: string;
   cigarette_lighter: string;
+  checklist_data?: Record<string, { status?: string; observation?: string }>;
   [key: string]: any; // Para acessar os campos dinâmicos dos itens
   vehicle: {
     vehicle_category: string;
@@ -324,7 +325,7 @@ const ChecklistView = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {checklistItems.map((item, index) => {
                   const fieldKey = getFieldKey(item.name);
-                  const value = checklist[fieldKey];
+                  const value = (checklist as any)?.checklist_data?.[fieldKey]?.status ?? (checklist as any)[fieldKey];
                   const isFirstColumn = index % 2 === 0;
                   
                   return (

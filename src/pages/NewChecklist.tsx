@@ -238,7 +238,7 @@ const NewChecklist = () => {
 
     try {
       // Preparar dados do checklist para salvar
-      const checklistData = {
+      const checklistData: any = {
         vehicle_id: formData.vehicle_id,
         inspector_id: formData.inspector_id,
         inspection_date: format(formData.inspection_date, 'yyyy-MM-dd'),
@@ -248,34 +248,45 @@ const NewChecklist = () => {
         exterior_photo_url: formData.exterior_photo_url,
         inspector_signature: formData.inspector_signature,
         status: 'completed',
-        unique_id: profile?.unique_id
+        unique_id: profile?.unique_id,
       };
+
+      // Coletar itens dinâmicos do checklist para salvar como JSON
+      const dynamicItems: Record<string, { status?: string; observation?: string }> = {};
 
       // Adicionar dados dinâmicos do checklist
       Object.keys(formData).forEach(key => {
         if (key !== 'vehicle_id' && key !== 'inspector_id' && key !== 'inspection_date' && 
             key !== 'vehicle_mileage' && key !== 'overall_condition' && key !== 'additional_notes' &&
             key !== 'interior_photo_url' && key !== 'exterior_photo_url' && key !== 'inspector_signature') {
-          
-          const itemData = formData[key];
-          if (itemData && typeof itemData === 'object' && 'status' in itemData) {
-            // Mapear campos conhecidos para o banco de dados
+          const itemData = (formData as any)[key];
+          if (itemData && typeof itemData === 'object' && ('status' in itemData || 'observation' in itemData)) {
+            // Salvar no JSON agregado
+            dynamicItems[key] = {
+              status: itemData.status,
+              observation: itemData.observation,
+            };
+
+            // Mapear alguns campos conhecidos para colunas específicas (legado)
             if (key === 'todas_as_luzes_internas_funcionando') {
-              (checklistData as any).all_interior_lights = itemData.status === 'funcionando';
+              checklistData.all_interior_lights = itemData.status === 'funcionando';
             } else if (key === 'banco_do_passageiro') {
-              (checklistData as any).passenger_seat = itemData.status === 'funcionando';
+              checklistData.passenger_seat = itemData.status === 'funcionando';
             } else if (key === 'extintor_de_incendio') {
-              (checklistData as any).fire_extinguisher = itemData.status === 'funcionando';
+              checklistData.fire_extinguisher = itemData.status === 'funcionando';
             } else if (key === 'todas_as_luzes_externas_funcionando') {
-              (checklistData as any).all_outside_lights = itemData.status === 'funcionando';
+              checklistData.all_outside_lights = itemData.status === 'funcionando';
             } else if (key === 'fechaduras_de_todos_os_armarios') {
-              (checklistData as any).all_cabinets_latches = itemData.status;
+              checklistData.all_cabinets_latches = itemData.status;
             } else if (key === 'acendedor_de_cigarro') {
-              (checklistData as any).cigarette_lighter = itemData.status;
+              checklistData.cigarette_lighter = itemData.status;
             }
           }
         }
       });
+
+      // Atribuir JSON de itens dinâmicos
+      checklistData.checklist_data = dynamicItems;
 
       // Salvar checklist no banco
       let savedChecklist;
