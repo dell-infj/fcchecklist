@@ -131,7 +131,7 @@ const ProfileDrawer = () => {
       
       <SheetContent side="right" className="w-full sm:w-full md:w-[720px] lg:w-[900px] xl:w-[1040px] max-w-[100vw] p-0 sm:rounded-none">
         <ScrollArea className="h-full w-full">
-          <div className="p-4 sm:p-6 space-y-6 max-w-full overflow-hidden">
+          <div className="p-2 sm:p-4 space-y-3 max-w-full overflow-hidden text-sm">
             <SheetHeader>
               <SheetTitle className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -161,13 +161,13 @@ const ProfileDrawer = () => {
 
             {/* Informações Pessoais */}
             <Card>
-              <CardHeader>
+              <CardHeader className="py-3">
                 <CardTitle className="flex items-center gap-2">
                   <User className="h-5 w-5 text-primary" />
                   Informações Pessoais
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3 p-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="first_name">Nome</Label>
@@ -206,7 +206,7 @@ const ProfileDrawer = () => {
 
             {/* ID Único Principal */}
             <Card className="border-primary/20 bg-primary/5">
-              <CardHeader>
+              <CardHeader className="py-3">
                 <CardTitle className="flex items-center gap-2">
                   <Building2 className="h-5 w-5 text-primary" />
                   ID Único Principal
@@ -215,7 +215,7 @@ const ProfileDrawer = () => {
                   </Badge>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3 p-4">
                 <div className="space-y-2">
                   <Label htmlFor="company_name">Nome da Empresa</Label>
                   <Input
@@ -257,13 +257,13 @@ const ProfileDrawer = () => {
 
             {/* IDs Únicos Adicionais */}
             <Card>
-              <CardHeader>
+              <CardHeader className="py-3">
                 <CardTitle>IDs Únicos Adicionais</CardTitle>
                 <p className="text-sm text-muted-foreground">
                   Adicione IDs únicos de outras empresas
                 </p>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3 p-4">
                 <div className="flex gap-2">
                   <Input
                     value={newCompanyId}
@@ -304,7 +304,7 @@ const ProfileDrawer = () => {
             {profile?.role === 'admin' && <TeamMembers />}
 
             {/* Botão Salvar */}
-            <div className="flex justify-end pt-4 border-t">
+            <div className="flex justify-end pt-3 border-t">
               <Button 
                 onClick={handleSave} 
                 disabled={loading}

@@ -222,9 +222,9 @@ export const TeamPresence = () => {
   const onlineCount = teamMembers.filter(member => member.isOnline).length;
 
   return (
-    <Card className="shadow-warm w-full max-w-full">
+    <Card className="shadow-warm w-full max-w-full text-sm">
       <CardHeader>
-        <CardTitle className="flex items-center justify-between text-lg">
+        <CardTitle className="flex items-center justify-between text-base">
           <div className="flex items-center gap-2">
             <Users className="h-5 w-5 text-primary" />
             Equipe ({profile.unique_id})
@@ -234,11 +234,11 @@ export const TeamPresence = () => {
           </Badge>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3 max-w-full overflow-hidden">
+      <CardContent className="space-y-2 p-4 max-w-full overflow-hidden">
         {teamMembers.map((member) => (
           <div
             key={member.id}
-            className={`flex items-center justify-between p-4 rounded-lg border transition-all w-full max-w-full ${
+            className={`flex items-center justify-between p-2 rounded-lg border transition-all w-full max-w-full ${
               member.isOnline 
                 ? 'bg-success/5 border-success/30' 
                 : 'bg-muted/30 border-border'
