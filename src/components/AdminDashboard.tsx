@@ -281,7 +281,7 @@ export default function AdminDashboard() {
         </Card>
 
         <Card 
-          className="cursor-pointer hover:bg-secondary/30 hover:text-secondary-foreground transition-all duration-300 hover:scale-105 hover:shadow-lg animate-fade-in [animation-delay:100ms]"
+          className="cursor-pointer hover:bg-accent transition-all duration-300 hover:scale-105 hover:shadow-lg animate-fade-in [animation-delay:100ms]"
           onClick={() => setOpenCommand('inspection')}
         >
           <CardHeader className="pb-4">
