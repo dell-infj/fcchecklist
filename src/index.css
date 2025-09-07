@@ -21,8 +21,8 @@ Cores em HSL para sistema de checklist de frota profissional
     /* Primary - Laranja vibrante e moderno */
     --primary: 14 100% 57%; /* #FF6B35 - laranja vibrante */
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 16 90% 65%; /* hover mais suave */
-    --primary-glow: 20 95% 75%; /* brilho elegante */
+    --primary-hover: 18 70% 75%; /* hover mais claro e suave */
+    --primary-glow: 22 85% 82%; /* brilho mais sutil */
 
     /* Secondary - Coral suave */
     --secondary: 16 100% 73%; /* #FF9F7A - coral suave */
@@ -93,8 +93,8 @@ Cores em HSL para sistema de checklist de frota profissional
     /* Primary - Laranja suave para dark mode */
     --primary: 16 85% 65%; /* #FF8A65 - laranja suave */
     --primary-foreground: 0 0% 12%;
-    --primary-hover: 16 75% 70%;
-    --primary-glow: 20 80% 75%;
+    --primary-hover: 18 60% 78%; /* hover ainda mais claro no dark */
+    --primary-glow: 22 70% 85%;
 
     /* Secondary - Laranja acinzentado */
     --secondary: 16 65% 67%; /* #FFAB91 - tom acinzentado */
