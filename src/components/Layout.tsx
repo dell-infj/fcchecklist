@@ -37,7 +37,7 @@ const Layout = ({ children }: LayoutProps) => {
                 />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-foreground">Frota</h1>
+                <h1 className="text-2xl font-bold text-foreground">FROTA</h1>
                 <p className="text-sm text-muted-foreground">Sistema de checklist</p>
               </div>
             </div>
