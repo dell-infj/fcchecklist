@@ -145,17 +145,23 @@ const ProfileDrawer = () => {
                     </p>
                   </div>
                 </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleSignOut}
-                  className="gap-2 hover:scale-105 transition-all duration-300"
-                >
-                  <LogOut className="h-4 w-4" />
-                  Sair
-                </Button>
               </SheetTitle>
             </SheetHeader>
+
+            <Separator />
+
+            {/* Botão Sair Centralizado */}
+            <div className="flex justify-center py-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleSignOut}
+                className="gap-2 hover:scale-105 transition-all duration-300"
+              >
+                <LogOut className="h-4 w-4" />
+                Sair do Perfil
+              </Button>
+            </div>
 
             <Separator />
 
@@ -303,17 +309,6 @@ const ProfileDrawer = () => {
             {/* Gerenciamento de Equipe para Admins */}
             {profile?.role === 'admin' && <TeamMembers />}
 
-            {/* Botão Salvar */}
-            <div className="flex justify-end pt-3 border-t">
-              <Button 
-                onClick={handleSave} 
-                disabled={loading}
-                className="gap-2"
-              >
-                <Save className="h-4 w-4" />
-                {loading ? 'Salvando...' : 'Salvar Alterações'}
-              </Button>
-            </div>
           </div>
         </ScrollArea>
       </SheetContent>
