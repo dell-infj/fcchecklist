@@ -93,20 +93,22 @@ export const PDFPreviewFloatingButton: React.FC<PDFPreviewFloatingButtonProps> =
             <DrawerHeader className="flex items-center justify-between">
               <DrawerTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5" />
-                Preview do Checklist
+                Preview em Tempo Real - Resultado Final do PDF
               </DrawerTitle>
               <Button variant="ghost" size="icon" onClick={handleClose}>
                 <X className="h-4 w-4" />
               </Button>
             </DrawerHeader>
-            <div className="flex-1 overflow-auto">
-              <ChecklistPreview 
-                formData={formData}
-                vehicles={vehicles}
-                inspectors={inspectors}
-                checklistItems={checklistItems}
-                profile={profile}
-              />
+            <div className="flex-1 overflow-auto bg-gray-100 p-4">
+              <div className="shadow-lg rounded-lg overflow-hidden">
+                <ChecklistPreview 
+                  formData={formData}
+                  vehicles={vehicles}
+                  inspectors={inspectors}
+                  checklistItems={checklistItems}
+                  profile={profile}
+                />
+              </div>
             </div>
           </DrawerContent>
         </Drawer>
@@ -122,17 +124,19 @@ export const PDFPreviewFloatingButton: React.FC<PDFPreviewFloatingButtonProps> =
           <DialogHeader className="p-6 pb-4">
             <DialogTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5" />
-              Preview do Checklist - Inspeção Veicular
+              Preview em Tempo Real - Resultado Final do PDF
             </DialogTitle>
           </DialogHeader>
-          <div className="flex-1 overflow-auto">
-            <ChecklistPreview 
-              formData={formData}
-              vehicles={vehicles}
-              inspectors={inspectors}
-              checklistItems={checklistItems}
-              profile={profile}
-            />
+          <div className="flex-1 overflow-auto bg-gray-100 p-4">
+            <div className="shadow-lg rounded-lg overflow-hidden">
+              <ChecklistPreview 
+                formData={formData}
+                vehicles={vehicles}
+                inspectors={inspectors}
+                checklistItems={checklistItems}
+                profile={profile}
+              />
+            </div>
           </div>
         </DialogContent>
       </Dialog>

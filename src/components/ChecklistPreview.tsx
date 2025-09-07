@@ -101,9 +101,15 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
   );
 
   return (
-    <div className="max-w-4xl mx-auto bg-background">
-      {/* Document Content */}
-      <div className="p-8 bg-white text-black print:p-4 print:text-black">
+    <div className="w-full bg-white">
+      {/* Document Content - Exatamente como será no PDF */}
+      <div className="p-8 bg-white text-black" style={{ 
+        minHeight: '100vh',
+        fontFamily: '"Times New Roman", serif',
+        fontSize: '12px',
+        lineHeight: '1.4',
+        color: '#000'
+      }}>
         <style dangerouslySetInnerHTML={{
           __html: `
             @media print {
@@ -117,41 +123,93 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
               .text-primary { color: #000 !important; }
               .border { border: 1px solid #ddd !important; }
             }
+            /* Preview styles to match PDF exactly */
+            .preview-document {
+              background: white;
+              color: black;
+              font-family: "Times New Roman", serif;
+            }
+            .preview-document h1 { font-size: 18px; font-weight: bold; margin-bottom: 8px; }
+            .preview-document h2 { font-size: 16px; font-weight: bold; margin-bottom: 12px; }
+            .preview-document h3 { font-size: 14px; font-weight: bold; margin-bottom: 8px; }
+            .preview-document p { font-size: 12px; margin-bottom: 4px; }
+            .preview-document .company-header { text-align: center; margin-bottom: 30px; }
+            .preview-document .section { margin-bottom: 25px; }
+            .preview-document .checklist-item { 
+              display: flex; 
+              justify-content: space-between; 
+              align-items: flex-start; 
+              padding: 8px; 
+              border: 1px solid #ddd; 
+              margin-bottom: 4px;
+              background: white;
+            }
+            .preview-document .status-badge {
+              padding: 4px 8px;
+              border-radius: 4px;
+              font-size: 10px;
+              font-weight: bold;
+              white-space: nowrap;
+            }
+            .preview-document .status-funcionando { background: #f0f9ff; color: #0369a1; border: 1px solid #bae6fd; }
+            .preview-document .status-revisao { background: #fefce8; color: #a16207; border: 1px solid #fef08a; }
+            .preview-document .status-ausente { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+            .preview-document .status-not_checked { background: #f9fafb; color: #6b7280; border: 1px solid #e5e7eb; }
           `
         }} />
         {/* Header */}
-        <div className="text-center mb-8 no-page-break">
-          <h1 className="text-2xl font-bold text-primary mb-2">
-            {profile?.company_name || 'FC GESTÃO EMPRESARIAL LTDA'}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            CNPJ: {profile?.cnpj || '05.873.924/0001-80'} | Email: contato@fcgestao.com.br
-          </p>
-          <p className="text-sm text-muted-foreground">
-            {profile?.address || 'Rua princesa imperial, 220 - Realengo - RJ'}
-          </p>
-          <div className="mt-6">
-            <h2 className="text-xl font-semibold">CHECKLIST DE INSPEÇÃO VEICULAR</h2>
+        <div className="preview-document">
+          <div className="company-header">
+            <h1 style={{ color: '#000', fontSize: '18px', fontWeight: 'bold', marginBottom: '8px' }}>
+              {profile?.company_name || 'FC GESTÃO EMPRESARIAL LTDA'}
+            </h1>
+            <p style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
+              CNPJ: {profile?.cnpj || '05.873.924/0001-80'} | Email: contato@fcgestao.com.br
+            </p>
+            <p style={{ fontSize: '12px', color: '#666', marginBottom: '20px' }}>
+              {profile?.address || 'Rua princesa imperial, 220 - Realengo - RJ'}
+            </p>
+            <h2 style={{ color: '#000', fontSize: '16px', fontWeight: 'bold' }}>
+              CHECKLIST DE INSPEÇÃO VEICULAR
+            </h2>
           </div>
         </div>
 
         {/* General Information */}
-        <div className="grid grid-cols-2 gap-6 mb-8 no-page-break">
+        <div className="section" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '30px' }}>
           <div>
-            <h3 className="font-semibold text-lg mb-4 border-b pb-2">Informações Gerais</h3>
-            <div className="space-y-2">
-              <p><strong>Data da Inspeção:</strong> {format(new Date(formData.inspection_date || new Date()), 'dd/MM/yyyy', { locale: ptBR })}</p>
-              <p><strong>Inspetor:</strong> {selectedInspector.first_name} {selectedInspector.last_name}</p>
-              <p><strong>Quilometragem:</strong> {formData.vehicle_mileage || 'Não informado'} km</p>
+            <h3 style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '12px', borderBottom: '1px solid #ddd', paddingBottom: '8px' }}>
+              Informações Gerais
+            </h3>
+            <div style={{ marginBottom: '8px' }}>
+              <p style={{ fontSize: '12px', marginBottom: '4px' }}>
+                <strong>Data da Inspeção:</strong> {format(new Date(formData.inspection_date || new Date()), 'dd/MM/yyyy', { locale: ptBR })}
+              </p>
+              <p style={{ fontSize: '12px', marginBottom: '4px' }}>
+                <strong>Inspetor:</strong> {selectedInspector.first_name} {selectedInspector.last_name}
+              </p>
+              <p style={{ fontSize: '12px', marginBottom: '4px' }}>
+                <strong>Quilometragem:</strong> {formData.vehicle_mileage || 'Não informado'} km
+              </p>
             </div>
           </div>
           <div>
-            <h3 className="font-semibold text-lg mb-4 border-b pb-2">Dados do Veículo</h3>
-            <div className="space-y-2">
-              <p><strong>Modelo:</strong> {selectedVehicle.model || 'Não informado'}</p>
-              <p><strong>Placa:</strong> {selectedVehicle.license_plate || 'Não informado'}</p>
-              <p><strong>Ano:</strong> {selectedVehicle.year || 'Não informado'}</p>
-              <p><strong>Categoria:</strong> {selectedVehicle.vehicle_category}</p>
+            <h3 style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '12px', borderBottom: '1px solid #ddd', paddingBottom: '8px' }}>
+              Dados do Veículo
+            </h3>
+            <div style={{ marginBottom: '8px' }}>
+              <p style={{ fontSize: '12px', marginBottom: '4px' }}>
+                <strong>Modelo:</strong> {selectedVehicle.model || 'Não informado'}
+              </p>
+              <p style={{ fontSize: '12px', marginBottom: '4px' }}>
+                <strong>Placa:</strong> {selectedVehicle.license_plate || 'Não informado'}
+              </p>
+              <p style={{ fontSize: '12px', marginBottom: '4px' }}>
+                <strong>Ano:</strong> {selectedVehicle.year || 'Não informado'}
+              </p>
+              <p style={{ fontSize: '12px', marginBottom: '4px' }}>
+                <strong>Categoria:</strong> {selectedVehicle.vehicle_category}
+              </p>
             </div>
           </div>
         </div>
@@ -166,13 +224,19 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
             return acc;
           }, {} as Record<string, any[]>)
         ).map(([category, categoryItems]) => {
-
           return (
-            <div key={category} className="mb-8 no-page-break">
-              <h3 className="font-semibold text-lg mb-4 border-b pb-2 text-primary">
+            <div key={category} className="section" style={{ marginBottom: '25px' }}>
+              <h3 style={{ 
+                fontSize: '14px', 
+                fontWeight: 'bold', 
+                marginBottom: '12px', 
+                borderBottom: '1px solid #ddd', 
+                paddingBottom: '8px',
+                color: '#000' 
+              }}>
                 {getCategoryTitle(category)}
               </h3>
-              <div className="space-y-3">
+              <div>
                 {(categoryItems as any[]).map((item) => {
                   const fieldKey = getFieldKey(item.name);
                   const itemData = formData[fieldKey] || {};
@@ -180,19 +244,38 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
                   const observation = itemData.observation || '';
 
                   return (
-                    <div key={item.name} className="flex justify-between items-start p-3 border rounded">
-                      <div className="flex-1">
-                        <p className="font-medium">{item.name}</p>
+                    <div key={item.name} className="checklist-item" style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'flex-start',
+                      padding: '8px',
+                      border: '1px solid #ddd',
+                      marginBottom: '4px',
+                      background: 'white'
+                    }}>
+                      <div style={{ flex: 1 }}>
+                        <p style={{ fontSize: '12px', fontWeight: '500', marginBottom: '2px' }}>
+                          {item.name}
+                        </p>
                         {item.description && (
-                          <p className="text-sm text-muted-foreground mt-1">{item.description}</p>
+                          <p style={{ fontSize: '11px', color: '#666', marginBottom: '2px' }}>
+                            {item.description}
+                          </p>
                         )}
                         {observation && (
-                          <p className="text-sm text-orange-600 mt-1">
+                          <p style={{ fontSize: '11px', color: '#d97706', marginTop: '4px' }}>
                             <strong>Observação:</strong> {observation}
                           </p>
                         )}
                       </div>
-                      <div className={`px-3 py-1 rounded text-sm font-medium ${getStatusColor(status)}`}>
+                      <div className={`status-badge status-${status}`} style={{
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        fontSize: '10px',
+                        fontWeight: 'bold',
+                        whiteSpace: 'nowrap',
+                        marginLeft: '8px'
+                      }}>
                         {getStatusText(status)}
                       </div>
                     </div>
@@ -204,44 +287,93 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
         })}
 
         {/* Overall Condition */}
-        <div className="mb-8 no-page-break">
-          <h3 className="font-semibold text-lg mb-4 border-b pb-2">Condição Geral</h3>
-          <p className="p-3 bg-muted rounded">
+        <div className="section" style={{ marginBottom: '25px' }}>
+          <h3 style={{ 
+            fontSize: '14px', 
+            fontWeight: 'bold', 
+            marginBottom: '12px', 
+            borderBottom: '1px solid #ddd', 
+            paddingBottom: '8px' 
+          }}>
+            Condição Geral
+          </h3>
+          <p style={{ 
+            padding: '12px', 
+            backgroundColor: '#f5f5f5', 
+            border: '1px solid #ddd',
+            fontSize: '12px'
+          }}>
             {formData.overall_condition || 'Não informado'}
           </p>
         </div>
 
         {/* Additional Notes */}
         {formData.additional_notes && (
-          <div className="mb-8 no-page-break">
-            <h3 className="font-semibold text-lg mb-4 border-b pb-2">Observações Adicionais</h3>
-            <p className="p-3 bg-muted rounded whitespace-pre-wrap">
+          <div className="section" style={{ marginBottom: '25px' }}>
+            <h3 style={{ 
+              fontSize: '14px', 
+              fontWeight: 'bold', 
+              marginBottom: '12px', 
+              borderBottom: '1px solid #ddd', 
+              paddingBottom: '8px' 
+            }}>
+              Observações Adicionais
+            </h3>
+            <p style={{ 
+              padding: '12px', 
+              backgroundColor: '#f5f5f5', 
+              border: '1px solid #ddd',
+              fontSize: '12px',
+              whiteSpace: 'pre-wrap'
+            }}>
               {formData.additional_notes}
             </p>
           </div>
         )}
 
         {/* Photos */}
-        <div className="page-break">
-          <h3 className="font-semibold text-lg mb-4 border-b pb-2">Documentação Fotográfica</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="section" style={{ marginTop: '30px' }}>
+          <h3 style={{ 
+            fontSize: '14px', 
+            fontWeight: 'bold', 
+            marginBottom: '12px', 
+            borderBottom: '1px solid #ddd', 
+            paddingBottom: '8px' 
+          }}>
+            Documentação Fotográfica
+          </h3>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
             {formData.exterior_photo_url && (
-              <div className="no-page-break">
-                <h4 className="font-medium mb-2">Foto Externa</h4>
+              <div>
+                <h4 style={{ fontSize: '12px', fontWeight: '500', marginBottom: '8px' }}>
+                  Foto Externa
+                </h4>
                 <img 
                   src={formData.exterior_photo_url} 
                   alt="Foto Externa do Veículo"
-                  className="w-full h-64 object-cover rounded border"
+                  style={{ 
+                    width: '100%', 
+                    height: '200px', 
+                    objectFit: 'cover', 
+                    border: '1px solid #ddd'
+                  }}
                 />
               </div>
             )}
             {formData.interior_photo_url && (
-              <div className="no-page-break">
-                <h4 className="font-medium mb-2">Foto Interna</h4>
+              <div>
+                <h4 style={{ fontSize: '12px', fontWeight: '500', marginBottom: '8px' }}>
+                  Foto Interna
+                </h4>
                 <img 
                   src={formData.interior_photo_url} 
                   alt="Foto Interna do Veículo"
-                  className="w-full h-64 object-cover rounded border"
+                  style={{ 
+                    width: '100%', 
+                    height: '200px', 
+                    objectFit: 'cover', 
+                    border: '1px solid #ddd'
+                  }}
                 />
               </div>
             )}
@@ -250,19 +382,38 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
 
         {/* Signature */}
         {formData.inspector_signature && (
-          <div className="mt-8 no-page-break">
-            <h3 className="font-semibold text-lg mb-4 border-b pb-2">Assinatura do Inspetor</h3>
-            <div className="flex justify-center">
-              <div className="text-center">
+          <div className="section" style={{ marginTop: '30px' }}>
+            <h3 style={{ 
+              fontSize: '14px', 
+              fontWeight: 'bold', 
+              marginBottom: '12px', 
+              borderBottom: '1px solid #ddd', 
+              paddingBottom: '8px' 
+            }}>
+              Assinatura do Inspetor
+            </h3>
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <div style={{ textAlign: 'center' }}>
                 <img 
                   src={formData.inspector_signature} 
                   alt="Assinatura do Inspetor"
-                  className="w-64 h-32 object-contain border rounded mb-2"
+                  style={{ 
+                    width: '250px', 
+                    height: '120px', 
+                    objectFit: 'contain', 
+                    border: '1px solid #ddd',
+                    marginBottom: '8px'
+                  }}
                 />
-                <p className="text-sm border-t pt-2">
+                <p style={{ 
+                  fontSize: '12px', 
+                  borderTop: '1px solid #ddd', 
+                  paddingTop: '8px',
+                  marginBottom: '4px'
+                }}>
                   {selectedInspector.first_name} {selectedInspector.last_name}
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p style={{ fontSize: '10px', color: '#666' }}>
                   Inspetor Responsável
                 </p>
               </div>
@@ -271,8 +422,17 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
         )}
 
         {/* Footer */}
-        <div className="mt-12 text-center text-xs text-muted-foreground border-t pt-4">
-          <p>Documento gerado em {format(new Date(), 'dd/MM/yyyy \'às\' HH:mm', { locale: ptBR })}</p>
+        <div style={{ 
+          marginTop: '40px', 
+          textAlign: 'center', 
+          fontSize: '10px', 
+          color: '#666',
+          borderTop: '1px solid #ddd',
+          paddingTop: '16px'
+        }}>
+          <p style={{ marginBottom: '4px' }}>
+            Documento gerado em {format(new Date(), 'dd/MM/yyyy \'às\' HH:mm', { locale: ptBR })}
+          </p>
           <p>Sistema de Gestão de Checklists - FC Gestão Empresarial</p>
         </div>
       </div>
