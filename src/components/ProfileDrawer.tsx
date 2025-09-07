@@ -165,15 +165,16 @@ const ProfileDrawer = () => {
 
             <Separator />
 
-            {/* Informações Pessoais */}
+            {/* Dados */}
             <Card>
               <CardHeader className="py-3">
                 <CardTitle className="flex items-center gap-2">
                   <User className="h-5 w-5 text-primary" />
-                  Informações Pessoais
+                  Dados
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 p-4">
+                {/* Informações Pessoais */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="first_name">Nome</Label>
@@ -207,56 +208,55 @@ const ProfileDrawer = () => {
                     placeholder="(11) 99999-9999"
                   />
                 </div>
-              </CardContent>
-            </Card>
 
-            {/* ID Único Principal */}
-            <Card className="border-primary/20 bg-primary/5">
-              <CardHeader className="py-3">
-                <CardTitle className="flex items-center gap-2">
-                  <Building2 className="h-5 w-5 text-primary" />
-                  ID Único Principal
-                  <Badge variant="default" className="bg-primary">
-                    {profile?.unique_id || 'Não definido'}
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 p-4">
-                <div className="space-y-2">
-                  <Label htmlFor="company_name">Nome da Empresa</Label>
-                  <Input
-                    id="company_name"
-                    value={formData.company_name}
-                    onChange={(e) => handleInputChange('company_name', e.target.value)}
-                    placeholder="Nome da sua empresa"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="cnpj" className="flex items-center gap-2">
-                    <FileText className="h-4 w-4" />
-                    CNPJ
-                  </Label>
-                  <Input
-                    id="cnpj"
-                    value={formData.cnpj}
-                    onChange={(e) => handleInputChange('cnpj', e.target.value)}
-                    placeholder="00.000.000/0000-00"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="address" className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4" />
-                    Endereço
-                  </Label>
-                  <Textarea
-                    id="address"
-                    value={formData.address}
-                    onChange={(e) => handleInputChange('address', e.target.value)}
-                    placeholder="Endereço completo da empresa"
-                    rows={3}
-                  />
+                <Separator className="my-4" />
+
+                {/* ID Único Principal */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Building2 className="h-5 w-5 text-primary" />
+                    <span className="font-medium">ID Único Principal</span>
+                    <Badge variant="default" className="bg-primary">
+                      {profile?.unique_id || 'Não definido'}
+                    </Badge>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="company_name">Nome da Empresa</Label>
+                    <Input
+                      id="company_name"
+                      value={formData.company_name}
+                      onChange={(e) => handleInputChange('company_name', e.target.value)}
+                      placeholder="Nome da sua empresa"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="cnpj" className="flex items-center gap-2">
+                      <FileText className="h-4 w-4" />
+                      CNPJ
+                    </Label>
+                    <Input
+                      id="cnpj"
+                      value={formData.cnpj}
+                      onChange={(e) => handleInputChange('cnpj', e.target.value)}
+                      placeholder="00.000.000/0000-00"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="address" className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4" />
+                      Endereço
+                    </Label>
+                    <Textarea
+                      id="address"
+                      value={formData.address}
+                      onChange={(e) => handleInputChange('address', e.target.value)}
+                      placeholder="Endereço completo da empresa"
+                      rows={3}
+                    />
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -302,9 +302,6 @@ const ProfileDrawer = () => {
                 )}
               </CardContent>
             </Card>
-
-            {/* Equipe e Presença */}
-            <TeamPresence />
 
             {/* Gerenciamento de Equipe para Admins */}
             {profile?.role === 'admin' && <TeamMembers />}
