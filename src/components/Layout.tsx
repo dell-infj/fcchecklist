@@ -1,5 +1,6 @@
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from 'next-themes';
 import ProfileDrawer from './ProfileDrawer';
 
 interface LayoutProps {
@@ -9,6 +10,7 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
+  const { theme } = useTheme();
 
   if (!user || !profile) {
     navigate('/auth');
@@ -24,7 +26,7 @@ const Layout = ({ children }: LayoutProps) => {
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 flex items-center justify-center">
                 <img 
-                  src="/lovable-uploads/3ff7c9af-3109-4509-bc5c-81649a11772f.png" 
+                  src={theme === 'dark' ? "/lovable-uploads/e4375a80-1834-4afe-9de6-2f916ac8402a.png" : "/lovable-uploads/3ff7c9af-3109-4509-bc5c-81649a11772f.png"}
                   alt="FC Gestão Logo" 
                   className="w-16 h-16 object-contain"
                 />
