@@ -129,7 +129,7 @@ const ProfileDrawer = () => {
         </Button>
       </SheetTrigger>
       
-      <SheetContent side="right" className="w-full sm:w-full md:w-[820px] lg:w-[1000px] xl:w-[1200px] max-w-[100vw] p-0 sm:rounded-none">
+      <SheetContent side="right" className="w-full sm:w-full md:w-[95vw] lg:w-[90vw] xl:w-[85vw] max-w-[100vw] p-0 sm:rounded-none">
         <ScrollArea className="h-full w-full">
           <div className="p-2 sm:p-4 space-y-3 max-w-full overflow-hidden text-sm">
             <SheetHeader>
