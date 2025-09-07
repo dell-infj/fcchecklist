@@ -9,7 +9,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { User, LogOut, Plus, X, Save, Phone, Building2, MapPin, FileText } from 'lucide-react';
+import { User, LogOut, Plus, X, Save, Phone, Building2, MapPin, FileText, Moon, Sun } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -20,6 +21,7 @@ const ProfileDrawer = () => {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { theme, setTheme } = useTheme();
   const [open, setOpen] = useState(false);
   
   const [formData, setFormData] = useState({
@@ -135,7 +137,7 @@ const ProfileDrawer = () => {
             <SheetHeader>
               <SheetTitle className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center">
+                  <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center shadow-elegant">
                     <User className="h-6 w-6 text-white" />
                   </div>
                   <div>
@@ -145,6 +147,20 @@ const ProfileDrawer = () => {
                     </p>
                   </div>
                 </div>
+                
+                {/* Toggle Dark Mode */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                  className="gap-2 hover:scale-110 transition-transform duration-300 p-2 rounded-full hover:bg-accent/20"
+                >
+                  {theme === 'dark' ? (
+                    <Sun className="h-5 w-5 text-orange-400" />
+                  ) : (
+                    <Moon className="h-5 w-5 text-slate-600" />
+                  )}
+                </Button>
               </SheetTitle>
             </SheetHeader>
 
