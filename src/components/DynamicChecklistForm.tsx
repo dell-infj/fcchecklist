@@ -174,14 +174,14 @@ const DynamicChecklistForm: React.FC<DynamicChecklistFormProps> = ({ formData, s
   }, {} as Record<string, ChecklistItem[]>);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Mostrar informação sobre a categoria do veículo */}
       {vehicleCategory && (
-        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-          <h2 className="text-lg font-semibold text-blue-900 mb-2">
+        <div className="bg-blue-50 p-3 sm:p-4 rounded-lg border border-blue-200">
+          <h2 className="text-base sm:text-lg font-semibold text-blue-900 mb-2">
             Checklist para: {getVehicleCategoryDisplayName(vehicleCategory)}
           </h2>
-          <p className="text-blue-700 text-sm">
+          <p className="text-blue-700 text-xs sm:text-sm">
             Os itens abaixo foram selecionados específicamente para esta categoria de veículo.
           </p>
         </div>
@@ -208,11 +208,11 @@ const DynamicChecklistForm: React.FC<DynamicChecklistFormProps> = ({ formData, s
               </Badge>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {items.map((item) => (
-                <div key={item.id} className="space-y-3 p-4 border rounded-lg bg-background">
+                <div key={item.id} className="space-y-3 p-3 sm:p-4 border rounded-lg bg-background">
                   <div className="flex items-start gap-2">
-                    <Label className="text-base font-medium flex-1">
+                    <Label className="text-sm sm:text-base font-medium flex-1">
                       {item.name}
                       {item.required && (
                         <Badge variant="default" className="ml-2 bg-success text-white text-xs">
@@ -223,29 +223,29 @@ const DynamicChecklistForm: React.FC<DynamicChecklistFormProps> = ({ formData, s
                   </div>
                   
                   {item.description && (
-                    <p className="text-sm text-muted-foreground">{item.description}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground">{item.description}</p>
                   )}
 
                   <RadioGroup
                     value={getFormValue(item.name, 'status')}
                     onValueChange={(value) => updateFormData(item.name, 'status', value)}
-                    className="flex gap-6"
+                    className="flex flex-col sm:flex-row gap-4 sm:gap-6"
                   >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="funcionando" id={`${item.id}-funcionando`} />
-                      <Label htmlFor={`${item.id}-funcionando`} className="text-green-600 font-medium">
+                      <Label htmlFor={`${item.id}-funcionando`} className="text-green-600 font-medium text-sm sm:text-base">
                         Sim
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="revisao" id={`${item.id}-revisao`} />
-                      <Label htmlFor={`${item.id}-revisao`} className="text-yellow-600 font-medium">
+                      <Label htmlFor={`${item.id}-revisao`} className="text-yellow-600 font-medium text-sm sm:text-base">
                         Revisão
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="ausente" id={`${item.id}-ausente`} />
-                      <Label htmlFor={`${item.id}-ausente`} className="text-red-600 font-medium">
+                      <Label htmlFor={`${item.id}-ausente`} className="text-red-600 font-medium text-sm sm:text-base">
                         Ausente
                       </Label>
                     </div>

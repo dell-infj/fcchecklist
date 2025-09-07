@@ -193,55 +193,55 @@ const InspectorDashboard = () => {
   }
 
   return (
-    <div className="space-y-6 px-4">
-      <div className="flex flex-col gap-3">
+    <div className="space-y-4 sm:space-y-6 px-2 sm:px-4">
+      <div className="flex flex-col gap-2 sm:gap-3">
         <div>
-          <h2 className="text-xl font-bold">Painel do Inspetor</h2>
-          <p className="text-muted-foreground text-sm">
+          <h2 className="text-lg sm:text-xl font-bold">Painel do Inspetor</h2>
+          <p className="text-muted-foreground text-xs sm:text-sm">
             Bem-vindo, {profile?.first_name}! Gerencie suas inspeções aqui.
           </p>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         <Card className="shadow-card">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
               <div className="p-2 bg-warning/10 rounded-lg">
-                <Clock className="h-5 w-5 text-warning" />
+                <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-warning" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Pendentes</p>
-                <p className="text-xl font-bold">{stats.pending}</p>
+                <p className="text-lg sm:text-xl font-bold">{stats.pending}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="shadow-card">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
               <div className="p-2 bg-success/10 rounded-lg">
-                <CheckCircle className="h-5 w-5 text-success" />
+                <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-success" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Concluídas</p>
-                <p className="text-xl font-bold">{stats.completed}</p>
+                <p className="text-lg sm:text-xl font-bold">{stats.completed}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="shadow-card">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
               <div className="p-2 bg-primary/10 rounded-lg">
-                <ClipboardList className="h-5 w-5 text-primary" />
+                <ClipboardList className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Hoje</p>
-                <p className="text-xl font-bold">{stats.todayCompleted}</p>
+                <p className="text-lg sm:text-xl font-bold">{stats.todayCompleted}</p>
               </div>
             </div>
           </CardContent>
@@ -265,17 +265,17 @@ const InspectorDashboard = () => {
             <div className="grid grid-cols-1 gap-3">
               {vehicles.map((vehicle) => (
                 <Card key={vehicle.id} className="border">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="font-semibold">
+                  <CardContent className="p-3 sm:p-4">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-sm sm:text-base truncate">
                           {vehicle.vehicle_category} - {vehicle.license_plate || 'Sem placa'}
                         </h3>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-xs sm:text-sm text-muted-foreground truncate">
                           {vehicle.owner_unique_id}
                         </p>
                         {vehicle.model && (
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-xs text-muted-foreground truncate">
                             {vehicle.model}
                           </p>
                         )}
@@ -284,10 +284,10 @@ const InspectorDashboard = () => {
                         size="sm" 
                         onClick={() => startNewInspection(vehicle.id)}
                         variant="safety"
-                        className="gap-2 w-full h-10"
+                        className="gap-2 w-full sm:w-auto h-9 sm:h-10 text-xs sm:text-sm"
                       >
-                        <Plus className="h-4 w-4" />
-                        Iniciar Inspeção
+                        <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <span className="sm:inline">Iniciar Inspeção</span>
                       </Button>
                     </div>
                   </CardContent>
@@ -311,31 +311,31 @@ const InspectorDashboard = () => {
                 <Button 
                   size="sm" 
                   variant="outline" 
-                  className="gap-2 w-full h-10"
+                  className="gap-2 w-full h-8 sm:h-10 text-xs sm:text-sm"
                   onClick={() => toast({
                     title: "Em desenvolvimento",
                     description: "Funcionalidade de filtros será implementada em breve"
                   })}
                 >
-                  <ClipboardList className="h-4 w-4" />
+                  <ClipboardList className="h-3 w-3 sm:h-4 sm:w-4" />
                   Ver Todas
                 </Button>
                  <Button 
                    size="sm" 
                    variant="default" 
-                   className="gap-2 w-full h-10"
+                   className="gap-2 w-full h-8 sm:h-10 text-xs sm:text-sm"
                    onClick={() => navigate('/checklist/new')}
                  >
-                   <Plus className="h-4 w-4" />
+                   <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
                    Nova Inspeção
                  </Button>
                  <Button 
                    size="sm" 
                    variant="outline" 
-                   className="gap-2 w-full h-10"
+                   className="gap-2 w-full h-8 sm:h-10 text-xs sm:text-sm"
                    onClick={() => navigate('/vehicles')}
                  >
-                   <Truck className="h-4 w-4" />
+                   <Truck className="h-3 w-3 sm:h-4 sm:w-4" />
                    Ver Veículos
                  </Button>
               </div>
@@ -362,30 +362,30 @@ const InspectorDashboard = () => {
               </Button>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {myChecklists.map((checklist) => (
-                <div key={checklist.id} className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg">
-                  <div>
-                    <p className="font-medium">
+                <div key={checklist.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 bg-secondary/50 rounded-lg gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm sm:text-base truncate">
                       {checklist.vehicle.vehicle_category}
                       {checklist.vehicle.license_plate && ` - ${checklist.vehicle.license_plate}`}
                     </p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-xs sm:text-sm text-muted-foreground truncate">
                       {checklist.vehicle.owner_unique_id}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {new Date(checklist.inspection_date).toLocaleDateString('pt-BR')}
                     </p>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
                     {getStatusBadge(checklist.status)}
-                    <div className="flex flex-col gap-1">
+                    <div className="flex flex-col gap-1 w-full sm:w-auto">
                       {checklist.status === 'draft' && (
                         <Button 
                           size="sm" 
                           variant="outline"
                           onClick={() => navigate(`/checklist/edit/${checklist.id}`)}
-                          className="w-full"
+                          className="w-full text-xs sm:text-sm h-8"
                         >
                           Continuar
                         </Button>
@@ -396,7 +396,7 @@ const InspectorDashboard = () => {
                             size="sm" 
                             variant="outline"
                             onClick={() => navigate(`/checklist/view/${checklist.id}`)}
-                            className="w-full"
+                            className="w-full text-xs sm:text-sm h-8"
                           >
                             Ver Relatório
                           </Button>
@@ -405,7 +405,7 @@ const InspectorDashboard = () => {
                               size="sm" 
                               variant="secondary"
                               onClick={() => downloadChecklistPDF(checklist)}
-                              className="w-full gap-1"
+                              className="w-full gap-1 text-xs sm:text-sm h-8"
                             >
                               <Download className="h-3 w-3" />
                               PDF

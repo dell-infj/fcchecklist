@@ -280,28 +280,30 @@ export default function ChecklistManagement() {
   }
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="mb-6">
-        <div className="flex items-center gap-4 mb-4">
+    <div className="container mx-auto p-3 sm:p-6">
+      <div className="mb-4 sm:mb-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 mb-4">
           <Button 
             variant="outline" 
             onClick={() => navigate('/')} 
-            className="gap-2"
+            className="gap-2 w-full sm:w-auto"
           >
             <ArrowLeft className="w-4 h-4" />
-            Voltar à Dashboard
+            <span className="hidden sm:inline">Voltar à Dashboard</span>
+            <span className="sm:hidden">Dashboard</span>
           </Button>
           <Button 
             variant="outline" 
             onClick={() => navigate('/')} 
-            className="gap-2"
+            className="gap-2 w-full sm:w-auto"
           >
             <Home className="w-4 h-4" />
-            Início
+            <span className="hidden sm:inline">Início</span>
+            <span className="sm:hidden">Home</span>
           </Button>
         </div>
-        <h1 className="text-3xl font-bold">Gerenciamento de Checklists</h1>
-        <p className="text-muted-foreground">Visualize, baixe e gerencie os checklists de inspeção</p>
+        <h1 className="text-2xl sm:text-3xl font-bold">Gerenciamento de Checklists</h1>
+        <p className="text-muted-foreground text-sm">Visualize, baixe e gerencie os checklists de inspeção</p>
       </div>
 
       <div className="grid gap-6">
@@ -319,29 +321,31 @@ export default function ChecklistManagement() {
           checklists.map((checklist) => (
             <Card key={checklist.id}>
               <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div className="space-y-2">
-                    <CardTitle className="flex items-center gap-2">
-                      <FileText className="w-5 h-5" />
-                      Checklist #{checklist.id.slice(0, 8)}
+                <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                  <div className="space-y-2 flex-1 min-w-0">
+                    <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <FileText className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                        <span className="truncate text-sm sm:text-base">Checklist #{checklist.id.slice(0, 8)}</span>
+                      </div>
                       {getStatusBadge(checklist.status)}
                     </CardTitle>
-                    <CardDescription className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <Car className="w-4 h-4" />
-                        <span>
+                    <CardDescription className="space-y-1 text-xs sm:text-sm">
+                      <div className="flex items-start gap-2">
+                        <Car className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0 mt-0.5" />
+                        <span className="break-words">
                           {checklist.vehicle.vehicle_category} - {checklist.vehicle.license_plate}
                           {checklist.vehicle.model && ` (${checklist.vehicle.model})`}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <User className="w-4 h-4" />
-                        <span>
+                      <div className="flex items-start gap-2">
+                        <User className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0 mt-0.5" />
+                        <span className="break-words">
                           Inspetor: {checklist.inspector.first_name} {checklist.inspector.last_name}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4" />
+                      <div className="flex items-start gap-2">
+                        <Calendar className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0 mt-0.5" />
                         <span>
                           Inspeção: {new Date(checklist.inspection_date).toLocaleDateString('pt-BR')}
                         </span>
@@ -352,24 +356,25 @@ export default function ChecklistManagement() {
                     </CardDescription>
                   </div>
                   
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => navigate(`/checklist/view/${checklist.id}`)}
-                      className="gap-2"
+                      className="gap-2 text-xs sm:text-sm w-full sm:w-auto"
                     >
-                      <Eye className="w-4 h-4" />
-                      Visualizar
+                      <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span className="hidden sm:inline">Visualizar</span>
+                      <span className="sm:hidden">Ver</span>
                     </Button>
                     
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleDownloadPDF(checklist)}
-                      className="gap-2"
+                      className="gap-2 text-xs sm:text-sm w-full sm:w-auto"
                     >
-                      <Download className="w-4 h-4" />
+                      <Download className="w-3 h-3 sm:w-4 sm:h-4" />
                       PDF
                     </Button>
 
@@ -378,25 +383,26 @@ export default function ChecklistManagement() {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="gap-2 text-destructive hover:text-destructive"
+                          className="gap-2 text-destructive hover:text-destructive text-xs sm:text-sm w-full sm:w-auto"
                           disabled={deletingId === checklist.id}
                         >
-                          <Trash2 className="w-4 h-4" />
-                          Excluir
+                          <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                          <span className="hidden sm:inline">Excluir</span>
+                          <span className="sm:hidden">Del</span>
                         </Button>
                       </AlertDialogTrigger>
-                      <AlertDialogContent>
+                      <AlertDialogContent className="max-w-[95vw] sm:max-w-md mx-2 sm:mx-auto">
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-                          <AlertDialogDescription>
+                          <AlertDialogTitle className="text-base sm:text-lg">Confirmar exclusão</AlertDialogTitle>
+                          <AlertDialogDescription className="text-sm">
                             Tem certeza que deseja excluir este checklist? Esta ação não pode ser desfeita.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                          <AlertDialogCancel className="w-full sm:w-auto">Cancelar</AlertDialogCancel>
                           <AlertDialogAction
                             onClick={() => handleDeleteChecklist(checklist.id)}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90 w-full sm:w-auto"
                           >
                             Excluir
                           </AlertDialogAction>

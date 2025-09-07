@@ -306,40 +306,43 @@ export default function VehicleManagement() {
   }
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-4">
+    <div className="container mx-auto p-3 sm:p-6">
+      <div className="mb-4 sm:mb-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
             <Button 
               variant="outline" 
               onClick={() => navigate('/')} 
-              className="gap-2"
+              className="gap-2 w-full sm:w-auto"
             >
               <ArrowLeft className="w-4 h-4" />
-              Voltar à Dashboard
+              <span className="hidden sm:inline">Voltar à Dashboard</span>
+              <span className="sm:hidden">Dashboard</span>
             </Button>
             <Button 
               variant="outline" 
               onClick={() => navigate('/')} 
-              className="gap-2"
+              className="gap-2 w-full sm:w-auto"
             >
               <Home className="w-4 h-4" />
-              Início
+              <span className="hidden sm:inline">Início</span>
+              <span className="sm:hidden">Home</span>
             </Button>
           </div>
           <Dialog open={isAddingVehicle} onOpenChange={setIsAddingVehicle}>
             <DialogTrigger asChild>
-              <Button variant="default" className="gap-2">
+              <Button variant="default" className="gap-2 w-full sm:w-auto">
                 <Plus className="h-4 w-4" />
-                Novo Veículo
+                <span className="hidden sm:inline">Novo Veículo</span>
+                <span className="sm:hidden">Novo</span>
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto mx-2 sm:mx-auto">
               <DialogHeader>
                 <DialogTitle>Cadastrar Novo Veículo</DialogTitle>
               </DialogHeader>
               <div className="grid gap-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="vehicle_category">Categoria *</Label>
                     <Select value={newVehicle.vehicle_category} onValueChange={(value) => setNewVehicle(prev => ({ ...prev, vehicle_category: value }))}>
@@ -483,8 +486,8 @@ export default function VehicleManagement() {
             </DialogContent>
           </Dialog>
         </div>
-        <h1 className="text-3xl font-bold">Gerenciamento de Veículos</h1>
-        <p className="text-muted-foreground">Visualize e edite informações dos veículos cadastrados</p>
+        <h1 className="text-2xl sm:text-3xl font-bold">Gerenciamento de Veículos</h1>
+        <p className="text-muted-foreground text-sm">Visualize e edite informações dos veículos cadastrados</p>
       </div>
 
       <div className="grid gap-6">

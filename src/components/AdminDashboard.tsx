@@ -253,15 +253,15 @@ export default function AdminDashboard() {
 
 
   return (
-    <div className="space-y-6 px-4">
+    <div className="space-y-4 sm:space-y-6 px-2 sm:px-4">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-bold">Dashboard Administrativo</h2>
-        <p className="text-muted-foreground text-sm">Visão geral da frota e inspeções</p>
+        <h2 className="text-lg sm:text-xl font-bold">Dashboard Administrativo</h2>
+        <p className="text-muted-foreground text-xs sm:text-sm">Visão geral da frota e inspeções</p>
       </div>
 
       {/* Main Action Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         <Card 
           className="cursor-pointer hover:bg-accent transition-all duration-300 hover:scale-105 hover:shadow-lg animate-fade-in"
           onClick={() => setOpenCommand('vehicles')}
@@ -375,12 +375,12 @@ export default function AdminDashboard() {
 
       {/* Vehicle Registration Modal */}
       <Dialog open={isAddingVehicle} onOpenChange={setIsAddingVehicle}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto mx-2 sm:mx-auto">
           <DialogHeader>
             <DialogTitle>Cadastrar Novo Veículo</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="vehicle_category">Categoria *</Label>
                 <Select value={newVehicle.vehicle_category} onValueChange={(value) => setNewVehicle(prev => ({ ...prev, vehicle_category: value }))}>
@@ -416,7 +416,7 @@ export default function AdminDashboard() {
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="license_plate">Placa *</Label>
                 <Input
@@ -437,7 +437,7 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="year">Ano</Label>
                 <Input
@@ -465,7 +465,7 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="chassis">Chassi</Label>
                 <Input
@@ -512,11 +512,11 @@ export default function AdminDashboard() {
               {newVehicle.crlv_pdf_url && <p className="text-sm text-green-600">PDF anexado com sucesso!</p>}
             </div>
 
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setIsAddingVehicle(false)}>
+            <div className="flex flex-col sm:flex-row justify-end gap-2">
+              <Button variant="outline" onClick={() => setIsAddingVehicle(false)} className="w-full sm:w-auto">
                 Cancelar
               </Button>
-              <Button onClick={handleAddVehicle}>
+              <Button onClick={handleAddVehicle} className="w-full sm:w-auto">
                 Cadastrar Veículo
               </Button>
             </div>

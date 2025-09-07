@@ -112,8 +112,8 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary">
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-2 gap-8 items-center min-h-screen">
+      <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
+        <div className="grid lg:grid-cols-2 gap-4 sm:gap-8 items-center min-h-screen">
           
           {/* Hero Section */}
           <div className="hidden lg:block">
@@ -156,18 +156,18 @@ const Auth = () => {
 
           {/* Auth Forms */}
           <div className="w-full max-w-md mx-auto">
-            <div className="text-center mb-8 lg:hidden">
-              <div className="mb-4">
+            <div className="text-center mb-6 sm:mb-8 lg:hidden">
+              <div className="mb-3 sm:mb-4">
                 <img 
                   src="/lovable-uploads/8ca766ed-435b-41a5-b398-a52b283c8e31.png" 
                   alt="FC Gestão" 
-                  className="h-20 w-auto mx-auto"
+                  className="h-16 sm:h-20 w-auto mx-auto"
                 />
               </div>
-              <h1 className="text-3xl font-bold text-primary mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold text-primary mb-2">
                 FC checklist
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground text-sm sm:text-base">
                 Sistema de checklist para frotas
               </p>
             </div>
@@ -200,17 +200,17 @@ const Auth = () => {
                             userType: value,
                             uniqueId: ''
                           }))}
-                          className="grid grid-cols-2 gap-4"
+                          className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4"
                         >
                           <div className="flex items-center space-x-2">
                             <RadioGroupItem value="inspector" id="inspector" />
                             <Label 
                               htmlFor="inspector" 
-                              className="flex-1 p-3 rounded-lg border cursor-pointer hover:bg-accent transition-colors"
+                              className="flex-1 p-2 sm:p-3 rounded-lg border cursor-pointer hover:bg-accent transition-colors"
                             >
                               <div className="flex items-center gap-2">
-                                <User className="w-4 h-4" />
-                                <span>Inspetor</span>
+                                <User className="w-3 h-3 sm:w-4 sm:h-4" />
+                                <span className="text-xs sm:text-sm">Inspetor</span>
                               </div>
                             </Label>
                           </div>
@@ -218,11 +218,11 @@ const Auth = () => {
                             <RadioGroupItem value="admin" id="admin" />
                             <Label 
                               htmlFor="admin" 
-                              className="flex-1 p-3 rounded-lg border cursor-pointer hover:bg-accent transition-colors"
+                              className="flex-1 p-2 sm:p-3 rounded-lg border cursor-pointer hover:bg-accent transition-colors"
                             >
                               <div className="flex items-center gap-2">
-                                <Shield className="w-4 h-4" />
-                                <span>Gestor</span>
+                                <Shield className="w-3 h-3 sm:w-4 sm:h-4" />
+                                <span className="text-xs sm:text-sm">Gestor</span>
                               </div>
                             </Label>
                           </div>
@@ -314,7 +314,7 @@ const Auth = () => {
                   </CardHeader>
                   <CardContent>
                     <form onSubmit={handleSignup} className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="first-name">Primeiro Nome</Label>
                           <Input
