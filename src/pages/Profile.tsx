@@ -109,7 +109,7 @@ const Profile = () => {
             variant="outline"
             size="sm"
             onClick={() => navigate('/')}
-            className="gap-2 hover:scale-105 transition-all duration-300 hover:shadow-lg"
+            className="gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
             Voltar

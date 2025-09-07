@@ -183,7 +183,7 @@ export default function InspectorManagement() {
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate('/')}
-                className="gap-2 hover:scale-105 transition-all duration-300 hover:shadow-lg"
+                className="gap-2"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Voltar

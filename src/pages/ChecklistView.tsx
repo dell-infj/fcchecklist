@@ -251,10 +251,7 @@ const ChecklistView = () => {
       <Layout>
         <div className="max-w-4xl mx-auto text-center py-12">
           <h1 className="text-2xl font-bold mb-4">Checklist não encontrado</h1>
-          <Button 
-            onClick={() => navigate('/')}
-            className="hover:scale-105 transition-all duration-300 hover:shadow-lg"
-          >
+          <Button onClick={() => navigate('/')}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Voltar ao Dashboard
           </Button>
@@ -271,7 +268,7 @@ const ChecklistView = () => {
           <Button
             variant="outline"
             onClick={() => navigate('/checklists')}
-            className="gap-2 w-fit hover:scale-105 transition-all duration-300 hover:shadow-lg"
+            className="gap-2 w-fit"
           >
             <ArrowLeft className="h-4 w-4" />
             Voltar ao Histórico
@@ -282,10 +279,7 @@ const ChecklistView = () => {
               <h1 className="text-2xl font-bold">Relatório de Inspeção</h1>
             </div>
             {checklist.pdf_url && (
-              <Button 
-                onClick={downloadPDF} 
-                className="gap-2 hover:scale-105 transition-all duration-300 hover:shadow-lg"
-              >
+              <Button onClick={downloadPDF} className="gap-2">
                 <Download className="h-4 w-4" />
                 Baixar PDF
               </Button>

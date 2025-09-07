@@ -409,7 +409,7 @@ const ChecklistEditor = () => {
             variant="outline"
             size="lg"
             onClick={() => navigate('/')}
-            className="gap-2 h-12 px-6 w-full sm:w-auto hover:scale-105 transition-all duration-300 hover:shadow-lg"
+            className="gap-2 h-12 px-6 w-full sm:w-auto"
           >
             <ArrowLeft className="h-5 w-5" />
             Voltar
