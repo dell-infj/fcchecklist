@@ -36,9 +36,9 @@ const Layout = ({ children }: LayoutProps) => {
                   className="w-16 h-16 object-contain"
                 />
               </div>
-              <div className="space-y-0">
+              <div className="space-y-0 flex flex-col justify-center">
                 <h1 className="text-2xl font-black text-foreground tracking-wider leading-none">FROTA</h1>
-                <p className="text-sm text-muted-foreground -mt-2">Sistema de checklist</p>
+                <p className="text-sm text-muted-foreground -mt-4">Sistema de checklist</p>
               </div>
             </div>
             
