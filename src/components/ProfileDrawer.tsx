@@ -16,14 +16,21 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import TeamMembers from './TeamMembers';
 import TeamPresence from './TeamPresence';
-
 const ProfileDrawer = () => {
-  const { user, profile, signOut } = useAuth();
+  const {
+    user,
+    profile,
+    signOut
+  } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const { theme, setTheme } = useTheme();
+  const {
+    toast
+  } = useToast();
+  const {
+    theme,
+    setTheme
+  } = useTheme();
   const [open, setOpen] = useState(false);
-  
   const [formData, setFormData] = useState({
     first_name: profile?.first_name || '',
     last_name: profile?.last_name || '',
@@ -33,17 +40,14 @@ const ProfileDrawer = () => {
     cnpj: profile?.cnpj || '',
     company_ids: profile?.company_ids || (profile?.unique_id ? [profile.unique_id] : [])
   });
-  
   const [newCompanyId, setNewCompanyId] = useState('');
   const [loading, setLoading] = useState(false);
-
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
   };
-
   const addCompanyId = () => {
     if (newCompanyId.trim() && !formData.company_ids.includes(newCompanyId.trim())) {
       setFormData(prev => ({
@@ -53,70 +57,53 @@ const ProfileDrawer = () => {
       setNewCompanyId('');
     }
   };
-
   const removeCompanyId = (idToRemove: string) => {
     setFormData(prev => ({
       ...prev,
       company_ids: prev.company_ids.filter(id => id !== idToRemove)
     }));
   };
-
   const handleSave = async () => {
     if (!profile?.id) return;
-    
     setLoading(true);
     try {
-      const finalCompanyIds = formData.company_ids.length > 0 
-        ? formData.company_ids 
-        : (profile.unique_id ? [profile.unique_id] : []);
-
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          first_name: formData.first_name,
-          last_name: formData.last_name,
-          phone: formData.phone,
-          company_name: formData.company_name,
-          address: formData.address,
-          cnpj: formData.cnpj,
-          company_ids: finalCompanyIds,
-        })
-        .eq('id', profile.id);
-
+      const finalCompanyIds = formData.company_ids.length > 0 ? formData.company_ids : profile.unique_id ? [profile.unique_id] : [];
+      const {
+        error
+      } = await supabase.from('profiles').update({
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        phone: formData.phone,
+        company_name: formData.company_name,
+        address: formData.address,
+        cnpj: formData.cnpj,
+        company_ids: finalCompanyIds
+      }).eq('id', profile.id);
       if (error) throw error;
-
       toast({
         title: "Perfil atualizado",
-        description: "Suas informações foram salvas com sucesso.",
+        description: "Suas informações foram salvas com sucesso."
       });
-      
       window.location.reload();
     } catch (error) {
       console.error('Error updating profile:', error);
       toast({
         title: "Erro",
         description: "Não foi possível atualizar o perfil.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setLoading(false);
     }
   };
-
   const handleSignOut = async () => {
     await signOut();
     navigate('/auth');
     setOpen(false);
   };
-
-  return (
-    <Sheet open={open} onOpenChange={setOpen}>
+  return <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="gap-2 hover:scale-105 transition-all duration-300 hover:shadow-md hover:bg-accent/50 p-3 rounded-full"
-        >
+        <Button variant="ghost" size="sm" className="gap-2 hover:scale-105 transition-all duration-300 hover:shadow-md hover:bg-accent/50 p-3 rounded-full">
           <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center">
             <User className="h-4 w-4 text-white" />
           </div>
@@ -149,17 +136,8 @@ const ProfileDrawer = () => {
                 </div>
                 
                 {/* Toggle Dark Mode */}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                  className="gap-2 hover:scale-110 transition-transform duration-300 p-2 rounded-full hover:bg-accent/20"
-                >
-                  {theme === 'dark' ? (
-                    <Sun className="h-5 w-5 text-orange-400" />
-                  ) : (
-                    <Moon className="h-5 w-5 text-slate-600" />
-                  )}
+                <Button variant="ghost" size="sm" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="gap-2 hover:scale-110 transition-transform duration-300 p-2 rounded-full hover:bg-accent/20 mx-[83px]">
+                  {theme === 'dark' ? <Sun className="h-5 w-5 text-orange-400" /> : <Moon className="h-5 w-5 text-slate-600" />}
                 </Button>
               </SheetTitle>
             </SheetHeader>
@@ -168,12 +146,7 @@ const ProfileDrawer = () => {
 
             {/* Botão Sair Centralizado */}
             <div className="flex justify-center py-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleSignOut}
-                className="gap-2 hover:scale-105 transition-all duration-300"
-              >
+              <Button variant="outline" size="sm" onClick={handleSignOut} className="gap-2 hover:scale-105 transition-all duration-300">
                 <LogOut className="h-4 w-4" />
                 Sair do Perfil
               </Button>
@@ -194,21 +167,11 @@ const ProfileDrawer = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="first_name">Nome</Label>
-                    <Input
-                      id="first_name"
-                      value={formData.first_name}
-                      onChange={(e) => handleInputChange('first_name', e.target.value)}
-                      placeholder="Seu nome"
-                    />
+                    <Input id="first_name" value={formData.first_name} onChange={e => handleInputChange('first_name', e.target.value)} placeholder="Seu nome" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="last_name">Sobrenome</Label>
-                    <Input
-                      id="last_name"
-                      value={formData.last_name}
-                      onChange={(e) => handleInputChange('last_name', e.target.value)}
-                      placeholder="Seu sobrenome"
-                    />
+                    <Input id="last_name" value={formData.last_name} onChange={e => handleInputChange('last_name', e.target.value)} placeholder="Seu sobrenome" />
                   </div>
                 </div>
                 
@@ -217,12 +180,7 @@ const ProfileDrawer = () => {
                     <Phone className="h-4 w-4" />
                     Telefone
                   </Label>
-                  <Input
-                    id="phone"
-                    value={formData.phone}
-                    onChange={(e) => handleInputChange('phone', e.target.value)}
-                    placeholder="(11) 99999-9999"
-                  />
+                  <Input id="phone" value={formData.phone} onChange={e => handleInputChange('phone', e.target.value)} placeholder="(11) 99999-9999" />
                 </div>
 
                 <Separator className="my-4" />
@@ -239,12 +197,7 @@ const ProfileDrawer = () => {
                   
                   <div className="space-y-2">
                     <Label htmlFor="company_name">Nome da Empresa</Label>
-                    <Input
-                      id="company_name"
-                      value={formData.company_name}
-                      onChange={(e) => handleInputChange('company_name', e.target.value)}
-                      placeholder="Nome da sua empresa"
-                    />
+                    <Input id="company_name" value={formData.company_name} onChange={e => handleInputChange('company_name', e.target.value)} placeholder="Nome da sua empresa" />
                   </div>
                   
                   <div className="space-y-2">
@@ -252,12 +205,7 @@ const ProfileDrawer = () => {
                       <FileText className="h-4 w-4" />
                       CNPJ
                     </Label>
-                    <Input
-                      id="cnpj"
-                      value={formData.cnpj}
-                      onChange={(e) => handleInputChange('cnpj', e.target.value)}
-                      placeholder="00.000.000/0000-00"
-                    />
+                    <Input id="cnpj" value={formData.cnpj} onChange={e => handleInputChange('cnpj', e.target.value)} placeholder="00.000.000/0000-00" />
                   </div>
                   
                   <div className="space-y-2">
@@ -265,13 +213,7 @@ const ProfileDrawer = () => {
                       <MapPin className="h-4 w-4" />
                       Endereço
                     </Label>
-                    <Textarea
-                      id="address"
-                      value={formData.address}
-                      onChange={(e) => handleInputChange('address', e.target.value)}
-                      placeholder="Endereço completo da empresa"
-                      rows={3}
-                    />
+                    <Textarea id="address" value={formData.address} onChange={e => handleInputChange('address', e.target.value)} placeholder="Endereço completo da empresa" rows={3} />
                   </div>
                 </div>
               </CardContent>
@@ -287,35 +229,21 @@ const ProfileDrawer = () => {
               </CardHeader>
               <CardContent className="space-y-3 p-4">
                 <div className="flex gap-2">
-                  <Input
-                    value={newCompanyId}
-                    onChange={(e) => setNewCompanyId(e.target.value)}
-                    placeholder="Digite um ID único"
-                    onKeyPress={(e) => e.key === 'Enter' && addCompanyId()}
-                  />
+                  <Input value={newCompanyId} onChange={e => setNewCompanyId(e.target.value)} placeholder="Digite um ID único" onKeyPress={e => e.key === 'Enter' && addCompanyId()} />
                   <Button onClick={addCompanyId} size="sm" className="gap-2">
                     <Plus className="h-4 w-4" />
                     Adicionar
                   </Button>
                 </div>
                 
-                {formData.company_ids.length > 0 && (
-                  <div className="space-y-2">
-                    {formData.company_ids.map((id, index) => (
-                      <div key={index} className="flex items-center justify-between p-2 bg-secondary/20 rounded-lg">
+                {formData.company_ids.length > 0 && <div className="space-y-2">
+                    {formData.company_ids.map((id, index) => <div key={index} className="flex items-center justify-between p-2 bg-secondary/20 rounded-lg">
                         <Badge variant="secondary">{id}</Badge>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeCompanyId(id)}
-                          className="h-6 w-6 p-0 hover:text-destructive"
-                        >
+                        <Button variant="ghost" size="sm" onClick={() => removeCompanyId(id)} className="h-6 w-6 p-0 hover:text-destructive">
                           <X className="h-3 w-3" />
                         </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                      </div>)}
+                  </div>}
               </CardContent>
             </Card>
 
@@ -325,8 +253,6 @@ const ProfileDrawer = () => {
           </div>
         </ScrollArea>
       </SheetContent>
-    </Sheet>
-  );
+    </Sheet>;
 };
-
 export default ProfileDrawer;
