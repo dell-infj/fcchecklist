@@ -44,7 +44,7 @@ const Layout = ({ children }: LayoutProps) => {
             
             <div className="flex items-center gap-4">
               <Card 
-                className="px-4 py-2 cursor-pointer hover:bg-accent transition-colors"
+                className="px-4 py-2 cursor-pointer hover:bg-accent transition-all duration-300 hover:scale-105 hover:shadow-md"
                 onClick={() => navigate('/profile')}
               >
                 <div className="flex items-center gap-2">
@@ -64,7 +64,7 @@ const Layout = ({ children }: LayoutProps) => {
                 variant="outline" 
                 size="sm" 
                 onClick={handleSignOut}
-                className="gap-2"
+                className="gap-2 hover:scale-105 transition-all duration-300 hover:shadow-md"
               >
                 <LogOut className="h-4 w-4" />
                 Sair

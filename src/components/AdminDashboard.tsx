@@ -263,7 +263,7 @@ export default function AdminDashboard() {
       {/* Main Action Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card 
-          className="cursor-pointer hover:bg-accent transition-colors"
+          className="cursor-pointer hover:bg-accent transition-all duration-300 hover:scale-105 hover:shadow-lg animate-fade-in"
           onClick={() => setOpenCommand('vehicles')}
         >
           <CardHeader className="pb-4">
@@ -281,7 +281,7 @@ export default function AdminDashboard() {
         </Card>
 
         <Card 
-          className="cursor-pointer hover:bg-accent transition-colors"
+          className="cursor-pointer hover:bg-accent transition-all duration-300 hover:scale-105 hover:shadow-lg animate-fade-in [animation-delay:100ms]"
           onClick={() => setOpenCommand('inspection')}
         >
           <CardHeader className="pb-4">
@@ -299,7 +299,7 @@ export default function AdminDashboard() {
         </Card>
 
         <Card 
-          className="cursor-pointer hover:bg-accent transition-colors"
+          className="cursor-pointer hover:bg-accent transition-all duration-300 hover:scale-105 hover:shadow-lg animate-fade-in [animation-delay:200ms]"
           onClick={() => setOpenCommand('reports')}
         >
           <CardHeader className="pb-4">
@@ -562,17 +562,22 @@ export default function AdminDashboard() {
               </div>
               <Button 
                 onClick={() => navigate('/checklist/new')}
-                className="flex items-center gap-2 px-8 py-3 text-lg"
+                className="flex items-center gap-2 px-8 py-3 text-lg hover:scale-105 transition-all duration-300 hover:shadow-lg animate-scale-in"
                 size="lg"
               >
-                <Plus className="w-5 h-5" />
+                <Plus className="w-5 h-5 animate-pulse" />
                 Nova Inspeção
               </Button>
             </div>
           ) : (
             <div className="space-y-4">
-              {recentChecklists.map((checklist) => (
-                <div key={checklist.id} className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg">
+              {recentChecklists.map((checklist, index) => (
+                <div 
+                  key={checklist.id} 
+                  className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg hover:bg-secondary/70 transition-all duration-300 hover:scale-[1.02] hover:shadow-md animate-fade-in cursor-pointer"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                  onClick={() => navigate(`/checklist/view/${checklist.id}`)}
+                >
                   <div>
                     <p className="font-medium">
                       {checklist.vehicle.vehicle_category} - {checklist.vehicle.license_plate}

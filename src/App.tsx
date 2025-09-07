@@ -3,8 +3,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import PageTransition from "@/components/PageTransition";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
@@ -19,6 +20,30 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+const AnimatedRoutes = () => {
+  const location = useLocation();
+  
+  return (
+    <PageTransition key={location.pathname}>
+      <Routes location={location}>
+        <Route path="/" element={<Index />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/checklist/new" element={<NewChecklist />} />
+        <Route path="/checklist/view/:id" element={<ChecklistView />} />
+        <Route path="/checklist/edit/:id" element={<NewChecklist />} />
+        <Route path="/reports" element={<Reports />} />
+        <Route path="/checklist-editor" element={<ChecklistEditor />} />
+        <Route path="/vehicles" element={<VehicleManagement />} />
+        <Route path="/checklists" element={<ChecklistManagement />} />
+        <Route path="/inspectors" element={<InspectorManagement />} />
+        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </PageTransition>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -26,21 +51,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/checklist/new" element={<NewChecklist />} />
-            <Route path="/checklist/view/:id" element={<ChecklistView />} />
-            <Route path="/checklist/edit/:id" element={<NewChecklist />} />
-            <Route path="/reports" element={<Reports />} />
-            <Route path="/checklist-editor" element={<ChecklistEditor />} />
-            <Route path="/vehicles" element={<VehicleManagement />} />
-            <Route path="/checklists" element={<ChecklistManagement />} />
-            <Route path="/inspectors" element={<InspectorManagement />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <AnimatedRoutes />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
