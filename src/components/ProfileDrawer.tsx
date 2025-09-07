@@ -129,9 +129,9 @@ const ProfileDrawer = () => {
         </Button>
       </SheetTrigger>
       
-      <SheetContent side="right" className="w-[600px] sm:w-[540px] p-0">
-        <ScrollArea className="h-full">
-          <div className="p-6 space-y-6">
+      <SheetContent side="right" className="w-[700px] sm:w-[600px] max-w-[90vw] p-0">
+        <ScrollArea className="h-full w-full">
+          <div className="p-6 space-y-6 max-w-full overflow-hidden">
             <SheetHeader>
               <SheetTitle className="flex items-center justify-between">
                 <div className="flex items-center gap-3">

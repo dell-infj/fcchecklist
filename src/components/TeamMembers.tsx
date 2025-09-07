@@ -131,7 +131,7 @@ const TeamMembers = () => {
   }
 
   return (
-    <Card>
+    <Card className="w-full max-w-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Users className="h-5 w-5" />
@@ -144,7 +144,7 @@ const TeamMembers = () => {
           Todos os usuários cadastrados com este ID único
         </p>
       </CardHeader>
-      <CardContent>
+      <CardContent className="max-w-full overflow-hidden">
         {teamMembers.length === 0 ? (
           <div className="text-center py-6">
             <UserCheck className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
@@ -160,7 +160,7 @@ const TeamMembers = () => {
               return (
                 <div
                   key={member.id}
-                  className={`flex items-center justify-between p-3 border rounded-lg transition-colors ${
+                  className={`flex items-center justify-between p-3 border rounded-lg transition-colors w-full max-w-full ${
                     isCurrentUser 
                       ? 'bg-primary/5 border-primary/30 ring-1 ring-primary/20' 
                       : 'hover:bg-accent/50'
