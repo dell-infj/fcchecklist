@@ -129,9 +129,9 @@ const ProfileDrawer = () => {
         </Button>
       </SheetTrigger>
       
-      <SheetContent side="right" className="w-[700px] sm:w-[600px] max-w-[90vw] p-0">
+      <SheetContent side="right" className="w-full sm:w-full md:w-[720px] lg:w-[900px] xl:w-[1040px] max-w-[100vw] p-0 sm:rounded-none">
         <ScrollArea className="h-full w-full">
-          <div className="p-6 space-y-6 max-w-full overflow-hidden">
+          <div className="p-4 sm:p-6 space-y-6 max-w-full overflow-hidden">
             <SheetHeader>
               <SheetTitle className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -168,7 +168,7 @@ const ProfileDrawer = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="first_name">Nome</Label>
                     <Input
