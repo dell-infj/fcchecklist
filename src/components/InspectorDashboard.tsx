@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ClipboardList, Truck, CheckCircle, Clock, Plus, Download } from 'lucide-react';
+import { ClipboardList, Truck, CheckCircle, Clock, Plus, Download, ChevronLeft, ChevronRight } from 'lucide-react';
+import useEmblaCarousel from 'embla-carousel-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -28,6 +29,129 @@ interface MyChecklist {
     license_plate?: string;
   };
 }
+
+// Componente VehiclesCarousel
+interface VehiclesCarouselProps {
+  vehicles: Vehicle[];
+  onStartInspection: (vehicleId: string) => void;
+}
+
+const VehiclesCarousel = ({ vehicles, onStartInspection }: VehiclesCarouselProps) => {
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    align: 'start',
+    dragFree: true,
+    containScroll: 'trimSnaps'
+  });
+
+  const scrollPrev = useCallback(() => {
+    if (emblaApi) emblaApi.scrollPrev();
+  }, [emblaApi]);
+
+  const scrollNext = useCallback(() => {
+    if (emblaApi) emblaApi.scrollNext();
+  }, [emblaApi]);
+
+  const [prevBtnEnabled, setPrevBtnEnabled] = useState(false);
+  const [nextBtnEnabled, setNextBtnEnabled] = useState(false);
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setPrevBtnEnabled(emblaApi.canScrollPrev());
+    setNextBtnEnabled(emblaApi.canScrollNext());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+    onSelect();
+    emblaApi.on('select', onSelect);
+    emblaApi.on('reInit', onSelect);
+  }, [emblaApi, onSelect]);
+
+  return (
+    <Card className="shadow-card" data-vehicles-section>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <Truck className="h-5 w-5" />
+            Veículos Disponíveis
+          </CardTitle>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={scrollPrev}
+              disabled={!prevBtnEnabled}
+              className="h-8 w-8 p-0"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={scrollNext}
+              disabled={!nextBtnEnabled}
+              className="h-8 w-8 p-0"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {vehicles.length === 0 ? (
+          <p className="text-muted-foreground text-center py-6">
+            Nenhum veículo disponível para inspeção
+          </p>
+        ) : (
+          <div className="embla overflow-hidden" ref={emblaRef}>
+            <div className="embla__container flex gap-4">
+              {vehicles.map((vehicle) => (
+                <div key={vehicle.id} className="embla__slide flex-none w-72 min-w-0">
+                  <Card className="border h-full">
+                    <CardContent className="p-4">
+                      <div className="flex flex-col gap-3 h-full">
+                        <div className="flex-1 space-y-2">
+                          <div className="p-3 bg-primary/10 rounded-lg flex items-center justify-center">
+                            <Truck className="h-8 w-8 text-primary" />
+                          </div>
+                          <h3 className="font-semibold text-base">
+                            {vehicle.vehicle_category}
+                          </h3>
+                          <div className="space-y-1">
+                            <p className="text-sm text-muted-foreground">
+                              <span className="font-medium">Placa:</span> {vehicle.license_plate || 'Sem placa'}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              <span className="font-medium">Empresa:</span> {vehicle.owner_unique_id}
+                            </p>
+                            {vehicle.model && (
+                              <p className="text-sm text-muted-foreground">
+                                <span className="font-medium">Modelo:</span> {vehicle.model}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <Button 
+                          size="sm" 
+                          onClick={() => onStartInspection(vehicle.id)}
+                          variant="safety"
+                          className="gap-2 w-full h-10"
+                        >
+                          <Plus className="h-4 w-4" />
+                          Iniciar Inspeção
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
 
 const InspectorDashboard = () => {
   const navigate = useNavigate();
@@ -248,55 +372,11 @@ const InspectorDashboard = () => {
         </Card>
       </div>
 
-      {/* Vehicles List */}
-      <Card className="shadow-card" data-vehicles-section>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Truck className="h-5 w-5" />
-            Veículos Disponíveis
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {vehicles.length === 0 ? (
-            <p className="text-muted-foreground text-center py-6">
-              Nenhum veículo disponível para inspeção
-            </p>
-          ) : (
-            <div className="grid grid-cols-1 gap-3">
-              {vehicles.map((vehicle) => (
-                <Card key={vehicle.id} className="border">
-                  <CardContent className="p-3 sm:p-4">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-sm sm:text-base truncate">
-                          {vehicle.vehicle_category} - {vehicle.license_plate || 'Sem placa'}
-                        </h3>
-                        <p className="text-xs sm:text-sm text-muted-foreground truncate">
-                          {vehicle.owner_unique_id}
-                        </p>
-                        {vehicle.model && (
-                          <p className="text-xs text-muted-foreground truncate">
-                            {vehicle.model}
-                          </p>
-                        )}
-                      </div>
-                      <Button 
-                        size="sm" 
-                        onClick={() => startNewInspection(vehicle.id)}
-                        variant="safety"
-                        className="gap-2 w-full sm:w-auto h-9 sm:h-10 text-xs sm:text-sm"
-                      >
-                        <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
-                        <span className="sm:inline">Iniciar Inspeção</span>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {/* Vehicles Carousel */}
+      <VehiclesCarousel 
+        vehicles={vehicles}
+        onStartInspection={startNewInspection}
+      />
 
       {/* My Checklists */}
       <Card className="shadow-card">

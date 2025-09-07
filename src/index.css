@@ -197,3 +197,19 @@ Cores em HSL para sistema de checklist de frota profissional
     }
   }
 }
+
+/* Embla Carousel Styles */
+.embla {
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.embla__container {
+  display: flex;
+  touch-action: pan-y;
+}
+
+.embla__slide {
+  flex: 0 0 auto;
+  min-width: 0;
+}
