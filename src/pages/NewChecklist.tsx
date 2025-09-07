@@ -51,6 +51,7 @@ interface FormData {
   inspector_id: string;
   inspection_date: Date;
   vehicle_mileage: string;
+  cost_center: string;
   overall_condition: string;
   additional_notes: string;
   interior_photo_url: string;
@@ -86,6 +87,7 @@ const NewChecklist = () => {
     inspector_id: profile?.role === 'inspector' ? profile.id : '',
     inspection_date: new Date(),
     vehicle_mileage: '',
+    cost_center: '',
     
     // Observações e fotos
     overall_condition: '',
@@ -132,6 +134,7 @@ const NewChecklist = () => {
         inspector_id: data.inspector_id,
         inspection_date: new Date(data.inspection_date),
         vehicle_mileage: data.vehicle_mileage || '',
+        cost_center: data.checklist_data?.cost_center || '',
         overall_condition: data.overall_condition || '',
         additional_notes: data.additional_notes || '',
         interior_photo_url: data.interior_photo_url || '',
@@ -257,7 +260,7 @@ const NewChecklist = () => {
       // Adicionar dados dinâmicos do checklist
       Object.keys(formData).forEach(key => {
         if (key !== 'vehicle_id' && key !== 'inspector_id' && key !== 'inspection_date' && 
-            key !== 'vehicle_mileage' && key !== 'overall_condition' && key !== 'additional_notes' &&
+            key !== 'vehicle_mileage' && key !== 'cost_center' && key !== 'overall_condition' && key !== 'additional_notes' &&
             key !== 'interior_photo_url' && key !== 'exterior_photo_url' && key !== 'inspector_signature') {
           const itemData = (formData as any)[key];
           if (itemData && typeof itemData === 'object' && ('status' in itemData || 'observation' in itemData)) {
@@ -285,8 +288,11 @@ const NewChecklist = () => {
         }
       });
 
-      // Atribuir JSON de itens dinâmicos
-      checklistData.checklist_data = dynamicItems;
+      // Atribuir JSON de itens dinâmicos incluindo centro de custo
+      checklistData.checklist_data = {
+        ...dynamicItems,
+        cost_center: formData.cost_center
+      };
 
       // Salvar checklist no banco
       let savedChecklist;
@@ -663,6 +669,16 @@ const NewChecklist = () => {
                       placeholder="Ex: 150000"
                       value={formData.vehicle_mileage}
                       onChange={(e) => setFormData(prev => ({...prev, vehicle_mileage: e.target.value}))}
+                      className="h-10 text-sm"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold">Centro de Custo</Label>
+                    <Input
+                      type="text"
+                      placeholder="Ex: ADM001, VENDAS002, etc."
+                      value={formData.cost_center}
+                      onChange={(e) => setFormData(prev => ({...prev, cost_center: e.target.value}))}
                       className="h-10 text-sm"
                     />
                   </div>
