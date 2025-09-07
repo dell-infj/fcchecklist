@@ -1,21 +1,14 @@
 import { useAuth } from '@/hooks/useAuth';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { LogOut, User, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import ProfileDrawer from './ProfileDrawer';
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 const Layout = ({ children }: LayoutProps) => {
-  const { user, profile, signOut } = useAuth();
+  const { user, profile } = useAuth();
   const navigate = useNavigate();
-
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/auth');
-  };
 
   if (!user || !profile) {
     navigate('/auth');
@@ -42,34 +35,7 @@ const Layout = ({ children }: LayoutProps) => {
               </div>
             </div>
             
-            <div className="flex items-center gap-4">
-              <Card 
-                className="px-4 py-2 cursor-pointer hover:bg-accent transition-all duration-300 hover:scale-105 hover:shadow-md"
-                onClick={() => navigate('/profile')}
-              >
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4 text-primary" />
-                  <div className="text-sm">
-                    <div className="font-medium">
-                      {profile.first_name} {profile.last_name}
-                    </div>
-                    <div className="text-xs text-muted-foreground capitalize">
-                      {profile.role === 'admin' ? 'Administrador' : 'Inspetor'}
-                    </div>
-                  </div>
-                </div>
-              </Card>
-              
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleSignOut}
-                className="gap-2 hover:scale-105 transition-all duration-300 hover:shadow-md"
-              >
-                <LogOut className="h-4 w-4" />
-                Sair
-              </Button>
-            </div>
+            <ProfileDrawer />
           </div>
         </div>
       </header>
