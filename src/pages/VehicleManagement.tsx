@@ -313,7 +313,7 @@ export default function VehicleManagement() {
             <Button 
               variant="outline" 
               onClick={() => navigate('/')} 
-              className="gap-2"
+              className="gap-2 hover:scale-105 transition-all duration-300 hover:shadow-lg"
             >
               <ArrowLeft className="w-4 h-4" />
               Voltar à Dashboard

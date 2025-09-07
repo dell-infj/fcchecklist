@@ -423,7 +423,7 @@ const NewChecklist = () => {
             variant="outline"
             size="lg"
             onClick={() => navigate('/')}
-            className="gap-2 h-12 px-4 w-full"
+            className="gap-2 h-12 px-4 w-full hover:scale-105 transition-all duration-300 hover:shadow-lg"
           >
             <ArrowLeft className="h-5 w-5" />
             Voltar
@@ -737,7 +737,7 @@ const NewChecklist = () => {
                       variant="outline" 
                       size="lg"
                       onClick={() => navigate('/')}
-                      className="w-full h-12 text-sm font-semibold"
+                      className="w-full h-12 text-sm font-semibold hover:scale-105 transition-all duration-300 hover:shadow-lg"
                     >
                       Cancelar
                     </Button>

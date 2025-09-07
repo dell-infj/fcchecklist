@@ -154,4 +154,28 @@ Cores em HSL para sistema de checklist de frota profissional
   .warm-glow {
     @apply hover:shadow-[0_0_20px_hsl(var(--primary-glow)/0.4)] transition-all duration-300;
   }
+  
+  /* Animações universais para navegação */
+  .btn-nav {
+    @apply hover:scale-105 transition-all duration-300 hover:shadow-lg;
+  }
+  
+  .card-interactive {
+    @apply hover:scale-[1.02] transition-all duration-300 hover:shadow-lg;
+  }
+  
+  .fade-in-up {
+    animation: fadeInUp 0.5s ease-out forwards;
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }

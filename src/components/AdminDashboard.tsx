@@ -323,11 +323,17 @@ export default function AdminDashboard() {
         <CommandList>
           <CommandEmpty>Nenhum resultado encontrado.</CommandEmpty>
           <CommandGroup heading="Veículos">
-            <CommandItem onSelect={() => { navigate('/vehicles'); setOpenCommand(null); }}>
+            <CommandItem 
+              onSelect={() => { navigate('/vehicles'); setOpenCommand(null); }}
+              className="hover:scale-105 transition-all duration-300"
+            >
               <Car className="mr-2 h-4 w-4" />
               Painel Veículos
             </CommandItem>
-            <CommandItem onSelect={() => { setIsAddingVehicle(true); setOpenCommand(null); }}>
+            <CommandItem 
+              onSelect={() => { setIsAddingVehicle(true); setOpenCommand(null); }}
+              className="hover:scale-105 transition-all duration-300"
+            >
               <Plus className="mr-2 h-4 w-4" />
               Cadastrar Veículo
             </CommandItem>
@@ -340,15 +346,24 @@ export default function AdminDashboard() {
         <CommandList>
           <CommandEmpty>Nenhum resultado encontrado.</CommandEmpty>
           <CommandGroup heading="Inspeção">
-            <CommandItem onSelect={() => { navigate('/checklist/new'); setOpenCommand(null); }}>
+            <CommandItem 
+              onSelect={() => { navigate('/checklist/new'); setOpenCommand(null); }}
+              className="hover:scale-105 transition-all duration-300"
+            >
               <FileText className="mr-2 h-4 w-4" />
               Nova Inspeção
             </CommandItem>
-            <CommandItem onSelect={() => { navigate('/inspectors'); setOpenCommand(null); }}>
+            <CommandItem 
+              onSelect={() => { navigate('/inspectors'); setOpenCommand(null); }}
+              className="hover:scale-105 transition-all duration-300"
+            >
               <Users className="mr-2 h-4 w-4" />
               Lista de Inspetores
             </CommandItem>
-            <CommandItem onSelect={() => { navigate('/checklists'); setOpenCommand(null); }}>
+            <CommandItem 
+              onSelect={() => { navigate('/checklists'); setOpenCommand(null); }}
+              className="hover:scale-105 transition-all duration-300"
+            >
               <ClipboardList className="mr-2 h-4 w-4" />
               Histórico
             </CommandItem>
@@ -361,11 +376,17 @@ export default function AdminDashboard() {
         <CommandList>
           <CommandEmpty>Nenhum resultado encontrado.</CommandEmpty>
           <CommandGroup heading="Relatórios">
-            <CommandItem onSelect={() => { navigate('/reports'); setOpenCommand(null); }}>
+            <CommandItem 
+              onSelect={() => { navigate('/reports'); setOpenCommand(null); }}
+              className="hover:scale-105 transition-all duration-300"
+            >
               <BarChart3 className="mr-2 h-4 w-4" />
               Histórico
             </CommandItem>
-            <CommandItem onSelect={() => { navigate('/checklist-editor'); setOpenCommand(null); }}>
+            <CommandItem 
+              onSelect={() => { navigate('/checklist-editor'); setOpenCommand(null); }}
+              className="hover:scale-105 transition-all duration-300"
+            >
               <ClipboardList className="mr-2 h-4 w-4" />
               Editor
             </CommandItem>

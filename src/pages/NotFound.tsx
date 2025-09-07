@@ -1,8 +1,12 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Home, ArrowLeft } from "lucide-react";
+import Layout from "@/components/Layout";
 
 const NotFound = () => {
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     console.error(
@@ -12,15 +16,40 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">404</h1>
-        <p className="text-xl text-gray-600 mb-4">Oops! Page not found</p>
-        <a href="/" className="text-blue-500 hover:text-blue-700 underline">
-          Return to Home
-        </a>
+    <Layout>
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="text-center space-y-6 fade-in-up">
+          <div className="space-y-4">
+            <h1 className="text-6xl font-black text-primary">404</h1>
+            <h2 className="text-2xl font-bold text-foreground">Página não encontrada</h2>
+            <p className="text-lg text-muted-foreground max-w-md mx-auto">
+              A página que você está procurando não existe ou foi movida.
+            </p>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button 
+              onClick={() => navigate('/')}
+              className="gap-2 hover:scale-105 transition-all duration-300 hover:shadow-lg"
+              size="lg"
+            >
+              <Home className="h-5 w-5" />
+              Ir para o Dashboard
+            </Button>
+            
+            <Button 
+              onClick={() => navigate(-1)}
+              variant="outline"
+              className="gap-2 hover:scale-105 transition-all duration-300 hover:shadow-lg"
+              size="lg"
+            >
+              <ArrowLeft className="h-5 w-5" />
+              Voltar
+            </Button>
+          </div>
+        </div>
       </div>
-    </div>
+    </Layout>
   );
 };
 
