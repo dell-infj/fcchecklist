@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ClipboardList, Truck, CheckCircle, Clock, Plus, Download, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ClipboardList, Truck, CheckCircle, Clock, Plus, Download, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import useEmblaCarousel from 'embla-carousel-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -159,7 +159,7 @@ const InspectorDashboard = () => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [myChecklists, setMyChecklists] = useState<MyChecklist[]>([]);
   const [stats, setStats] = useState({
-    pending: 0,
+    cancelled: 0,
     completed: 0,
     todayCompleted: 0
   });
@@ -203,7 +203,7 @@ const InspectorDashboard = () => {
 
       // Calculate stats
       const today = new Date().toISOString().split('T')[0];
-      const pending = checklistData?.filter(c => c.status === 'draft').length || 0;
+      const cancelled = checklistData?.filter(c => c.status === 'cancelled').length || 0;
       const completed = checklistData?.filter(c => c.status === 'completed').length || 0;
       const todayCompleted = checklistData?.filter(
         c => c.status === 'completed' && c.inspection_date === today
@@ -221,7 +221,7 @@ const InspectorDashboard = () => {
           license_plate: item.vehicles?.license_plate || ''
         }
       })) || []);
-      setStats({ pending, completed, todayCompleted });
+      setStats({ cancelled, completed, todayCompleted });
 
     } catch (error) {
       console.error('Error loading inspector data:', error);
@@ -295,6 +295,8 @@ const InspectorDashboard = () => {
         return <Badge variant="default" className="bg-success">Concluído</Badge>;
       case 'draft':
         return <Badge variant="secondary">Em Andamento</Badge>;
+      case 'cancelled':
+        return <Badge variant="destructive">Cancelada</Badge>;
       case 'reviewed':
         return <Badge variant="outline">Revisado</Badge>;
       default:
@@ -332,12 +334,12 @@ const InspectorDashboard = () => {
         <Card className="shadow-card">
           <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2 sm:gap-3">
-              <div className="p-2 bg-warning/10 rounded-lg">
-                <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-warning" />
+              <div className="p-2 bg-destructive/10 rounded-lg">
+                <X className="h-4 w-4 sm:h-5 sm:w-5 text-destructive" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">Pendentes</p>
-                <p className="text-lg sm:text-xl font-bold">{stats.pending}</p>
+                <p className="text-xs text-muted-foreground">Canceladas</p>
+                <p className="text-lg sm:text-xl font-bold">{stats.cancelled}</p>
               </div>
             </div>
           </CardContent>
