@@ -68,10 +68,10 @@ export const PDFPreviewFloatingButton: React.FC<PDFPreviewFloatingButtonProps> =
   const FloatingButton = (
     <Button
       onClick={handlePreview}
-      className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-primary hover:bg-primary/90 z-50 transition-all duration-200 hover:scale-105"
+      className="fixed bottom-6 right-6 h-16 w-16 rounded-full shadow-glow bg-gradient-warm hover:bg-gradient-sunset z-[9999] transition-all duration-300 hover:scale-110 hover:shadow-elegant"
       size="icon"
     >
-      <Eye className="h-6 w-6 text-primary-foreground" />
+      <Eye className="h-8 w-8 text-white" strokeWidth={2.5} />
     </Button>
   );
 
