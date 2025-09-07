@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { FileText, Eye, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -65,14 +66,22 @@ export const PDFPreviewFloatingButton: React.FC<PDFPreviewFloatingButtonProps> =
     setIsOpen(false);
   };
 
-  const FloatingButton = (
+  const FloatingButton = createPortal(
     <Button
       onClick={handlePreview}
-      className="fixed bottom-6 right-6 h-16 w-16 rounded-full shadow-glow bg-gradient-warm hover:bg-gradient-sunset z-[9999] transition-all duration-300 hover:scale-110 hover:shadow-elegant"
+      className="fixed bottom-6 right-6 h-16 w-16 rounded-full shadow-glow bg-gradient-warm hover:bg-gradient-sunset transition-all duration-300 hover:scale-110 hover:shadow-elegant"
+      style={{ 
+        position: 'fixed !important' as any,
+        zIndex: 99999,
+        top: 'auto',
+        bottom: '1.5rem',
+        right: '1.5rem'
+      }}
       size="icon"
     >
       <Eye className="h-8 w-8 text-white" strokeWidth={2.5} />
-    </Button>
+    </Button>,
+    document.body
   );
 
   if (isMobile) {
