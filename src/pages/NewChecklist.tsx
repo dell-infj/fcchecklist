@@ -314,44 +314,85 @@ const NewChecklist = () => {
       }
 
 
-      // Preparar dados para o PDF
+      // Preparar dados para o PDF baseados no preview
       const selectedVehicle = vehicles.find(v => v.id === formData.vehicle_id);
       const selectedInspector = inspectors.find(i => i.id === formData.inspector_id);
       
       if (selectedVehicle && selectedInspector) {
-        const { generateChecklistPDF, downloadPDF, getPDFBlob } = await import('@/lib/pdfGenerator');
+        // Gerar PDF usando html2canvas e jsPDF para capturar o layout do preview
+        const { jsPDF } = await import('jspdf');
+        const html2canvas = (await import('html2canvas')).default;
         
-        const pdfData = {
-          vehicleInfo: {
-            model: selectedVehicle.model || 'Não informado',
-            license_plate: selectedVehicle.license_plate || 'Não informado',
-            year: selectedVehicle.year || 0,
-            vehicle_category: selectedVehicle.vehicle_category
-          },
-          inspectorInfo: {
-            first_name: selectedInspector.first_name,
-            last_name: selectedInspector.last_name
-          },
-          companyInfo: {
-            name: profile?.company_name || 'FC GESTÃO EMPRESARIAL LTDA',
-            cnpj: profile?.cnpj || '05.873.924/0001-80',
-            email: 'contato@fcgestao.com.br',
-            address: profile?.address || 'Rua princesa imperial, 220 - Realengo - RJ'
-          },
-          inspection_date: formData.inspection_date,
-          vehicle_mileage: formData.vehicle_mileage,
-          overall_condition: formData.overall_condition || 'Não informado',
-          additional_notes: formData.additional_notes || '',
-          interior_photo_url: formData.interior_photo_url,
-          exterior_photo_url: formData.exterior_photo_url,
-          inspector_signature: formData.inspector_signature,
-          checklistItems: formData,
-          checklist_items: checklistItems
-        };
-
-        // Gerar PDF
-        const pdfDoc = await generateChecklistPDF(pdfData);
-        const pdfBlob = getPDFBlob(pdfDoc);
+        // Criar um container temporário com o mesmo conteúdo do preview
+        const tempContainer = document.createElement('div');
+        tempContainer.style.position = 'absolute';
+        tempContainer.style.left = '-9999px';
+        tempContainer.style.top = '0';
+        tempContainer.style.width = '210mm'; // A4 width
+        tempContainer.style.backgroundColor = 'white';
+        tempContainer.style.padding = '20mm';
+        tempContainer.style.fontFamily = 'Arial, sans-serif';
+        
+        // Usar o mesmo conteúdo do ChecklistPreview
+        const { ChecklistPreview } = await import('@/components/ChecklistPreview');
+        const { createRoot } = await import('react-dom/client');
+        
+        // Renderizar o preview no container temporário
+        const root = createRoot(tempContainer);
+        await new Promise<void>((resolve) => {
+          root.render(
+            React.createElement(ChecklistPreview, {
+              formData,
+              vehicles,
+              inspectors,
+              checklistItems,
+              profile
+            })
+          );
+          setTimeout(resolve, 1000); // Aguardar renderização
+        });
+        
+        document.body.appendChild(tempContainer);
+        
+        try {
+          // Capturar o preview como imagem
+          const canvas = await html2canvas(tempContainer, {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#ffffff'
+          });
+          
+          // Criar PDF
+          const pdf = new jsPDF('p', 'mm', 'a4');
+          const imgData = canvas.toDataURL('image/png');
+          
+          const pdfWidth = 210; // A4 width in mm
+          const pdfHeight = 297; // A4 height in mm
+          const imgWidth = pdfWidth;
+          const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+          
+          // Se a imagem for maior que uma página, dividir em páginas
+          let position = 0;
+          
+          while (position < imgHeight) {
+            if (position > 0) {
+              pdf.addPage();
+            }
+            
+            pdf.addImage(
+              imgData,
+              'PNG',
+              0,
+              position === 0 ? 0 : -position,
+              imgWidth,
+              imgHeight
+            );
+            
+            position += pdfHeight;
+          }
+          
+          const pdfBlob = pdf.output('blob');
         
         // Criar nome do arquivo
         const pdfFileName = `checklist_${selectedVehicle.license_plate}_${format(formData.inspection_date, 'ddMMyyyy')}.pdf`;
@@ -376,8 +417,20 @@ const NewChecklist = () => {
             .eq('id', savedChecklist.id);
         }
 
-        // Download do PDF (abre "Salvar como")
-        await downloadPDF(pdfDoc, pdfFileName);
+          // Download do PDF
+          const url = window.URL.createObjectURL(pdfBlob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = pdfFileName;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+        } finally {
+          // Limpar container temporário
+          document.body.removeChild(tempContainer);
+          root.unmount();
+        }
       }
 
       toast({
