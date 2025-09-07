@@ -28,16 +28,17 @@ const Layout = ({ children }: LayoutProps) => {
       <header className="bg-card border-b border-border shadow-warm backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 flex items-center justify-center">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 flex items-center justify-center">
                 <img 
                   src="/lovable-uploads/3ff7c9af-3109-4509-bc5c-81649a11772f.png" 
                   alt="FC Gestão Logo" 
-                  className="w-10 h-10 object-contain"
+                  className="w-16 h-16 object-contain"
                 />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Sistema de Checklist</p>
+                <h1 className="text-2xl font-bold text-foreground">Frota</h1>
+                <p className="text-sm text-muted-foreground">Sistema de checklist</p>
               </div>
             </div>
             
