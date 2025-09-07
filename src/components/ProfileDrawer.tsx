@@ -211,11 +211,11 @@ const ProfileDrawer = () => {
 
                 <Separator className="my-4" />
 
-                {/* ID Único Principal */}
+                {/* Informações extras */}
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
                     <Building2 className="h-5 w-5 text-primary" />
-                    <span className="font-medium">ID Único Principal</span>
+                    <span className="font-medium">Informações extras</span>
                     <Badge variant="default" className="bg-primary">
                       {profile?.unique_id || 'Não definido'}
                     </Badge>
