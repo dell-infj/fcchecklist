@@ -24,17 +24,17 @@ Cores em HSL para sistema de checklist de frota profissional
     --primary-hover: 18 70% 75%; /* hover mais claro e suave */
     --primary-glow: 22 85% 82%; /* brilho mais sutil */
 
-    /* Secondary - Coral suave */
+    /* Secondary - Coral suave com melhor contraste */
     --secondary: 16 100% 73%; /* #FF9F7A - coral suave */
-    --secondary-foreground: 20 25% 12%;
+    --secondary-foreground: 20 50% 20%; /* texto mais escuro para melhor contraste */
 
     /* Fundos e neutros - tons quentes */
     --muted: 25 8% 92%; /* cinza quente */
     --muted-foreground: 20 15% 50%;
 
-    /* Accent - Laranja queimado para contrastes */
+    /* Accent - Laranja queimado com melhor contraste */
     --accent: 14 100% 45%; /* #E55100 - laranja queimado */
-    --accent-foreground: 0 0% 100%;
+    --accent-foreground: 0 0% 95%; /* texto quase branco mas suave */
 
     /* Estados de status - harmonizados */
     --success: 142 76% 36%;
