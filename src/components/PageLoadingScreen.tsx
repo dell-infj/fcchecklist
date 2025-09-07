@@ -1,12 +1,19 @@
 import React from 'react';
+import { useTheme } from 'next-themes';
 
 const PageLoadingScreen = () => {
+  const { theme } = useTheme();
+
   return (
     <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="text-center">
         {/* Logo animado */}
-        <div className="w-16 h-16 bg-gradient-primary rounded-xl flex items-center justify-center mx-auto mb-6 animate-pulse">
-          <span className="text-white font-bold text-lg">CC</span>
+        <div className="w-16 h-16 flex items-center justify-center mx-auto mb-6 animate-pulse">
+          <img 
+            src={theme === 'dark' ? "/lovable-uploads/e4375a80-1834-4afe-9de6-2f916ac8402a.png" : "/lovable-uploads/3ff7c9af-3109-4509-bc5c-81649a11772f.png"}
+            alt="FC Gestão Logo" 
+            className="w-16 h-16 object-contain"
+          />
         </div>
         
         {/* Spinner animado */}
