@@ -65,6 +65,12 @@ export default function VehicleManagement() {
     setAvailableCompanies(companies);
   };
 
+  useEffect(() => {
+    if (profile?.unique_id && !newVehicle.owner_unique_id) {
+      setNewVehicle((prev) => ({ ...prev, owner_unique_id: profile.unique_id }));
+    }
+  }, [profile, newVehicle.owner_unique_id]);
+
   const handlePdfUploadForNew = async (file: File) => {
     if (!file || file.type !== 'application/pdf') {
       toast({
@@ -140,8 +146,8 @@ export default function VehicleManagement() {
         renavam: newVehicle.renavam,
         crv_number: newVehicle.crv_number,
         crlv_pdf_url: newVehicle.crlv_pdf_url,
-        status: newVehicle.status,
-        unique_id: profile?.unique_id || ''
+          status: newVehicle.status,
+          unique_id: newVehicle.owner_unique_id
       };
 
       const { error } = await supabase
@@ -174,7 +180,7 @@ export default function VehicleManagement() {
       console.error('Error adding vehicle:', error);
       toast({
         title: "Erro",
-        description: "Erro ao cadastrar veículo",
+        description: error instanceof Error ? error.message : 'Erro ao cadastrar veículo',
         variant: "destructive"
       });
     }
