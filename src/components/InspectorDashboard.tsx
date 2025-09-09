@@ -394,7 +394,7 @@ const InspectorDashboard = () => {
                   size="sm" 
                   variant="outline" 
                   className="gap-2 h-8 sm:h-10 text-xs sm:text-sm"
-                  onClick={() => navigate('/reports')}
+                  onClick={() => navigate('/checklists')}
                 >
                   <ClipboardList className="h-3 w-3 sm:h-4 sm:w-4" />
                   Ver Todas
