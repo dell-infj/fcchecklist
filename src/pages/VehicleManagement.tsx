@@ -26,6 +26,7 @@ interface Vehicle {
   crlv_pdf_url: string;
   status: string;
   created_at: string;
+  truck_number?: string;
 }
 
 export default function VehicleManagement() {
@@ -49,6 +50,7 @@ export default function VehicleManagement() {
     renavam: '',
     crv_number: '',
     crlv_pdf_url: '',
+    truck_number: '',
     status: 'active' as const
   });
 
@@ -146,8 +148,11 @@ export default function VehicleManagement() {
         renavam: newVehicle.renavam,
         crv_number: newVehicle.crv_number,
         crlv_pdf_url: newVehicle.crlv_pdf_url,
-          status: newVehicle.status,
-          unique_id: newVehicle.owner_unique_id
+        status: newVehicle.status,
+        unique_id: newVehicle.owner_unique_id,
+        ...(newVehicle.vehicle_category === 'caminhao'
+          ? { truck_number: (newVehicle.truck_number?.trim() || newVehicle.license_plate) }
+          : {})
       };
 
       const { error } = await supabase
@@ -172,6 +177,7 @@ export default function VehicleManagement() {
         renavam: '',
         crv_number: '',
         crlv_pdf_url: '',
+        truck_number: '',
         status: 'active' as const
       });
       setIsAddingVehicle(false);
@@ -284,6 +290,7 @@ export default function VehicleManagement() {
           chassis: editingVehicle.chassis,
           renavam: editingVehicle.renavam,
           crv_number: editingVehicle.crv_number,
+          truck_number: editingVehicle.truck_number,
           status: editingVehicle.status
         })
         .eq('id', editingVehicle.id);
@@ -464,6 +471,19 @@ export default function VehicleManagement() {
                   />
                 </div>
 
+                {newVehicle.vehicle_category === 'caminhao' && (
+                  <div>
+                    <Label htmlFor="truck_number">Número do Caminhão (único)</Label>
+                    <Input
+                      id="truck_number"
+                      value={newVehicle.truck_number}
+                      onChange={(e) => setNewVehicle(prev => ({ ...prev, truck_number: e.target.value }))}
+                      placeholder="Ex: CM-001"
+                    />
+                    <p className="text-xs text-muted-foreground">Se vazio, usaremos a placa como número.</p>
+                  </div>
+                )}
+
                 <div>
                   <Label htmlFor="crlv_pdf">PDF do CRLV (até 5MB)</Label>
                   <Input
@@ -641,6 +661,18 @@ export default function VehicleManagement() {
                             onChange={(e) => setEditingVehicle(prev => prev ? { ...prev, crv_number: e.target.value } : null)}
                           />
                         </div>
+
+                        {editingVehicle.vehicle_category === 'caminhao' && (
+                          <div>
+                            <Label>Número do Caminhão (único)</Label>
+                            <Input
+                              value={editingVehicle.truck_number || ''}
+                              onChange={(e) => setEditingVehicle(prev => prev ? { ...prev, truck_number: e.target.value } : null)}
+                            />
+                            <p className="text-xs text-muted-foreground">Se vazio, usaremos a placa como número.</p>
+                          </div>
+                        )}
+
 
                         <div>
                           <Label>Status</Label>
