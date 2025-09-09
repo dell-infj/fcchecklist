@@ -389,11 +389,11 @@ const InspectorDashboard = () => {
               Minhas Inspeções
             </CardTitle>
             {myChecklists.length > 0 && (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-row gap-2">
                 <Button 
                   size="sm" 
                   variant="outline" 
-                  className="gap-2 w-full h-8 sm:h-10 text-xs sm:text-sm"
+                  className="gap-2 h-8 sm:h-10 text-xs sm:text-sm"
                   onClick={() => toast({
                     title: "Em desenvolvimento",
                     description: "Funcionalidade de filtros será implementada em breve"
@@ -405,7 +405,7 @@ const InspectorDashboard = () => {
                  <Button 
                    size="sm" 
                    variant="default" 
-                   className="gap-2 w-full h-8 sm:h-10 text-xs sm:text-sm"
+                   className="gap-2 h-8 sm:h-10 text-xs sm:text-sm"
                    onClick={() => navigate('/checklist/new')}
                  >
                    <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -414,7 +414,7 @@ const InspectorDashboard = () => {
                  <Button 
                    size="sm" 
                    variant="outline" 
-                   className="gap-2 w-full h-8 sm:h-10 text-xs sm:text-sm"
+                   className="gap-2 h-8 sm:h-10 text-xs sm:text-sm"
                    onClick={() => navigate('/vehicles')}
                  >
                    <Truck className="h-3 w-3 sm:h-4 sm:w-4" />
