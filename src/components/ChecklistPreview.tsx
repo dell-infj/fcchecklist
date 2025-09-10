@@ -20,8 +20,23 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
 }) => {
   const { toast } = useToast();
 
+  console.log('ChecklistPreview - formData:', formData);
+  console.log('ChecklistPreview - vehicles:', vehicles);
+  console.log('ChecklistPreview - inspectors:', inspectors);
+
   const selectedVehicle = vehicles.find(v => v.id === formData.vehicle_id);
-  const selectedInspector = inspectors.find(i => i.id === formData.inspector_id);
+  let selectedInspector = inspectors.find(i => i.id === formData.inspector_id);
+
+  // Se não encontrou inspetor mas o usuário é inspetor, tentar identificação automática
+  if (!selectedInspector && profile?.role === 'inspector') {
+    selectedInspector = inspectors.find(inspector => 
+      inspector.id === profile.id || 
+      (inspector.first_name === profile.first_name && inspector.last_name === profile.last_name)
+    );
+  }
+
+  console.log('ChecklistPreview - selectedVehicle:', selectedVehicle);
+  console.log('ChecklistPreview - selectedInspector:', selectedInspector);
 
   // Mapear categorias de veículo para unique_id (mesma lógica do DynamicChecklistForm)
   const getUniqueIdByCategory = (category: string) => {

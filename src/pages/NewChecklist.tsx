@@ -84,7 +84,7 @@ const NewChecklist = () => {
   const [formData, setFormData] = useState<FormData>({
     // Identificação
     vehicle_id: preselectedVehicleId || '',
-    inspector_id: profile?.role === 'inspector' ? profile.id : '',
+    inspector_id: '', // Será preenchido após carregar os inspetores
     inspection_date: new Date(),
     vehicle_mileage: '',
     cost_center: '',
@@ -96,6 +96,23 @@ const NewChecklist = () => {
     exterior_photo_url: '',
     inspector_signature: ''
   });
+
+  // Efeito para auto-selecionar inspetor se o usuário for inspetor
+  useEffect(() => {
+    if (profile?.role === 'inspector' && inspectors.length > 0 && !formData.inspector_id) {
+      const currentInspector = inspectors.find(inspector => 
+        inspector.id === profile.id || 
+        (inspector.first_name === profile.first_name && inspector.last_name === profile.last_name)
+      );
+      
+      if (currentInspector) {
+        setFormData(prev => ({
+          ...prev,
+          inspector_id: currentInspector.id
+        }));
+      }
+    }
+  }, [profile, inspectors, formData.inspector_id]);
 
   useEffect(() => {
     loadData();

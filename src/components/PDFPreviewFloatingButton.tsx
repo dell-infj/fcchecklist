@@ -28,6 +28,14 @@ export const PDFPreviewFloatingButton: React.FC<PDFPreviewFloatingButtonProps> =
   const [isOpen, setIsOpen] = useState(false);
 
   const handlePreview = () => {
+    console.log('Preview - formData:', { 
+      vehicle_id: formData.vehicle_id, 
+      inspector_id: formData.inspector_id 
+    });
+    console.log('Preview - vehicles:', vehicles);
+    console.log('Preview - inspectors:', inspectors);
+    console.log('Preview - profile:', profile);
+
     // Verificar se o veículo foi selecionado
     if (!formData.vehicle_id) {
       toast({
@@ -39,13 +47,22 @@ export const PDFPreviewFloatingButton: React.FC<PDFPreviewFloatingButtonProps> =
     }
 
     // Se o usuário for inspetor, identificar automaticamente
-    const currentInspectorId = formData.inspector_id || 
-      (profile?.role === 'inspector' ? 
-        inspectors.find(inspector => 
-          inspector.email === profile.user_id || 
-          inspector.id === profile.id ||
-          inspector.first_name === profile.first_name && inspector.last_name === profile.last_name
-        )?.id : null);
+    let currentInspectorId = formData.inspector_id;
+    
+    // Se não há inspetor selecionado e o usuário é inspetor, tentar identificar automaticamente
+    if (!currentInspectorId && profile?.role === 'inspector') {
+      const autoInspector = inspectors.find(inspector => 
+        inspector.id === profile.id || 
+        (inspector.first_name === profile.first_name && inspector.last_name === profile.last_name)
+      );
+      
+      if (autoInspector) {
+        currentInspectorId = autoInspector.id;
+        console.log('Auto-identificado inspetor:', autoInspector);
+      }
+    }
+
+    console.log('Preview - currentInspectorId:', currentInspectorId);
 
     // Verificar se tem inspetor (selecionado ou identificado automaticamente)
     if (!currentInspectorId) {
