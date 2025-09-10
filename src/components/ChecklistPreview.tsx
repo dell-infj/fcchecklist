@@ -27,12 +27,20 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
   const selectedVehicle = vehicles.find(v => v.id === formData.vehicle_id);
   let selectedInspector = inspectors.find(i => i.id === formData.inspector_id);
 
-  // Se não encontrou inspetor mas o usuário é inspetor, tentar identificação automática
+  // Se não encontrou inspetor mas o usuário é inspetor, tentar identificação automática e, em último caso, usar o próprio perfil
   if (!selectedInspector && profile?.role === 'inspector') {
     selectedInspector = inspectors.find(inspector => 
       inspector.id === profile.id || 
       (inspector.first_name === profile.first_name && inspector.last_name === profile.last_name)
     );
+
+    if (!selectedInspector && profile) {
+      selectedInspector = {
+        id: profile.id,
+        first_name: profile.first_name,
+        last_name: profile.last_name
+      } as any;
+    }
   }
 
   console.log('ChecklistPreview - selectedVehicle:', selectedVehicle);

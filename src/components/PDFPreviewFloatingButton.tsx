@@ -66,11 +66,14 @@ export const PDFPreviewFloatingButton: React.FC<PDFPreviewFloatingButtonProps> =
 
     // Verificar se tem inspetor (selecionado ou identificado automaticamente)
     if (!currentInspectorId) {
+      if (profile?.role === 'inspector') {
+        console.log('Abrindo preview usando o perfil do inspetor logado');
+        setIsOpen(true);
+        return;
+      }
       toast({
         title: "Informações incompletas",
-        description: profile?.role === 'inspector' ? 
-          "Não foi possível identificar o inspetor automaticamente" :
-          "Selecione um inspetor para visualizar o preview",
+        description: "Selecione um inspetor para visualizar o preview",
         variant: "destructive"
       });
       return;

@@ -99,11 +99,12 @@ const NewChecklist = () => {
 
   // Efeito para auto-selecionar inspetor se o usuário for inspetor
   useEffect(() => {
-    if (profile?.role === 'inspector' && inspectors.length > 0 && !formData.inspector_id) {
+    if (profile?.role === 'inspector' && !formData.inspector_id) {
+      // Primeiro tenta encontrar na lista (quando carregada)
       const currentInspector = inspectors.find(inspector => 
         inspector.id === profile.id || 
         (inspector.first_name === profile.first_name && inspector.last_name === profile.last_name)
-      );
+      ) || (profile ? { id: profile.id } as any : null);
       
       if (currentInspector) {
         setFormData(prev => ({
@@ -191,8 +192,8 @@ const NewChecklist = () => {
         .eq('active', true)
         .order('item_order');
 
-      // Carregar inspetores (apenas admins podem ver todos)
-      let inspectorData = [];
+      // Carregar inspetores
+      let inspectorData: any[] = [];
       if (profile?.role === 'admin') {
         const { data: profilesData } = await supabase
           .from('profiles')
@@ -209,6 +210,14 @@ const NewChecklist = () => {
             email: 'Email não disponível' // Simplificado para evitar problemas de API
           }));
         }
+      } else if (profile?.role === 'inspector' && profile) {
+        // Em contas de inspetor, disponibilizar apenas o próprio inspetor
+        inspectorData = [{
+          id: profile.id,
+          first_name: profile.first_name || 'Inspetor',
+          last_name: profile.last_name || '',
+          email: 'Email não disponível'
+        }];
       }
 
       setVehicles(vehicleData || []);
