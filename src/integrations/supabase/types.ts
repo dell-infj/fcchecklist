@@ -202,6 +202,39 @@ export type Database = {
           },
         ]
       }
+      vehicle_categories: {
+        Row: {
+          active: boolean
+          created_at: string
+          icon_name: string
+          id: string
+          label: string
+          name: string
+          unique_id: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          icon_name?: string
+          id?: string
+          label: string
+          name: string
+          unique_id: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          icon_name?: string
+          id?: string
+          label?: string
+          name?: string
+          unique_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       vehicles: {
         Row: {
           chassis: string | null

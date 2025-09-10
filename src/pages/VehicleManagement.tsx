@@ -39,6 +39,7 @@ export default function VehicleManagement() {
   const [uploadingPdf, setUploadingPdf] = useState(false);
   const [availableCompanies, setAvailableCompanies] = useState<string[]>([]);
   const [isAddingVehicle, setIsAddingVehicle] = useState(false);
+  const [vehicleCategories, setVehicleCategories] = useState<{value: string; label: string}[]>([]);
   const [newVehicle, setNewVehicle] = useState({
     vehicle_category: '',
     owner_unique_id: '',
@@ -57,6 +58,7 @@ export default function VehicleManagement() {
   useEffect(() => {
     fetchVehicles();
     fetchAvailableCompanies();
+    fetchVehicleCategories();
   }, []);
 
   const fetchAvailableCompanies = async () => {
@@ -65,6 +67,37 @@ export default function VehicleManagement() {
     // Usar Set para remover duplicatas
     const companies = [...new Set([profile.unique_id, ...(profile.company_ids || [])].filter(Boolean))];
     setAvailableCompanies(companies);
+  };
+
+  const fetchVehicleCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('vehicle_categories')
+        .select('name, label')
+        .eq('active', true)
+        .order('name');
+
+      if (error) throw error;
+
+      const categories = (data || []).map(cat => ({
+        value: cat.name.toLowerCase(),
+        label: cat.label
+      }));
+      setVehicleCategories(categories);
+    } catch (error) {
+      console.error('Error fetching vehicle categories:', error);
+      // Fallback para categorias padrão se houver erro
+      setVehicleCategories([
+        { value: 'carro', label: 'Carro' },
+        { value: 'caminhao', label: 'Caminhão' },
+        { value: 'moto', label: 'Moto' },
+        { value: 'retroescavadeira', label: 'Retroescavadeira' },
+        { value: 'passageiro', label: 'Passageiro' },
+        { value: 'onibus', label: 'Ônibus' },
+        { value: 'trator', label: 'Trator' },
+        { value: 'outros', label: 'Outros' }
+      ]);
+    }
   };
 
   useEffect(() => {
@@ -363,14 +396,11 @@ export default function VehicleManagement() {
                         <SelectValue placeholder="Selecione a categoria" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="carro">Carro</SelectItem>
-                        <SelectItem value="caminhao">Caminhão</SelectItem>
-                        <SelectItem value="moto">Moto</SelectItem>
-                        <SelectItem value="retroescavadeira">Retroescavadeira</SelectItem>
-                        <SelectItem value="passageiro">Passageiro</SelectItem>
-                        <SelectItem value="onibus">Ônibus</SelectItem>
-                        <SelectItem value="trator">Trator</SelectItem>
-                        <SelectItem value="outros">Outros</SelectItem>
+                        {vehicleCategories.map(category => (
+                          <SelectItem key={category.value} value={category.value}>
+                            {category.label}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
