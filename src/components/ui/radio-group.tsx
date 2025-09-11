@@ -20,19 +20,34 @@ RadioGroup.displayName = RadioGroupPrimitive.Root.displayName
 
 const RadioGroupItem = React.forwardRef<
   React.ElementRef<typeof RadioGroupPrimitive.Item>,
-  React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Item>
->(({ className, ...props }, ref) => {
+  React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Item> & {
+    variant?: 'default' | 'warning' | 'error'
+  }
+>(({ className, variant = 'default', ...props }, ref) => {
+  const variantStyles = {
+    default: "border-green-500 text-green-500",
+    warning: "border-yellow-500 text-yellow-500", 
+    error: "border-red-500 text-red-500"
+  }
+
+  const variantEmojis = {
+    default: "✅",
+    warning: "⚠️",
+    error: "❌"
+  }
+
   return (
     <RadioGroupPrimitive.Item
       ref={ref}
       className={cn(
-        "aspect-square h-8 w-8 rounded-md border border-green-500 text-green-500 ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+        "aspect-square h-8 w-8 rounded-md border ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+        variantStyles[variant],
         className
       )}
       {...props}
     >
       <RadioGroupPrimitive.Indicator className="flex items-center justify-center">
-        <span className="text-lg">✅</span>
+        <span className="text-lg">{variantEmojis[variant]}</span>
       </RadioGroupPrimitive.Indicator>
     </RadioGroupPrimitive.Item>
   )

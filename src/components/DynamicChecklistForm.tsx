@@ -206,19 +206,19 @@ const DynamicChecklistForm: React.FC<DynamicChecklistFormProps> = ({ formData, s
                     className="flex flex-col sm:flex-row gap-4 sm:gap-6"
                   >
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="funcionando" id={`${item.id}-funcionando`} />
+                      <RadioGroupItem value="funcionando" id={`${item.id}-funcionando`} variant="default" />
                       <Label htmlFor={`${item.id}-funcionando`} className="text-green-600 font-medium text-sm sm:text-base">
                         Conforme
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="revisao" id={`${item.id}-revisao`} />
+                      <RadioGroupItem value="revisao" id={`${item.id}-revisao`} variant="warning" />
                       <Label htmlFor={`${item.id}-revisao`} className="text-yellow-600 font-medium text-sm sm:text-base">
                         Revisão
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="ausente" id={`${item.id}-ausente`} />
+                      <RadioGroupItem value="ausente" id={`${item.id}-ausente`} variant="error" />
                       <Label htmlFor={`${item.id}-ausente`} className="text-red-600 font-medium text-sm sm:text-base">
                         Ausente
                       </Label>
