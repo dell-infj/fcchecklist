@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils';
 import Layout from '@/components/Layout';
 import SignatureCanvas from '@/components/SignatureCanvas';
 import DynamicChecklistForm from '@/components/DynamicChecklistForm';
+import { MultipleImageCapture } from '@/components/MultipleImageCapture';
 import { PDFPreviewFloatingButton } from '@/components/PDFPreviewFloatingButton';
 import ImageCapture from '@/components/ImageCapture';
 import CategoryValidationAlert from '@/components/CategoryValidationAlert';
@@ -794,29 +795,25 @@ const NewChecklist = () => {
                 <CardContent className="space-y-4 p-4">
                   {/* Upload de Fotos */}
                   <div className="grid grid-cols-1 gap-4">
-                    <div className="space-y-3">
-                      <h3 className="font-semibold text-base">Foto do Interior</h3>
-                      <ImageCapture
-                        value={formData.interior_photo_url}
-                        onImageCapture={(imageData) => 
-                          setFormData(prev => ({...prev, interior_photo_url: imageData}))
-                        }
-                        placeholder="Clique para adicionar foto do interior"
-                        className="hover-lift warm-glow"
-                      />
-                    </div>
+                    <MultipleImageCapture
+                      title="Fotos do Interior"
+                      images={formData.interior_photos || []}
+                      onImagesChange={(images) => 
+                        setFormData(prev => ({...prev, interior_photos: images}))
+                      }
+                      maxImages={7}
+                      placeholder="Clique para adicionar foto do interior"
+                    />
 
-                    <div className="space-y-3">
-                      <h3 className="font-semibold text-base">Foto do Exterior</h3>
-                      <ImageCapture
-                        value={formData.exterior_photo_url}
-                        onImageCapture={(imageData) => 
-                          setFormData(prev => ({...prev, exterior_photo_url: imageData}))
-                        }
-                        placeholder="Clique para adicionar foto do exterior"
-                        className="hover-lift warm-glow"
-                      />
-                    </div>
+                    <MultipleImageCapture
+                      title="Fotos do Exterior"
+                      images={formData.exterior_photos || []}
+                      onImagesChange={(images) => 
+                        setFormData(prev => ({...prev, exterior_photos: images}))
+                      }
+                      maxImages={7}
+                      placeholder="Clique para adicionar foto do exterior"
+                    />
                   </div>
 
                   {/* Observações */}

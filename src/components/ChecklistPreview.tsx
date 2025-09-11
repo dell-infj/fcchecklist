@@ -373,42 +373,84 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
           }}>
             Documentação Fotográfica
           </h3>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-            {formData.exterior_photo_url && (
-              <div>
-                <h4 style={{ fontSize: '12px', fontWeight: '500', marginBottom: '8px' }}>
-                  Foto Externa
-                </h4>
-                <img 
-                  src={formData.exterior_photo_url} 
-                  alt="Foto Externa do Veículo"
-                  style={{ 
-                    width: '100%', 
-                    height: '200px', 
-                    objectFit: 'cover', 
-                    border: '1px solid #ddd'
-                  }}
-                />
+          
+          {/* Interior Photos */}
+          {(formData.interior_photos && formData.interior_photos.length > 0) || formData.interior_photo_url ? (
+            <div style={{ marginBottom: '20px' }}>
+              <h4 style={{ fontSize: '12px', fontWeight: '500', marginBottom: '8px' }}>
+                Fotos Internas
+              </h4>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+                {/* Show new multiple photos if available */}
+                {formData.interior_photos && formData.interior_photos.length > 0 
+                  ? formData.interior_photos.map((photo: string, index: number) => (
+                      <img 
+                        key={index}
+                        src={photo} 
+                        alt={`Foto Interna ${index + 1}`}
+                        style={{ 
+                          width: '100%', 
+                          height: '150px', 
+                          objectFit: 'cover', 
+                          border: '1px solid #ddd'
+                        }}
+                      />
+                    ))
+                  : formData.interior_photo_url && (
+                      <img 
+                        src={formData.interior_photo_url} 
+                        alt="Foto Interna do Veículo"
+                        style={{ 
+                          width: '100%', 
+                          height: '150px', 
+                          objectFit: 'cover', 
+                          border: '1px solid #ddd'
+                        }}
+                      />
+                    )
+                }
               </div>
-            )}
-            {formData.interior_photo_url && (
-              <div>
-                <h4 style={{ fontSize: '12px', fontWeight: '500', marginBottom: '8px' }}>
-                  Foto Interna
-                </h4>
-                <img 
-                  src={formData.interior_photo_url} 
-                  alt="Foto Interna do Veículo"
-                  style={{ 
-                    width: '100%', 
-                    height: '200px', 
-                    objectFit: 'cover', 
-                    border: '1px solid #ddd'
-                  }}
-                />
+            </div>
+          ) : null}
+          
+          {/* Exterior Photos */}
+          {(formData.exterior_photos && formData.exterior_photos.length > 0) || formData.exterior_photo_url ? (
+            <div>
+              <h4 style={{ fontSize: '12px', fontWeight: '500', marginBottom: '8px' }}>
+                Fotos Externas
+              </h4>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+                {/* Show new multiple photos if available */}
+                {formData.exterior_photos && formData.exterior_photos.length > 0 
+                  ? formData.exterior_photos.map((photo: string, index: number) => (
+                      <img 
+                        key={index}
+                        src={photo} 
+                        alt={`Foto Externa ${index + 1}`}
+                        style={{ 
+                          width: '100%', 
+                          height: '150px', 
+                          objectFit: 'cover', 
+                          border: '1px solid #ddd'
+                        }}
+                      />
+                    ))
+                  : formData.exterior_photo_url && (
+                      <img 
+                        src={formData.exterior_photo_url} 
+                        alt="Foto Externa do Veículo"
+                        style={{ 
+                          width: '100%', 
+                          height: '150px', 
+                          objectFit: 'cover', 
+                          border: '1px solid #ddd'
+                        }}
+                      />
+                    )
+                }
               </div>
-            )}
-          </div>
+            </div>
+          ) : null}
         </div>
 
         {/* Signature */}
