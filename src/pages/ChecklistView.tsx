@@ -635,22 +635,64 @@ const ChecklistView = () => {
                   {checklist.interior_photo_url && (
                     <div className="mb-5">
                       <h4 className="text-xs font-medium mb-2">Fotos Internas</h4>
-                      <img 
-                        src={checklist.interior_photo_url} 
-                        alt="Foto do interior" 
-                        className="w-full max-w-md h-40 object-cover border border-gray-300"
-                      />
+                      {checklist.interior_photo_url.startsWith('data:') ? (
+                        <img 
+                          src={checklist.interior_photo_url} 
+                          alt="Foto do interior" 
+                          className="w-full max-w-md h-40 object-cover border border-gray-300"
+                        />
+                      ) : (
+                        <img 
+                          src={checklist.interior_photo_url.startsWith('http') ? 
+                            checklist.interior_photo_url : 
+                            `https://iotbioxbckuqpbwjjouq.supabase.co/storage/v1/object/public/checklist-photos/${checklist.interior_photo_url}`
+                          } 
+                          alt="Foto do interior" 
+                          className="w-full max-w-md h-40 object-cover border border-gray-300"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            const parent = e.currentTarget.parentElement;
+                            if (parent) {
+                              const errorMsg = document.createElement('p');
+                              errorMsg.textContent = 'Imagem não disponível';
+                              errorMsg.className = 'text-xs text-gray-500 italic';
+                              parent.appendChild(errorMsg);
+                            }
+                          }}
+                        />
+                      )}
                     </div>
                   )}
                   
                   {checklist.exterior_photo_url && (
                     <div>
                       <h4 className="text-xs font-medium mb-2">Fotos Externas</h4>
-                      <img 
-                        src={checklist.exterior_photo_url} 
-                        alt="Foto do exterior" 
-                        className="w-full max-w-md h-40 object-cover border border-gray-300"
-                      />
+                      {checklist.exterior_photo_url.startsWith('data:') ? (
+                        <img 
+                          src={checklist.exterior_photo_url} 
+                          alt="Foto do exterior" 
+                          className="w-full max-w-md h-40 object-cover border border-gray-300"
+                        />
+                      ) : (
+                        <img 
+                          src={checklist.exterior_photo_url.startsWith('http') ? 
+                            checklist.exterior_photo_url : 
+                            `https://iotbioxbckuqpbwjjouq.supabase.co/storage/v1/object/public/checklist-photos/${checklist.exterior_photo_url}`
+                          } 
+                          alt="Foto do exterior" 
+                          className="w-full max-w-md h-40 object-cover border border-gray-300"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            const parent = e.currentTarget.parentElement;
+                            if (parent) {
+                              const errorMsg = document.createElement('p');
+                              errorMsg.textContent = 'Imagem não disponível';
+                              errorMsg.className = 'text-xs text-gray-500 italic';
+                              parent.appendChild(errorMsg);
+                            }
+                          }}
+                        />
+                      )}
                     </div>
                   )}
                 </div>
