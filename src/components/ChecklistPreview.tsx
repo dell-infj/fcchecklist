@@ -128,15 +128,15 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
       {/* Document Content - Exatamente como será no PDF */}
       <div className="p-8 bg-white text-black" style={{ 
         minHeight: '100vh',
-        fontFamily: '"Times New Roman", serif',
-        fontSize: '12px',
+        fontFamily: 'Arial, sans-serif',
+        fontSize: '14px',
         lineHeight: '1.4',
         color: '#000'
       }}>
         <style dangerouslySetInnerHTML={{
           __html: `
             @media print {
-              body { margin: 0 !important; font-size: 12px !important; }
+              body { margin: 0 !important; font-size: 14px !important; }
               .print\\:hidden { display: none !important; }
               .page-break { page-break-before: always !important; }
               .no-page-break { page-break-inside: avoid !important; }
@@ -150,29 +150,32 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
             .preview-document {
               background: white;
               color: black;
-              font-family: "Times New Roman", serif;
+              font-family: Arial, sans-serif;
             }
-            .preview-document h1 { font-size: 18px; font-weight: bold; margin-bottom: 8px; }
-            .preview-document h2 { font-size: 16px; font-weight: bold; margin-bottom: 12px; }
-            .preview-document h3 { font-size: 14px; font-weight: bold; margin-bottom: 8px; }
-            .preview-document p { font-size: 12px; margin-bottom: 4px; }
+            .preview-document h1 { font-size: 20px; font-weight: bold; margin-bottom: 8px; }
+            .preview-document h2 { font-size: 18px; font-weight: bold; margin-bottom: 12px; }
+            .preview-document h3 { font-size: 16px; font-weight: bold; margin-bottom: 8px; }
+            .preview-document p { font-size: 14px; margin-bottom: 4px; }
             .preview-document .company-header { text-align: center; margin-bottom: 30px; }
             .preview-document .section { margin-bottom: 25px; }
             .preview-document .checklist-item { 
               display: flex; 
               justify-content: space-between; 
               align-items: flex-start; 
-              padding: 8px; 
+              padding: 10px; 
               border: 1px solid #ddd; 
-              margin-bottom: 4px;
+              margin-bottom: 6px;
               background: white;
+              font-size: 14px;
             }
             .preview-document .status-badge {
-              padding: 4px 8px;
+              padding: 6px 12px;
               border-radius: 4px;
-              font-size: 10px;
+              font-size: 12px;
               font-weight: bold;
               white-space: nowrap;
+              min-width: 100px;
+              text-align: center;
             }
             .preview-document .status-funcionando { background: #f0f9ff; color: #0369a1; border: 1px solid #bae6fd; }
             .preview-document .status-revisao { background: #fefce8; color: #a16207; border: 1px solid #fef08a; }
@@ -183,16 +186,16 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
         {/* Header */}
         <div className="preview-document">
           <div className="company-header">
-            <h1 style={{ color: '#000', fontSize: '18px', fontWeight: 'bold', marginBottom: '8px' }}>
-              {profile?.company_name || 'FC GESTÃO EMPRESARIAL LTDA'}
+            <h1 style={{ color: '#000', fontSize: '20px', fontWeight: 'bold', marginBottom: '8px' }}>
+              {profile?.company_name || 'Facilita Serviços e Construções LTDA'}
             </h1>
-            <p style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
+            <p style={{ fontSize: '14px', color: '#666', marginBottom: '4px' }}>
               CNPJ: {profile?.cnpj || '05.873.924/0001-80'} | Email: contato@fcgestao.com.br
             </p>
-            <p style={{ fontSize: '12px', color: '#666', marginBottom: '20px' }}>
+            <p style={{ fontSize: '14px', color: '#666', marginBottom: '20px' }}>
               {profile?.address || 'Rua princesa imperial, 220 - Realengo - RJ'}
             </p>
-            <h2 style={{ color: '#000', fontSize: '16px', fontWeight: 'bold' }}>
+            <h2 style={{ color: '#000', fontSize: '18px', fontWeight: 'bold' }}>
               CHECKLIST DE INSPEÇÃO VEICULAR
             </h2>
           </div>
@@ -201,41 +204,41 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
         {/* General Information */}
         <div className="section" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '30px' }}>
           <div>
-            <h3 style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '12px', borderBottom: '1px solid #ddd', paddingBottom: '8px' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '12px', borderBottom: '1px solid #ddd', paddingBottom: '8px' }}>
               Informações Gerais
             </h3>
             <div style={{ marginBottom: '8px' }}>
-              <p style={{ fontSize: '12px', marginBottom: '4px' }}>
+              <p style={{ fontSize: '14px', marginBottom: '4px' }}>
                 <strong>Data da Inspeção:</strong> {format(new Date(formData.inspection_date || new Date()), 'dd/MM/yyyy', { locale: ptBR })}
               </p>
-              <p style={{ fontSize: '12px', marginBottom: '4px' }}>
+              <p style={{ fontSize: '14px', marginBottom: '4px' }}>
                 <strong>Inspetor:</strong> {selectedInspector.first_name} {selectedInspector.last_name}
               </p>
-              <p style={{ fontSize: '12px', marginBottom: '4px' }}>
+              <p style={{ fontSize: '14px', marginBottom: '4px' }}>
                 <strong>Quilometragem:</strong> {formData.vehicle_mileage || 'Não informado'} km
               </p>
               {formData.cost_center && (
-                <p style={{ fontSize: '12px', marginBottom: '4px' }}>
+                <p style={{ fontSize: '14px', marginBottom: '4px' }}>
                   <strong>Centro de Custo:</strong> {formData.cost_center}
                 </p>
               )}
             </div>
           </div>
           <div>
-            <h3 style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '12px', borderBottom: '1px solid #ddd', paddingBottom: '8px' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '12px', borderBottom: '1px solid #ddd', paddingBottom: '8px' }}>
               Dados do Veículo
             </h3>
             <div style={{ marginBottom: '8px' }}>
-              <p style={{ fontSize: '12px', marginBottom: '4px' }}>
+              <p style={{ fontSize: '14px', marginBottom: '4px' }}>
                 <strong>Modelo:</strong> {selectedVehicle.model || 'Não informado'}
               </p>
-              <p style={{ fontSize: '12px', marginBottom: '4px' }}>
+              <p style={{ fontSize: '14px', marginBottom: '4px' }}>
                 <strong>Placa:</strong> {selectedVehicle.license_plate || 'Não informado'}
               </p>
-              <p style={{ fontSize: '12px', marginBottom: '4px' }}>
+              <p style={{ fontSize: '14px', marginBottom: '4px' }}>
                 <strong>Ano:</strong> {selectedVehicle.year || 'Não informado'}
               </p>
-              <p style={{ fontSize: '12px', marginBottom: '4px' }}>
+              <p style={{ fontSize: '14px', marginBottom: '4px' }}>
                 <strong>Categoria:</strong> {selectedVehicle.vehicle_category}
               </p>
             </div>
@@ -255,7 +258,7 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
           return (
             <div key={category} className="section" style={{ marginBottom: '25px' }}>
               <h3 style={{ 
-                fontSize: '14px', 
+                fontSize: '16px', 
                 fontWeight: 'bold', 
                 marginBottom: '12px', 
                 borderBottom: '1px solid #ddd', 
@@ -276,33 +279,35 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
                       display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'flex-start',
-                      padding: '8px',
+                      padding: '10px',
                       border: '1px solid #ddd',
-                      marginBottom: '4px',
-                      background: 'white'
+                      marginBottom: '6px',
+                      background: 'white',
+                      fontSize: '14px'
                     }}>
-                      <div style={{ flex: 1 }}>
-                        <p style={{ fontSize: '12px', fontWeight: '500', marginBottom: '2px' }}>
+                      <div style={{ flex: 1, paddingRight: '10px' }}>
+                        <p style={{ fontSize: '14px', fontWeight: '500', marginBottom: '2px' }}>
                           {item.name}
                         </p>
                         {item.description && (
-                          <p style={{ fontSize: '11px', color: '#666', marginBottom: '2px' }}>
+                          <p style={{ fontSize: '12px', color: '#666', marginBottom: '2px' }}>
                             {item.description}
                           </p>
                         )}
                         {observation && (
-                          <p style={{ fontSize: '11px', color: '#d97706', marginTop: '4px' }}>
+                          <p style={{ fontSize: '12px', color: '#d97706', marginTop: '4px' }}>
                             <strong>Observação:</strong> {observation}
                           </p>
                         )}
                       </div>
                       <div className={`status-badge status-${status}`} style={{
-                        padding: '4px 8px',
+                        padding: '6px 12px',
                         borderRadius: '4px',
-                        fontSize: '10px',
+                        fontSize: '12px',
                         fontWeight: 'bold',
                         whiteSpace: 'nowrap',
-                        marginLeft: '8px'
+                        minWidth: '100px',
+                        textAlign: 'center'
                       }}>
                         {getStatusText(status)}
                       </div>
