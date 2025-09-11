@@ -353,14 +353,6 @@ const ChecklistView = () => {
                 <Download className="h-4 w-4" />
                 Baixar PDF
               </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => window.open(checklist.pdf_url.startsWith('http') ? checklist.pdf_url : `${supabase.storage.from('checklist-pdfs').getPublicUrl(checklist.pdf_url).data.publicUrl}`, '_blank')}
-                className="gap-2"
-              >
-                <FileText className="h-4 w-4" />
-                Visualizar PDF
-              </Button>
             </div>
           )}
         </div>
