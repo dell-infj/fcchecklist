@@ -174,7 +174,7 @@ const ChecklistEditor = () => {
     if (selectedVehicleCategory) {
       loadChecklistItems();
     }
-  }, [selectedVehicleCategory]);
+  }, [selectedVehicleCategory, profile?.unique_id]);
 
   const loadVehicleCategories = async () => {
     try {
@@ -193,6 +193,7 @@ const ChecklistEditor = () => {
       if (categories.length > 0 && !selectedVehicleCategory) {
         setSelectedVehicleCategory(categories[0].name);
       }
+      setLoading(false);
     } catch (error) {
       console.error('Error loading vehicle categories:', error);
       toast({
