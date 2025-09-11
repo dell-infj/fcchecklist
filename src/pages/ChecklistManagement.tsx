@@ -16,7 +16,9 @@ import {
   FileText,
   Car,
   User,
-  Calendar
+  Calendar,
+  RefreshCw,
+  Upload
 } from 'lucide-react';
 import {
   AlertDialog,
@@ -29,6 +31,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { getPDFBlob } from '@/lib/pdfGenerator';
 
 interface ChecklistItem {
   id: string;
@@ -67,6 +70,8 @@ export default function ChecklistManagement() {
   const [checklists, setChecklists] = useState<ChecklistItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [regeneratingId, setRegeneratingId] = useState<string | null>(null);
+  const [regeneratingAll, setRegeneratingAll] = useState(false);
 
   useEffect(() => {
     fetchChecklists();
@@ -93,6 +98,9 @@ export default function ChecklistManagement() {
           all_outside_lights,
           cigarette_lighter,
           all_cabinets_latches,
+          checklist_data,
+          vehicle_id,
+          inspector_id,
           vehicles!inner (
             license_plate,
             vehicle_category,
@@ -125,6 +133,9 @@ export default function ChecklistManagement() {
         all_outside_lights: item.all_outside_lights,
         cigarette_lighter: item.cigarette_lighter,
         all_cabinets_latches: item.all_cabinets_latches,
+        checklist_data: item.checklist_data,
+        vehicle_id: item.vehicle_id,
+        inspector_id: item.inspector_id,
         vehicle: {
           license_plate: item.vehicles?.license_plate || '',
           vehicle_category: item.vehicles?.vehicle_category || '',
@@ -321,6 +332,214 @@ export default function ChecklistManagement() {
     }
   };
 
+  const handleRegeneratePDF = async (checklist: ChecklistItem) => {
+    try {
+      setRegeneratingId(checklist.id);
+      
+      // Buscar dados dos itens do checklist pela categoria do veículo
+      const { data: checklistItems, error: itemsError } = await supabase
+        .from('checklist_items')
+        .select('*')
+        .eq('category', checklist.vehicle.vehicle_category.toLowerCase())
+        .eq('active', true)
+        .order('item_order');
+
+      let items = checklistItems;
+      
+      // Se não encontrou por categoria, tentar por unique_id (fallback)
+      if (!items || items.length === 0) {
+        const { data: itemsDataUnique } = await supabase
+          .from('checklist_items')
+          .select('*')
+          .eq('unique_id', checklist.vehicle.vehicle_category.toUpperCase())
+          .eq('active', true)
+          .order('item_order');
+        items = itemsDataUnique;
+      }
+
+      // Extrair dados do checklist_data se disponível
+      const checklistData = (checklist as any).checklist_data || {};
+      const vehicleMileage = checklistData.vehicle_mileage || "Não informado";
+      const costCenter = checklistData.cost_center || "Não informado";
+
+      // Criar dados completos para o PDF seguindo o modelo do Preview
+      const pdfData = {
+        vehicleInfo: {
+          model: checklist.vehicle.model,
+          license_plate: checklist.vehicle.license_plate,
+          year: checklist.vehicle.year,
+          vehicle_category: checklist.vehicle.vehicle_category
+        },
+        inspectorInfo: {
+          first_name: checklist.inspector.first_name,
+          last_name: checklist.inspector.last_name
+        },
+        companyInfo: {
+          name: 'FC GESTÃO EMPRESARIAL LTDA',
+          cnpj: '05.873.924/0001-80',
+          email: 'contato@fcgestao.com.br',
+          address: 'Rua princesa imperial, 220 - Realengo - RJ'
+        },
+        inspection_date: new Date(checklist.inspection_date),
+        vehicle_mileage: vehicleMileage,
+        cost_center: costCenter,
+        overall_condition: checklist.overall_condition || "Não informado",
+        additional_notes: checklist.additional_notes || "",
+        interior_photo_url: checklist.interior_photo_url,
+        exterior_photo_url: checklist.exterior_photo_url,
+        inspector_signature: checklist.inspector_signature,
+        // Mapear dados do checklist seguindo a estrutura do Preview
+        checklistItems: (() => {
+          const mappedItems: Record<string, { status: string; observation?: string }> = {};
+          
+          // Se tem itens configurados, mapear cada um
+          if (items && items.length > 0) {
+            items.forEach((item: any) => {
+              const fieldKey = item.name
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^a-z0-9]/g, '_')
+                .replace(/_+/g, '_')
+                .replace(/^_|_$/g, '');
+              
+              // Buscar no checklist_data primeiro
+              const itemData = checklistData[fieldKey];
+              if (itemData && typeof itemData === 'object') {
+                mappedItems[fieldKey] = {
+                  status: itemData.status || 'não verificado',
+                  observation: itemData.observation
+                };
+              } else {
+                // Fallback para campos diretos do checklist
+                const directValue = (checklist as any)[fieldKey];
+                if (directValue !== undefined) {
+                  let status = 'não verificado';
+                  if (typeof directValue === 'boolean') {
+                    status = directValue ? 'funcionando' : 'ausente';
+                  } else if (typeof directValue === 'string') {
+                    status = directValue;
+                  }
+                  mappedItems[fieldKey] = { status };
+                }
+              }
+            });
+          } else {
+            // Mapear campos booleanos básicos se não há itens configurados
+            const booleanFields = {
+              all_interior_lights: checklist.all_interior_lights,
+              passenger_seat: checklist.passenger_seat,
+              fire_extinguisher: checklist.fire_extinguisher,
+              all_outside_lights: checklist.all_outside_lights
+            };
+            
+            Object.entries(booleanFields).forEach(([key, value]) => {
+              if (value !== undefined) {
+                mappedItems[key] = { 
+                  status: typeof value === 'boolean' ? (value ? 'funcionando' : 'ausente') : String(value)
+                };
+              }
+            });
+            
+            // Campos string
+            if (checklist.cigarette_lighter) {
+              mappedItems.cigarette_lighter = { status: checklist.cigarette_lighter };
+            }
+            if (checklist.all_cabinets_latches) {
+              mappedItems.all_cabinets_latches = { status: checklist.all_cabinets_latches };
+            }
+          }
+          
+          return mappedItems;
+        })(),
+        checklist_items: items || []
+      };
+
+      // Gerar PDF
+      const doc = await generateChecklistPDF(pdfData);
+      const pdfBlob = getPDFBlob(doc);
+      
+      // Upload para Supabase Storage
+      const filename = `checklist_${checklist.vehicle.license_plate}_${checklist.inspection_date}_${Date.now()}.pdf`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('checklist-pdfs')
+        .upload(filename, pdfBlob, {
+          contentType: 'application/pdf',
+          upsert: true
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Atualizar URL do PDF no banco de dados
+      const { error: updateError } = await supabase
+        .from('checklists')
+        .update({ pdf_url: uploadData.path })
+        .eq('id', checklist.id);
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: "Sucesso",
+        description: "PDF regenerado e salvo com sucesso!"
+      });
+
+      // Recarregar dados
+      fetchChecklists();
+    } catch (error) {
+      console.error('Error regenerating PDF:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao regenerar PDF",
+        variant: "destructive"
+      });
+    } finally {
+      setRegeneratingId(null);
+    }
+  };
+
+  const handleRegenerateAllPDFs = async () => {
+    try {
+      setRegeneratingAll(true);
+      
+      // Filtrar checklists que não têm PDF ou têm status completed
+      const checklistsToRegenerate = checklists.filter(checklist => 
+        !checklist.pdf_url || checklist.status === 'completed'
+      );
+
+      if (checklistsToRegenerate.length === 0) {
+        toast({
+          title: "Info",
+          description: "Todos os checklists já possuem PDFs atualizados."
+        });
+        return;
+      }
+
+      // Processar em lotes para evitar sobrecarga
+      for (let i = 0; i < checklistsToRegenerate.length; i++) {
+        await handleRegeneratePDF(checklistsToRegenerate[i]);
+        
+        // Pequeno delay entre cada regeneração
+        if (i < checklistsToRegenerate.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
+
+      toast({
+        title: "Sucesso",
+        description: `${checklistsToRegenerate.length} PDFs regenerados com sucesso!`
+      });
+    } catch (error) {
+      console.error('Error regenerating all PDFs:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao regenerar PDFs em lote",
+        variant: "destructive"
+      });
+    } finally {
+      setRegeneratingAll(false);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'completed':
@@ -361,8 +580,28 @@ export default function ChecklistManagement() {
             <span className="sm:hidden">Home</span>
           </Button>
         </div>
-        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Gerenciamento de Checklists</h1>
-        <p className="text-muted-foreground text-xs sm:text-sm">Visualize, baixe e gerencie os checklists de inspeção</p>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-2">
+          <div>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Gerenciamento de Checklists</h1>
+            <p className="text-muted-foreground text-xs sm:text-sm">Visualize, baixe e gerencie os checklists de inspeção</p>
+          </div>
+          
+          {checklists.length > 0 && (
+            <Button
+              variant="outline"
+              onClick={handleRegenerateAllPDFs}
+              disabled={regeneratingAll}
+              className="gap-2 w-full sm:w-auto"
+            >
+              {regeneratingAll ? (
+                <RefreshCw className="w-4 h-4 animate-spin" />
+              ) : (
+                <Upload className="w-4 h-4" />
+              )}
+              {regeneratingAll ? 'Regenerando...' : 'Regenerar Todos PDFs'}
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="grid gap-3 sm:gap-4 lg:gap-6">
@@ -435,6 +674,21 @@ export default function ChecklistManagement() {
                     >
                       <Download className="w-3 h-3 sm:w-4 sm:h-4" />
                       PDF
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleRegeneratePDF(checklist)}
+                      disabled={regeneratingId === checklist.id}
+                      className="gap-2 text-xs sm:text-sm w-full md:w-auto"
+                    >
+                      {regeneratingId === checklist.id ? (
+                        <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" />
+                      ) : (
+                        <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4" />
+                      )}
+                      Regenerar
                     </Button>
 
                     <AlertDialog>
