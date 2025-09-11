@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Edit, FileText, Download, ArrowLeft, Home, Plus } from 'lucide-react';
+import { Edit, FileText, Download, ArrowLeft, Home, Plus, Trash2 } from 'lucide-react';
 
 interface Vehicle {
   id: string;
@@ -39,7 +39,7 @@ export default function VehicleManagement() {
   const [uploadingPdf, setUploadingPdf] = useState(false);
   const [availableCompanies, setAvailableCompanies] = useState<string[]>([]);
   const [isAddingVehicle, setIsAddingVehicle] = useState(false);
-  const [vehicleCategories, setVehicleCategories] = useState<{value: string; label: string}[]>([]);
+  const [vehicleCategories, setVehicleCategories] = useState<{value: string; label: string; icon_name?: string}[]>([]);
   const [newVehicle, setNewVehicle] = useState({
     vehicle_category: '',
     owner_unique_id: '',
@@ -73,7 +73,7 @@ export default function VehicleManagement() {
     try {
       const { data, error } = await supabase
         .from('vehicle_categories')
-        .select('name, label')
+        .select('name, label, icon_name')
         .eq('active', true)
         .order('name');
 
@@ -81,26 +81,19 @@ export default function VehicleManagement() {
 
       const categories = (data || []).map(cat => ({
         value: cat.name.toLowerCase(),
-        label: cat.label
+        label: cat.label,
+        icon_name: cat.icon_name
       }));
       setVehicleCategories(categories);
     } catch (error) {
       console.error('Error fetching vehicle categories:', error);
-      // Fallback para categorias padrão se houver erro - usar as categorias específicas atuais
+      // Fallback para categorias padrão se houver erro
       setVehicleCategories([
         { value: 'carro', label: 'Carro' },
         { value: 'moto', label: 'Moto' },
-        { value: 'caminhao_carroceria', label: 'Caminhão Carroceria' },
-        { value: 'caminhao_basculante', label: 'Caminhão Basculante' },
-        { value: 'caminhao_munck', label: 'Caminhão Munck' },
-        { value: 'caminhao_pipa', label: 'Caminhão Pipa' },
-        { value: 'carreta_prancha', label: 'Carreta Prancha' },
-        { value: 'retroescavadeira', label: 'Retroescavadeira/Valetadeira' },
-        { value: 'escavadeira', label: 'Escavadeira/Trator Esteira' },
-        { value: 'pa_carregadeira', label: 'Pá Carregadeira' },
-        { value: 'motoniveladora', label: 'Motoniveladora' },
-        { value: 'rolo_compactador', label: 'Rolo Compactador' },
-        { value: 'hidrojato', label: 'Hidrojato/Sucção/Roots' }
+        { value: 'caminhao', label: 'Caminhão' },
+        { value: 'retroescavadeira', label: 'Retroescavadeira' },
+        { value: 'outros', label: 'Outros' }
       ]);
     }
   };
@@ -352,6 +345,35 @@ export default function VehicleManagement() {
     }
   };
 
+  const handleDeleteVehicle = async (vehicleId: string, licensePlate: string) => {
+    if (!confirm(`Tem certeza que deseja remover o veículo ${licensePlate}?`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('vehicles')
+        .delete()
+        .eq('id', vehicleId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso",
+        description: "Veículo removido com sucesso!"
+      });
+
+      fetchVehicles();
+    } catch (error) {
+      console.error('Error deleting vehicle:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao remover veículo",
+        variant: "destructive"
+      });
+    }
+  };
+
   if (loading) {
     return <div className="flex justify-center items-center h-64">Carregando...</div>;
   }
@@ -564,194 +586,201 @@ export default function VehicleManagement() {
                     </Badge>
                   </CardTitle>
                   <CardDescription className="text-xs sm:text-sm break-words">
-                    {vehicle.model} • {vehicle.vehicle_category} • {vehicle.year}
+                    {vehicle.model} • {vehicleCategories.find(cat => cat.value === vehicle.vehicle_category)?.label || vehicle.vehicle_category} • {vehicle.year}
                   </CardDescription>
                 </div>
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setEditingVehicle(vehicle)}
-                      className="w-full md:w-auto text-xs sm:text-sm"
-                    >
-                      <Edit className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                      Editar
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-[95vw] sm:max-w-[90vw] lg:max-w-2xl max-h-[95vh] overflow-y-auto mx-1 sm:mx-2 lg:mx-auto">
-                    <DialogHeader>
-                      <DialogTitle>Editar Veículo - {vehicle.license_plate}</DialogTitle>
-                    </DialogHeader>
-                    {editingVehicle && (
-                      <div className="grid gap-3 sm:gap-4">
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEditingVehicle(vehicle)}
+                        className="w-full sm:w-auto text-xs sm:text-sm"
+                      >
+                        <Edit className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                        Editar
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-[95vw] sm:max-w-[90vw] lg:max-w-2xl max-h-[95vh] overflow-y-auto mx-1 sm:mx-2 lg:mx-auto">
+                      <DialogHeader>
+                        <DialogTitle>Editar Veículo - {vehicle.license_plate}</DialogTitle>
+                      </DialogHeader>
+                      {editingVehicle && (
+                        <div className="grid gap-3 sm:gap-4">
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
+                            <div>
+                              <Label>Categoria *</Label>
+                              <Select
+                                value={editingVehicle.vehicle_category}
+                                onValueChange={(value) => setEditingVehicle(prev => prev ? { ...prev, vehicle_category: value } : null)}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {vehicleCategories.map(category => (
+                                    <SelectItem key={category.value} value={category.value}>
+                                      {category.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label>Proprietário *</Label>
+                              <Select
+                                value={editingVehicle.owner_unique_id}
+                                onValueChange={(value) => setEditingVehicle(prev => prev ? { ...prev, owner_unique_id: value } : null)}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {availableCompanies.map((company) => (
+                                    <SelectItem key={company} value={company}>
+                                      {company}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
+                            <div>
+                              <Label>Placa *</Label>
+                              <Input
+                                value={editingVehicle.license_plate}
+                                onChange={(e) => setEditingVehicle(prev => prev ? { ...prev, license_plate: e.target.value } : null)}
+                              />
+                            </div>
+                            <div>
+                              <Label>Modelo *</Label>
+                              <Input
+                                value={editingVehicle.model}
+                                onChange={(e) => setEditingVehicle(prev => prev ? { ...prev, model: e.target.value } : null)}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
+                            <div>
+                              <Label>Ano</Label>
+                              <Input
+                                type="number"
+                                value={editingVehicle.year}
+                                onChange={(e) => setEditingVehicle(prev => prev ? { ...prev, year: parseInt(e.target.value) } : null)}
+                              />
+                            </div>
+                            <div>
+                              <Label>Combustível</Label>
+                              <Select
+                                value={editingVehicle.fuel_type}
+                                onValueChange={(value) => setEditingVehicle(prev => prev ? { ...prev, fuel_type: value } : null)}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="gasolina">Gasolina</SelectItem>
+                                  <SelectItem value="etanol">Etanol</SelectItem>
+                                  <SelectItem value="diesel-s10">Diesel S10</SelectItem>
+                                  <SelectItem value="ev">EV (Elétrico)</SelectItem>
+                                  <SelectItem value="gnv">GNV</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label>Chassi</Label>
+                              <Input
+                                value={editingVehicle.chassis}
+                                onChange={(e) => setEditingVehicle(prev => prev ? { ...prev, chassis: e.target.value } : null)}
+                              />
+                            </div>
+                            <div>
+                              <Label>Renavam</Label>
+                              <Input
+                                value={editingVehicle.renavam}
+                                onChange={(e) => setEditingVehicle(prev => prev ? { ...prev, renavam: e.target.value } : null)}
+                              />
+                            </div>
+                          </div>
+
                           <div>
-                            <Label>Categoria *</Label>
+                            <Label>Número CRV</Label>
+                            <Input
+                              value={editingVehicle.crv_number}
+                              onChange={(e) => setEditingVehicle(prev => prev ? { ...prev, crv_number: e.target.value } : null)}
+                            />
+                          </div>
+
+                          {editingVehicle.vehicle_category === 'caminhao' && (
+                            <div>
+                              <Label>Número do Caminhão (único)</Label>
+                              <Input
+                                value={editingVehicle.truck_number || ''}
+                                onChange={(e) => setEditingVehicle(prev => prev ? { ...prev, truck_number: e.target.value } : null)}
+                              />
+                              <p className="text-xs text-muted-foreground">Se vazio, usaremos a placa como número.</p>
+                            </div>
+                          )}
+
+                          <div>
+                            <Label>Status</Label>
                             <Select
-                              value={editingVehicle.vehicle_category}
-                              onValueChange={(value) => setEditingVehicle(prev => prev ? { ...prev, vehicle_category: value } : null)}
+                              value={editingVehicle.status}
+                              onValueChange={(value) => setEditingVehicle(prev => prev ? { ...prev, status: value } : null)}
                             >
                               <SelectTrigger>
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="carro">Carro</SelectItem>
-                                <SelectItem value="caminhao">Caminhão</SelectItem>
-                                <SelectItem value="moto">Moto</SelectItem>
-                                <SelectItem value="retroescavadeira">Retroescavadeira</SelectItem>
-                                <SelectItem value="passageiro">Passageiro</SelectItem>
-                                <SelectItem value="onibus">Ônibus</SelectItem>
-                                <SelectItem value="trator">Trator</SelectItem>
-                                <SelectItem value="outros">Outros</SelectItem>
+                                <SelectItem value="active">Ativo</SelectItem>
+                                <SelectItem value="inactive">Inativo</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
+
                           <div>
-                            <Label>Proprietário *</Label>
-                            <Select
-                              value={editingVehicle.owner_unique_id}
-                              onValueChange={(value) => setEditingVehicle(prev => prev ? { ...prev, owner_unique_id: value } : null)}
-                            >
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {availableCompanies.map((company) => (
-                                  <SelectItem key={company} value={company}>
-                                    {company}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-                        
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
-                          <div>
-                            <Label>Placa *</Label>
+                            <Label>Atualizar PDF do CRLV</Label>
                             <Input
-                              value={editingVehicle.license_plate}
-                              onChange={(e) => setEditingVehicle(prev => prev ? { ...prev, license_plate: e.target.value } : null)}
+                              type="file"
+                              accept=".pdf"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handlePdfUpload(file, editingVehicle.id);
+                              }}
+                              disabled={uploadingPdf}
                             />
+                            {uploadingPdf && <p className="text-sm text-muted-foreground">Enviando PDF...</p>}
                           </div>
-                          <div>
-                            <Label>Modelo *</Label>
-                            <Input
-                              value={editingVehicle.model}
-                              onChange={(e) => setEditingVehicle(prev => prev ? { ...prev, model: e.target.value } : null)}
-                            />
-                          </div>
-                        </div>
 
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
-                          <div>
-                            <Label>Ano</Label>
-                            <Input
-                              type="number"
-                              value={editingVehicle.year}
-                              onChange={(e) => setEditingVehicle(prev => prev ? { ...prev, year: parseInt(e.target.value) } : null)}
-                            />
-                          </div>
-                          <div>
-                            <Label>Combustível</Label>
-                            <Select
-                              value={editingVehicle.fuel_type}
-                              onValueChange={(value) => setEditingVehicle(prev => prev ? { ...prev, fuel_type: value } : null)}
-                            >
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="gasolina">Gasolina</SelectItem>
-                                <SelectItem value="etanol">Etanol</SelectItem>
-                                <SelectItem value="diesel-s10">Diesel S10</SelectItem>
-                                <SelectItem value="ev">EV (Elétrico)</SelectItem>
-                                <SelectItem value="gnv">GNV</SelectItem>
-                              </SelectContent>
-                            </Select>
+                          <div className="flex justify-end gap-2">
+                            <Button variant="outline" onClick={() => setEditingVehicle(null)}>
+                              Cancelar
+                            </Button>
+                            <Button onClick={handleUpdateVehicle}>
+                              Salvar Alterações
+                            </Button>
                           </div>
                         </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label>Chassi</Label>
-                            <Input
-                              value={editingVehicle.chassis}
-                              onChange={(e) => setEditingVehicle(prev => prev ? { ...prev, chassis: e.target.value } : null)}
-                            />
-                          </div>
-                          <div>
-                            <Label>Renavam</Label>
-                            <Input
-                              value={editingVehicle.renavam}
-                              onChange={(e) => setEditingVehicle(prev => prev ? { ...prev, renavam: e.target.value } : null)}
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <Label>Número CRV</Label>
-                          <Input
-                            value={editingVehicle.crv_number}
-                            onChange={(e) => setEditingVehicle(prev => prev ? { ...prev, crv_number: e.target.value } : null)}
-                          />
-                        </div>
-
-                        {editingVehicle.vehicle_category === 'caminhao' && (
-                          <div>
-                            <Label>Número do Caminhão (único)</Label>
-                            <Input
-                              value={editingVehicle.truck_number || ''}
-                              onChange={(e) => setEditingVehicle(prev => prev ? { ...prev, truck_number: e.target.value } : null)}
-                            />
-                            <p className="text-xs text-muted-foreground">Se vazio, usaremos a placa como número.</p>
-                          </div>
-                        )}
-
-
-                        <div>
-                          <Label>Status</Label>
-                          <Select
-                            value={editingVehicle.status}
-                            onValueChange={(value) => setEditingVehicle(prev => prev ? { ...prev, status: value } : null)}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="active">Ativo</SelectItem>
-                              <SelectItem value="inactive">Inativo</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div>
-                          <Label>Atualizar PDF do CRLV</Label>
-                          <Input
-                            type="file"
-                            accept=".pdf"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) handlePdfUpload(file, editingVehicle.id);
-                            }}
-                            disabled={uploadingPdf}
-                          />
-                          {uploadingPdf && <p className="text-sm text-muted-foreground">Enviando PDF...</p>}
-                        </div>
-
-                        <div className="flex justify-end gap-2">
-                          <Button variant="outline" onClick={() => setEditingVehicle(null)}>
-                            Cancelar
-                          </Button>
-                          <Button onClick={handleUpdateVehicle}>
-                            Salvar Alterações
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </DialogContent>
-                </Dialog>
+                      )}
+                    </DialogContent>
+                  </Dialog>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDeleteVehicle(vehicle.id, vehicle.license_plate)}
+                    className="w-full sm:w-auto text-xs sm:text-sm text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                    Remover
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
