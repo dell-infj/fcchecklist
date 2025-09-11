@@ -1,0 +1,126 @@
+-- Inserir/atualizar categorias de veículos (continuação com itens restantes)
+-- Itens para HIDROJATO
+INSERT INTO public.checklist_items (name, description, category, required, item_order, unique_id) VALUES
+('Sistema de sucção', 'Verificar funcionamento do sistema de sucção', 'hidrojato', true, 1, 'default'),
+('Sistema hidrojato', 'Testar funcionamento do sistema de hidrojato', 'hidrojato', true, 2, 'default'),
+('Mangueiras', 'Verificar estado das mangueiras de alta pressão', 'hidrojato', true, 3, 'default'),
+('Bomba de alta pressão', 'Testar funcionamento da bomba', 'hidrojato', true, 4, 'default'),
+('Tanque de água', 'Verificar integridade do tanque de água', 'hidrojato', true, 5, 'default'),
+('Sistema roots', 'Verificar funcionamento do sistema roots', 'hidrojato', true, 6, 'default'),
+('Pneus', 'Verificar estado de todos os pneus', 'hidrojato', true, 7, 'default'),
+('Motor', 'Verificar funcionamento do motor principal', 'hidrojato', true, 8, 'default'),
+('Sistema elétrico', 'Verificar funcionamento do sistema elétrico', 'hidrojato', true, 9, 'default'),
+('Válvulas de segurança', 'Testar válvulas de alívio de pressão', 'hidrojato', true, 10, 'default'),
+('Filtros', 'Verificar estado dos filtros do sistema', 'hidrojato', true, 11, 'default'),
+('Manômetros', 'Verificar funcionamento dos medidores de pressão', 'hidrojato', true, 12, 'default'),
+('Documentação', 'Verificar documentos do equipamento', 'hidrojato', true, 13, 'default'),
+('EPIs', 'Verificar equipamentos de proteção individual', 'hidrojato', true, 14, 'default'),
+('Extintor de incêndio', 'Verificar presença e validade', 'hidrojato', true, 15, 'default'),
+('Bicos aspersores', 'Verificar estado dos bicos', 'hidrojato', false, 16, 'default'),
+('Sistema de aquecimento', 'Verificar sistema de aquecimento da água', 'hidrojato', false, 17, 'default'),
+('Cabine', 'Verificar estado da cabine', 'hidrojato', false, 18, 'default');
+
+-- Itens para PÁ CARREGADEIRA
+INSERT INTO public.checklist_items (name, description, category, required, item_order, unique_id) VALUES
+('Caçamba dianteira', 'Verificar funcionamento da caçamba frontal', 'pa_carregadeira', true, 1, 'default'),
+('Sistema hidráulico', 'Testar funcionamento do sistema hidráulico', 'pa_carregadeira', true, 2, 'default'),
+('Braços de elevação', 'Verificar movimentação dos braços', 'pa_carregadeira', true, 3, 'default'),
+('Pneus', 'Verificar estado de todos os pneus', 'pa_carregadeira', true, 4, 'default'),
+('Motor', 'Verificar funcionamento do motor', 'pa_carregadeira', true, 5, 'default'),
+('Transmissão', 'Testar funcionamento da transmissão', 'pa_carregadeira', true, 6, 'default'),
+('Freios', 'Testar sistema de freios', 'pa_carregadeira', true, 7, 'default'),
+('Sistema elétrico', 'Verificar funcionamento do sistema elétrico', 'pa_carregadeira', true, 8, 'default'),
+('Faróis de trabalho', 'Testar iluminação para trabalho', 'pa_carregadeira', true, 9, 'default'),
+('Buzina de ré', 'Testar alarme sonoro de ré', 'pa_carregadeira', true, 10, 'default'),
+('Óleo hidráulico', 'Verificar nível e estado do óleo', 'pa_carregadeira', true, 11, 'default'),
+('Filtros', 'Verificar estado dos filtros', 'pa_carregadeira', true, 12, 'default'),
+('Articulação central', 'Verificar funcionamento da articulação', 'pa_carregadeira', true, 13, 'default'),
+('Documentação', 'Verificar documentos da máquina', 'pa_carregadeira', true, 14, 'default'),
+('Extintor de incêndio', 'Verificar presença e validade', 'pa_carregadeira', true, 15, 'default'),
+('Cabine/ROPS', 'Verificar estrutura de proteção', 'pa_carregadeira', true, 16, 'default'),
+('Ar condicionado', 'Verificar funcionamento do ar condicionado', 'pa_carregadeira', false, 17, 'default'),
+('Sistema de inclinação', 'Testar inclinação da caçamba', 'pa_carregadeira', false, 18, 'default');
+
+-- Itens para ESCAVADEIRA
+INSERT INTO public.checklist_items (name, description, category, required, item_order, unique_id) VALUES
+('Sistema hidráulico', 'Verificar funcionamento do sistema hidráulico', 'escavadeira', true, 1, 'default'),
+('Braço escavador', 'Testar movimentação do braço principal', 'escavadeira', true, 2, 'default'),
+('Lança', 'Verificar funcionamento da lança', 'escavadeira', true, 3, 'default'),
+('Caçamba', 'Testar movimentação da caçamba', 'escavadeira', true, 4, 'default'),
+('Rotação da torre', 'Testar rotação 360 graus', 'escavadeira', true, 5, 'default'),
+('Esteiras', 'Verificar estado das esteiras', 'escavadeira', true, 6, 'default'),
+('Motor', 'Verificar funcionamento do motor', 'escavadeira', true, 7, 'default'),
+('Sistema elétrico', 'Verificar funcionamento do sistema elétrico', 'escavadeira', true, 8, 'default'),
+('Faróis de trabalho', 'Testar iluminação para trabalho', 'escavadeira', true, 9, 'default'),
+('Buzina de ré', 'Testar alarme sonoro de ré', 'escavadeira', true, 10, 'default'),
+('Óleo hidráulico', 'Verificar nível e estado do óleo', 'escavadeira', true, 11, 'default'),
+('Filtros', 'Verificar estado dos filtros', 'escavadeira', true, 12, 'default'),
+('Sistema de deslocamento', 'Testar movimentação das esteiras', 'escavadeira', true, 13, 'default'),
+('Documentação', 'Verificar documentos da máquina', 'escavadeira', true, 14, 'default'),
+('Extintor de incêndio', 'Verificar presença e validade', 'escavadeira', true, 15, 'default'),
+('Cabine/ROPS', 'Verificar estrutura de proteção', 'escavadeira', true, 16, 'default'),
+('Ar condicionado', 'Verificar funcionamento do ar condicionado', 'escavadeira', false, 17, 'default'),
+('Martelo hidráulico', 'Verificar acessório martelo (se equipado)', 'escavadeira', false, 18, 'default');
+
+-- Itens para MOTONIVELADORA
+INSERT INTO public.checklist_items (name, description, category, required, item_order, unique_id) VALUES
+('Lâmina niveladora', 'Verificar funcionamento da lâmina principal', 'motoniveladora', true, 1, 'default'),
+('Sistema hidráulico', 'Testar funcionamento do sistema hidráulico', 'motoniveladora', true, 2, 'default'),
+('Articulação', 'Verificar funcionamento da articulação central', 'motoniveladora', true, 3, 'default'),
+('Pneus dianteiros', 'Verificar estado dos pneus dianteiros', 'motoniveladora', true, 4, 'default'),
+('Pneus traseiros', 'Verificar estado dos pneus traseiros', 'motoniveladora', true, 5, 'default'),
+('Motor', 'Verificar funcionamento do motor', 'motoniveladora', true, 6, 'default'),
+('Transmissão', 'Testar funcionamento da transmissão', 'motoniveladora', true, 7, 'default'),
+('Sistema elétrico', 'Verificar funcionamento do sistema elétrico', 'motoniveladora', true, 8, 'default'),
+('Faróis de trabalho', 'Testar iluminação para trabalho', 'motoniveladora', true, 9, 'default'),
+('Buzina', 'Testar funcionamento da buzina', 'motoniveladora', true, 10, 'default'),
+('Freios', 'Testar sistema de freios', 'motoniveladora', true, 11, 'default'),
+('Escarificador', 'Verificar funcionamento do escarificador traseiro', 'motoniveladora', true, 12, 'default'),
+('Óleo hidráulico', 'Verificar nível e estado do óleo', 'motoniveladora', true, 13, 'default'),
+('Documentação', 'Verificar documentos da máquina', 'motoniveladora', true, 14, 'default'),
+('Extintor de incêndio', 'Verificar presença e validade', 'motoniveladora', true, 15, 'default'),
+('Cabine', 'Verificar estado da cabine', 'motoniveladora', true, 16, 'default'),
+('Sistema de inclinação lateral', 'Testar inclinação lateral da lâmina', 'motoniveladora', false, 17, 'default'),
+('Ar condicionado', 'Verificar funcionamento do ar condicionado', 'motoniveladora', false, 18, 'default');
+
+-- Itens para ROLO COMPACTADOR
+INSERT INTO public.checklist_items (name, description, category, required, item_order, unique_id) VALUES
+('Cilindro compactador', 'Verificar estado do cilindro de compactação', 'rolo_compactador', true, 1, 'default'),
+('Sistema de vibração', 'Testar funcionamento do sistema vibratório', 'rolo_compactador', true, 2, 'default'),
+('Sistema de aspersão', 'Verificar sistema de aspersão de água', 'rolo_compactador', true, 3, 'default'),
+('Tanque de água', 'Verificar integridade do tanque de água', 'rolo_compactador', true, 4, 'default'),
+('Pneus traseiros', 'Verificar estado dos pneus traseiros', 'rolo_compactador', true, 5, 'default'),
+('Motor', 'Verificar funcionamento do motor', 'rolo_compactador', true, 6, 'default'),
+('Sistema hidráulico', 'Testar funcionamento do sistema hidráulico', 'rolo_compactador', true, 7, 'default'),
+('Sistema elétrico', 'Verificar funcionamento do sistema elétrico', 'rolo_compactador', true, 8, 'default'),
+('Faróis de trabalho', 'Testar iluminação para trabalho', 'rolo_compactador', true, 9, 'default'),
+('Buzina de ré', 'Testar alarme sonoro de ré', 'rolo_compactador', true, 10, 'default'),
+('Freios', 'Testar sistema de freios', 'rolo_compactador', true, 11, 'default'),
+('Transmissão', 'Verificar funcionamento da transmissão', 'rolo_compactador', true, 12, 'default'),
+('Óleo hidráulico', 'Verificar nível e estado do óleo', 'rolo_compactador', true, 13, 'default'),
+('Documentação', 'Verificar documentos da máquina', 'rolo_compactador', true, 14, 'default'),
+('Extintor de incêndio', 'Verificar presença e validade', 'rolo_compactador', true, 15, 'default'),
+('Cabine', 'Verificar estado da cabine', 'rolo_compactador', true, 16, 'default'),
+('Raspador do cilindro', 'Verificar funcionamento do raspador', 'rolo_compactador', false, 17, 'default'),
+('Ar condicionado', 'Verificar funcionamento do ar condicionado', 'rolo_compactador', false, 18, 'default');
+
+-- Itens para CAMINHÃO MUNCK
+INSERT INTO public.checklist_items (name, description, category, required, item_order, unique_id) VALUES
+('Sistema de guincho', 'Verificar funcionamento do guincho principal', 'caminhao_munck', true, 1, 'default'),
+('Lança telescópica', 'Testar extensão e retração da lança', 'caminhao_munck', true, 2, 'default'),
+('Sistema hidráulico', 'Verificar funcionamento do sistema hidráulico', 'caminhao_munck', true, 3, 'default'),
+('Estabilizadores', 'Testar funcionamento dos estabilizadores', 'caminhao_munck', true, 4, 'default'),
+('Gancho/Moitão', 'Verificar estado do gancho e moitão', 'caminhao_munck', true, 5, 'default'),
+('Cabo de aço', 'Verificar estado do cabo de aço', 'caminhao_munck', true, 6, 'default'),
+('Pneus', 'Verificar estado de todos os pneus', 'caminhao_munck', true, 7, 'default'),
+('Motor', 'Verificar funcionamento do motor', 'caminhao_munck', true, 8, 'default'),
+('Sistema elétrico', 'Verificar funcionamento do sistema elétrico', 'caminhao_munck', true, 9, 'default'),
+('Freios', 'Testar sistema de freios', 'caminhao_munck', true, 10, 'default'),
+('Limitador de carga', 'Verificar funcionamento do limitador', 'caminhao_munck', true, 11, 'default'),
+('Rotação da torre', 'Testar rotação da torre do munck', 'caminhao_munck', true, 12, 'default'),
+('Óleo hidráulico', 'Verificar nível e estado do óleo', 'caminhao_munck', true, 13, 'default'),
+('Documentação', 'Verificar CRLV e ART do equipamento', 'caminhao_munck', true, 14, 'default'),
+('Extintor de incêndio', 'Verificar presença e validade', 'caminhao_munck', true, 15, 'default'),
+('Sinalização de segurança', 'Verificar equipamentos de sinalização', 'caminhao_munck', true, 16, 'default'),
+('Cabine auxiliar', 'Verificar cabine de comando do munck', 'caminhao_munck', false, 17, 'default'),
+('Sistema de comunicação', 'Verificar interfone ou rádio', 'caminhao_munck', false, 18, 'default');
