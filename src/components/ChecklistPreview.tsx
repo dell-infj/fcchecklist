@@ -65,7 +65,7 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
 
   const getStatusText = (status: string): string => {
     switch (status) {
-      case 'funcionando': return 'CONFIRME';
+      case 'funcionando': return 'CONFORME';
       case 'revisao': return 'REVISÃO';
       case 'ausente': return 'AUSENTE';
       case 'ok': return 'OK';
