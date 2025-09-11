@@ -65,7 +65,7 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
 
   const getStatusText = (status: string): string => {
     switch (status) {
-      case 'funcionando': return 'SIM';
+      case 'funcionando': return 'CONFIRME';
       case 'revisao': return 'REVISÃO';
       case 'ausente': return 'AUSENTE';
       case 'ok': return 'OK';
@@ -274,7 +274,7 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
                       <div className={`status-badge status-${status}`} style={{
                         padding: '6px 12px',
                         borderRadius: '4px',
-                        fontSize: '12px',
+                        fontSize: '22px',
                         fontWeight: 'bold',
                         whiteSpace: 'nowrap',
                         minWidth: '100px',
