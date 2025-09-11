@@ -347,14 +347,12 @@ const ChecklistView = () => {
             Voltar ao Histórico
           </Button>
           
-          {checklist.pdf_url && (
-            <div className="flex gap-2 justify-end">
-              <Button onClick={downloadPDF} className="gap-2">
-                <Download className="h-4 w-4" />
-                Baixar PDF
-              </Button>
-            </div>
-          )}
+          <div className="flex gap-2 justify-end">
+            <Button onClick={downloadPDF} className="gap-2">
+              <Download className="h-4 w-4" />
+              Baixar PDF
+            </Button>
+          </div>
         </div>
 
         {/* Document Content - Igual ao Preview do PDF */}
