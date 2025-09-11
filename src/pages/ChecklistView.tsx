@@ -304,7 +304,7 @@ const ChecklistView = () => {
 
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto space-y-6 px-4">
+      <div className="max-w-6xl mx-auto space-y-6 px-4">
         {/* Header */}
         <div className="flex flex-col gap-4">
           <Button
@@ -315,258 +315,333 @@ const ChecklistView = () => {
             <ArrowLeft className="h-4 w-4" />
             Voltar ao Histórico
           </Button>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <FileText className="h-6 w-6 text-primary" />
-              <h1 className="text-2xl font-bold">Relatório de Inspeção</h1>
+          
+          {checklist.pdf_url && (
+            <div className="flex gap-2 justify-end">
+              <Button onClick={downloadPDF} className="gap-2">
+                <Download className="h-4 w-4" />
+                Baixar PDF
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => window.open(checklist.pdf_url.startsWith('http') ? checklist.pdf_url : `${supabase.storage.from('checklist-pdfs').getPublicUrl(checklist.pdf_url).data.publicUrl}`, '_blank')}
+                className="gap-2"
+              >
+                <FileText className="h-4 w-4" />
+                Visualizar PDF
+              </Button>
             </div>
-            <div className="flex gap-2">
-              {checklist.pdf_url && (
-                <Button onClick={downloadPDF} className="gap-2">
-                  <Download className="h-4 w-4" />
-                  Baixar PDF
-                </Button>
-              )}
-              {checklist.pdf_url && (
-                <Button 
-                  variant="outline" 
-                  onClick={() => window.open(checklist.pdf_url.startsWith('http') ? checklist.pdf_url : `${supabase.storage.from('checklist-pdfs').getPublicUrl(checklist.pdf_url).data.publicUrl}`, '_blank')}
-                  className="gap-2"
-                >
-                  <FileText className="h-4 w-4" />
-                  Visualizar PDF
-                </Button>
-              )}
-            </div>
-          </div>
+          )}
         </div>
 
-        {/* Status e Informações Básicas */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>Informações da Inspeção</CardTitle>
-              {getStatusBadge(checklist.status)}
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Informações Gerais */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 bg-muted/50 rounded-lg">
-              <div>
-                <h4 className="text-sm font-medium text-muted-foreground mb-1">Data da Inspeção</h4>
-                <p className="font-semibold">{new Date(checklist.inspection_date).toLocaleDateString('pt-BR')}</p>
+        {/* Document Content - Igual ao Preview do PDF */}
+        <Card className="overflow-hidden">
+          <CardContent className="p-8 bg-white text-black">
+            <div className="preview-document" style={{ 
+              fontFamily: 'Arial, sans-serif',
+              fontSize: '14px',
+              lineHeight: '1.4',
+              color: '#000'
+            }}>
+              
+              {/* Header da Empresa */}
+              <div className="company-header text-center mb-8">
+                <h1 className="text-xl font-bold mb-2 text-black">
+                  Facilita Serviços e Construções LTDA
+                </h1>
+                <p className="text-sm text-gray-600 mb-1">
+                  CNPJ: 05.873.924/0001-80 | Email: contato@fcgestao.com.br
+                </p>
+                <p className="text-sm text-gray-600 mb-5">
+                  Rua princesa imperial, 220 - Realengo - RJ
+                </p>
+                <h2 className="text-lg font-bold text-black">
+                  CHECKLIST DE INSPEÇÃO VEICULAR
+                </h2>
               </div>
-              <div>
-                <h4 className="text-sm font-medium text-muted-foreground mb-1">Inspetor</h4>
-                <p className="font-semibold">{checklist.inspector.first_name} {checklist.inspector.last_name}</p>
-              </div>
-              <div>
-                <h4 className="text-sm font-medium text-muted-foreground mb-1">Status</h4>
-                <div className="font-semibold">{getStatusBadge(checklist.status)}</div>
-              </div>
-            </div>
 
-            {/* Quilometragem e Centro de Custo */}
-            {(checklist.checklist_data?.vehicle_mileage || checklist.checklist_data?.cost_center) && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-muted/50 rounded-lg">
-                {checklist.checklist_data?.vehicle_mileage && typeof checklist.checklist_data.vehicle_mileage === 'string' && (
-                  <div>
-                    <h4 className="text-sm font-medium text-muted-foreground mb-1">Quilometragem</h4>
-                    <p className="font-semibold">{checklist.checklist_data.vehicle_mileage} km</p>
+              {/* Informações em Duas Colunas */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div>
+                  <h3 className="text-base font-bold mb-3 pb-2 border-b border-gray-300 text-black">
+                    Informações Gerais
+                  </h3>
+                  <div className="space-y-1">
+                    <p className="text-sm">
+                      <strong>Data da Inspeção:</strong> {new Date(checklist.inspection_date).toLocaleDateString('pt-BR')}
+                    </p>
+                    <p className="text-sm">
+                      <strong>Inspetor:</strong> {checklist.inspector.first_name} {checklist.inspector.last_name}
+                    </p>
+                    <p className="text-sm">
+                      <strong>Quilometragem:</strong> {checklist.checklist_data?.vehicle_mileage && typeof checklist.checklist_data.vehicle_mileage === 'string' ? `${checklist.checklist_data.vehicle_mileage} km` : 'Não informado'}
+                    </p>
+                    <p className="text-sm">
+                      <strong>Centro de Custo:</strong> {checklist.checklist_data?.cost_center && typeof checklist.checklist_data.cost_center === 'string' ? checklist.checklist_data.cost_center : 'Não informado'}
+                    </p>
                   </div>
-                )}
-                {checklist.checklist_data?.cost_center && typeof checklist.checklist_data.cost_center === 'string' && (
-                  <div>
-                    <h4 className="text-sm font-medium text-muted-foreground mb-1">Centro de Custo</h4>
-                    <p className="font-semibold">{checklist.checklist_data.cost_center}</p>
+                </div>
+                
+                <div>
+                  <h3 className="text-base font-bold mb-3 pb-2 border-b border-gray-300 text-black">
+                    Dados do Veículo
+                  </h3>
+                  <div className="space-y-1">
+                    <p className="text-sm">
+                      <strong>Modelo:</strong> {checklist.vehicle.model}
+                    </p>
+                    <p className="text-sm">
+                      <strong>Placa:</strong> {checklist.vehicle.license_plate}
+                    </p>
+                    <p className="text-sm">
+                      <strong>Ano:</strong> {checklist.vehicle.year}
+                    </p>
+                    <p className="text-sm">
+                      <strong>Categoria:</strong> {checklist.vehicle.vehicle_category}
+                    </p>
                   </div>
-                )}
-              </div>
-            )}
-
-            {/* Detalhes do Veículo */}
-            <div>
-              <h3 className="text-lg font-semibold mb-3 pb-2 border-b">Detalhes do Veículo</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground mb-1">Modelo</h4>
-                  <p className="font-medium">{checklist.vehicle.model}</p>
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground mb-1">Placa</h4>
-                  <p className="font-medium">{checklist.vehicle.license_plate}</p>
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground mb-1">Ano</h4>
-                  <p className="font-medium">{checklist.vehicle.year}</p>
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground mb-1">Categoria</h4>
-                  <p className="font-medium">{checklist.vehicle.vehicle_category}</p>
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground mb-1">Proprietário</h4>
-                  <p className="font-medium">{checklist.vehicle.owner_unique_id}</p>
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground mb-1">Itens Verificados</h4>
-                  <p className="font-medium">{checklistItems.length || Object.keys(checklist.checklist_data || {}).filter(k => k !== 'cost_center' && k !== 'vehicle_mileage').length}</p>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
 
-        {/* Itens de Inspeção */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Itens Verificados ({checklistItems.length} itens)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {checklistItems.length > 0 ? (
-              <div className="space-y-4">
-                {checklistItems.map((item) => {
-                  const fieldKey = getFieldKey(item.name);
-                  const itemData = (checklist as any)?.checklist_data?.[fieldKey];
-                  const value = itemData?.status ?? (checklist as any)[fieldKey];
-                  const observation = itemData?.observation;
-                  
-                  return (
-                    <div key={item.id} className="border rounded-lg p-4 space-y-2">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1 pr-2">
-                          <span className="font-medium">{item.name}</span>
-                          {item.required && <span className="text-red-500 ml-1">*</span>}
-                          {item.description && (
-                            <p className="text-sm text-muted-foreground mt-1">{item.description}</p>
-                          )}
+              {/* Itens de Inspeção */}
+              <div className="mb-6">
+                <h3 className="text-base font-bold mb-3 pb-2 border-b border-gray-300 text-black">
+                  Itens de Inspeção
+                </h3>
+                <div className="space-y-2">
+                  {checklistItems.length > 0 ? (
+                    checklistItems.map((item) => {
+                      const fieldKey = getFieldKey(item.name);
+                      const itemData = (checklist as any)?.checklist_data?.[fieldKey];
+                      const value = itemData?.status ?? (checklist as any)[fieldKey];
+                      const observation = itemData?.observation;
+                      
+                      const getStatusDisplay = (val: boolean | string) => {
+                        if (typeof val === 'boolean') {
+                          return val ? 'CONFORME' : 'NÃO CONFORME';
+                        }
+                        const v = String(val).toLowerCase();
+                        switch (v) {
+                          case 'funcionando':
+                          case 'sim':
+                          case 'ok':
+                            return 'CONFORME';
+                          case 'revisao':
+                          case 'revisão':
+                            return 'REVISÃO';
+                          case 'ausente':
+                            return 'AUSENTE';
+                          case 'not_ok':
+                          case 'nao':
+                          case 'não':
+                            return 'NÃO CONFORME';
+                          case 'not_applicable':
+                            return 'N/A';
+                          default:
+                            return 'Não verificado';
+                        }
+                      };
+
+                      const getStatusColor = (val: boolean | string) => {
+                        if (typeof val === 'boolean') {
+                          return val ? 'bg-green-700 text-white' : 'bg-red-700 text-white';
+                        }
+                        const v = String(val).toLowerCase();
+                        switch (v) {
+                          case 'funcionando':
+                          case 'sim':
+                          case 'ok':
+                            return 'bg-green-700 text-white';
+                          case 'revisao':
+                          case 'revisão':
+                            return 'bg-orange-500 text-white';
+                          case 'ausente':
+                          case 'not_ok':
+                          case 'nao':
+                          case 'não':
+                            return 'bg-red-700 text-white';
+                          case 'not_applicable':
+                            return 'bg-gray-500 text-white';
+                          default:
+                            return 'bg-gray-300 text-gray-700';
+                        }
+                      };
+
+                      return (
+                        <div key={item.id} className="flex justify-between items-start p-3 border border-gray-300 bg-white">
+                          <div className="flex-1 pr-3">
+                            <p className="font-bold text-sm text-black mb-1">
+                              {item.name}
+                            </p>
+                            {item.description && (
+                              <p className="text-xs text-gray-600 mb-1">
+                                {item.description}
+                              </p>
+                            )}
+                            {observation && (
+                              <p className="text-xs text-orange-600 mt-1">
+                                <strong>Observação:</strong> {observation}
+                              </p>
+                            )}
+                          </div>
+                          <div className={`px-3 py-1.5 rounded font-bold text-sm min-w-[100px] text-center ${getStatusColor(value)}`}>
+                            {getStatusDisplay(value)}
+                          </div>
                         </div>
-                        <Badge variant={getItemBadgeVariant(value)} className="shrink-0">
-                          {getItemStatusLabel(value)}
-                        </Badge>
-                      </div>
-                      {observation && (
-                        <div className="mt-2">
-                          <p className="text-sm text-muted-foreground">
-                            <strong>Observação:</strong> {observation}
-                          </p>
+                      );
+                    })
+                  ) : (
+                    <div>
+                      <p className="text-gray-600 mb-4 text-sm">Nenhum item de checklist configurado encontrado para esta categoria de veículo.</p>
+                      {checklist.checklist_data && Object.keys(checklist.checklist_data).length > 0 && (
+                        <div className="space-y-2">
+                          {Object.entries(checklist.checklist_data).map(([key, data]) => {
+                            const itemData = data as { status?: string; observation?: string };
+                            if (key === 'cost_center' || key === 'vehicle_mileage') return null;
+                            if (!itemData || typeof itemData !== 'object' || (!itemData.status && !itemData.observation)) return null;
+                            
+                            const getStatusDisplay = (status: string) => {
+                              const v = status.toLowerCase();
+                              switch (v) {
+                                case 'funcionando':
+                                case 'sim':
+                                case 'ok':
+                                  return 'CONFORME';
+                                case 'revisao':
+                                case 'revisão':
+                                  return 'REVISÃO';
+                                case 'ausente':
+                                  return 'AUSENTE';
+                                case 'not_ok':
+                                case 'nao':
+                                case 'não':
+                                  return 'NÃO CONFORME';
+                                case 'not_applicable':
+                                  return 'N/A';
+                                default:
+                                  return status;
+                              }
+                            };
+
+                            const getStatusColor = (status: string) => {
+                              const v = status.toLowerCase();
+                              switch (v) {
+                                case 'funcionando':
+                                case 'sim':
+                                case 'ok':
+                                  return 'bg-green-700 text-white';
+                                case 'revisao':
+                                case 'revisão':
+                                  return 'bg-orange-500 text-white';
+                                case 'ausente':
+                                case 'not_ok':
+                                case 'nao':
+                                case 'não':
+                                  return 'bg-red-700 text-white';
+                                case 'not_applicable':
+                                  return 'bg-gray-500 text-white';
+                                default:
+                                  return 'bg-gray-300 text-gray-700';
+                              }
+                            };
+
+                            return (
+                              <div key={key} className="flex justify-between items-start p-3 border border-gray-300 bg-white">
+                                <div className="flex-1 pr-3">
+                                  <p className="font-bold text-sm text-black mb-1">
+                                    {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                  </p>
+                                  {itemData.observation && (
+                                    <p className="text-xs text-orange-600 mt-1">
+                                      <strong>Observação:</strong> {itemData.observation}
+                                    </p>
+                                  )}
+                                </div>
+                                {itemData.status && (
+                                  <div className={`px-3 py-1.5 rounded font-bold text-sm min-w-[100px] text-center ${getStatusColor(itemData.status)}`}>
+                                    {getStatusDisplay(itemData.status)}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
                       )}
                     </div>
-                  );
-                })}
+                  )}
+                </div>
               </div>
-            ) : (
-              <div className="space-y-4">
-                <p className="text-muted-foreground mb-4">Nenhum item de checklist configurado encontrado para esta categoria de veículo.</p>
-                {checklist.checklist_data && Object.keys(checklist.checklist_data).length > 0 && (
-                  <div>
-                    <h4 className="font-semibold mb-3">Dados da Inspeção Realizada:</h4>
-                    <div className="space-y-3">
-                      {Object.entries(checklist.checklist_data).map(([key, data]) => {
-                        const itemData = data as { status?: string; observation?: string };
-                        if (key === 'cost_center' || key === 'vehicle_mileage') return null;
-                        if (!itemData || typeof itemData !== 'object' || (!itemData.status && !itemData.observation)) return null;
-                        
-                        return (
-                          <div key={key} className="border rounded-lg p-4 space-y-2">
-                            <div className="flex justify-between items-start">
-                              <div className="flex-1 pr-2">
-                                <span className="font-medium">{key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
-                              </div>
-                              {itemData.status && (
-                                <Badge variant={getItemBadgeVariant(itemData.status)} className="shrink-0">
-                                  {getItemStatusLabel(itemData.status)}
-                                </Badge>
-                              )}
-                            </div>
-                            {itemData.observation && (
-                              <div className="mt-2">
-                                <p className="text-sm text-muted-foreground">
-                                  <strong>Observação:</strong> {itemData.observation}
-                                </p>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
+
+              {/* Condição Geral */}
+              <div className="mb-6">
+                <h3 className="text-sm font-bold mb-3 pb-2 border-b border-gray-300 text-black">
+                  Condição Geral
+                </h3>
+                <p className="p-3 bg-gray-50 border border-gray-300 text-xs">
+                  {checklist.overall_condition || 'Não informado'}
+                </p>
+              </div>
+
+              {/* Observações Adicionais */}
+              {checklist.additional_notes && (
+                <div className="mb-6">
+                  <h3 className="text-sm font-bold mb-3 pb-2 border-b border-gray-300 text-black">
+                    Observações Adicionais
+                  </h3>
+                  <p className="p-3 bg-gray-50 border border-gray-300 text-xs whitespace-pre-wrap">
+                    {checklist.additional_notes}
+                  </p>
+                </div>
+              )}
+
+              {/* Fotos */}
+              {(checklist.interior_photo_url || checklist.exterior_photo_url) && (
+                <div className="mb-6">
+                  <h3 className="text-sm font-bold mb-3 pb-2 border-b border-gray-300 text-black">
+                    Documentação Fotográfica
+                  </h3>
+                  
+                  {checklist.interior_photo_url && (
+                    <div className="mb-5">
+                      <h4 className="text-xs font-medium mb-2">Fotos Internas</h4>
+                      <img 
+                        src={checklist.interior_photo_url} 
+                        alt="Foto do interior" 
+                        className="w-full max-w-md h-40 object-cover border border-gray-300"
+                      />
                     </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                  )}
+                  
+                  {checklist.exterior_photo_url && (
+                    <div>
+                      <h4 className="text-xs font-medium mb-2">Fotos Externas</h4>
+                      <img 
+                        src={checklist.exterior_photo_url} 
+                        alt="Foto do exterior" 
+                        className="w-full max-w-md h-40 object-cover border border-gray-300"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
 
-        {/* Fotos */}
-        {(checklist.interior_photo_url || checklist.exterior_photo_url) && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Fotos da Inspeção</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {checklist.interior_photo_url && (
-                  <div>
-                    <h3 className="font-semibold mb-2">Interior</h3>
-                    <img 
-                      src={checklist.interior_photo_url} 
-                      alt="Foto do interior" 
-                      className="w-full h-64 object-cover rounded-lg border"
-                    />
-                  </div>
-                )}
-                {checklist.exterior_photo_url && (
-                  <div>
-                    <h3 className="font-semibold mb-2">Exterior</h3>
-                    <img 
-                      src={checklist.exterior_photo_url} 
-                      alt="Foto do exterior" 
-                      className="w-full h-64 object-cover rounded-lg border"
-                    />
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+              {/* Assinatura */}
+              {checklist.inspector_signature && (
+                <div className="mt-8">
+                  <h3 className="text-sm font-bold mb-3 pb-2 border-b border-gray-300 text-black">
+                    Assinatura do Inspetor
+                  </h3>
+                  <img 
+                    src={checklist.inspector_signature} 
+                    alt="Assinatura do inspetor" 
+                    className="max-w-sm h-32 object-contain border border-gray-300"
+                  />
+                </div>
+              )}
 
-        {/* Observações */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Observações</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <h3 className="font-semibold mb-2">Condição Geral</h3>
-              <p className="text-muted-foreground">
-                {checklist.overall_condition || 'Nenhuma observação sobre a condição geral.'}
-              </p>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-2">Observações Adicionais</h3>
-              <p className="text-muted-foreground">
-                {checklist.additional_notes || 'Nenhuma observação adicional.'}
-              </p>
             </div>
           </CardContent>
         </Card>
-
-        {/* Assinatura */}
-        {checklist.inspector_signature && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Assinatura do Inspetor</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <img 
-                src={checklist.inspector_signature} 
-                alt="Assinatura do inspetor" 
-                className="max-w-md h-32 object-contain border rounded-lg"
-              />
-            </CardContent>
-          </Card>
-        )}
       </div>
     </Layout>
   );
