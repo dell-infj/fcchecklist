@@ -110,17 +110,17 @@ const DynamicChecklistForm: React.FC<DynamicChecklistFormProps> = ({ formData, s
       }
     }));
 
-    // Adicionar animação quando marcar um item
-    if (field === 'status' && value !== 'funcionando') {
+    // Adicionar animação quando marcar qualquer item (apenas quando mudar status)
+    if (field === 'status') {
       setCheckedItems(prev => new Set([...prev, fieldKey]));
-      // Remover após animação
+      // Remover após animação de 1 segundo
       setTimeout(() => {
         setCheckedItems(prev => {
           const newSet = new Set(prev);
           newSet.delete(fieldKey);
           return newSet;
         });
-      }, 2000);
+      }, 1000);
     }
   };
 
@@ -205,7 +205,7 @@ const DynamicChecklistForm: React.FC<DynamicChecklistFormProps> = ({ formData, s
                     <div key={item.id} className="space-y-3 p-3 sm:p-4 border rounded-lg bg-background relative">
                       {/* Emoji de confirmação animado */}
                       {isChecked && (
-                        <div className="absolute -top-2 -right-2 text-2xl animate-scale-in">
+                        <div className="absolute -top-2 -right-2 text-2xl animate-scale-in z-10">
                           ✅
                         </div>
                       )}
