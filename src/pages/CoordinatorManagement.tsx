@@ -95,6 +95,7 @@ export default function CoordinatorManagement() {
             first_name: values.firstName,
             last_name: values.lastName,
             role: 'admin',
+            unique_id: profile?.unique_id, // Herdar o unique_id do administrador pai
             company_ids: profile?.company_ids || []
           }
         }
@@ -103,10 +104,14 @@ export default function CoordinatorManagement() {
       if (error) throw error;
 
       if (authData.user) {
-        // Update the profile to mark it as managed by current admin
+        // Update the profile to mark it as managed by current admin and ensure proper setup
         const { error: updateError } = await supabase
           .from('profiles')
-          .update({ managed_by: profile?.id })
+          .update({ 
+            managed_by: profile?.id,
+            unique_id: profile?.unique_id, // Garantir que herda o unique_id
+            company_ids: profile?.company_ids || []
+          })
           .eq('user_id', authData.user.id);
 
         if (updateError) throw updateError;
