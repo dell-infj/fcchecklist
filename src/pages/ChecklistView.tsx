@@ -345,37 +345,73 @@ const ChecklistView = () => {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Informações Gerais</CardTitle>
+              <CardTitle>Informações da Inspeção</CardTitle>
               {getStatusBadge(checklist.status)}
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <CardContent className="space-y-6">
+            {/* Informações Gerais */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 bg-muted/50 rounded-lg">
               <div>
-                <h3 className="font-semibold mb-2">Veículo</h3>
-                <p><strong>Categoria:</strong> {checklist.vehicle.vehicle_category}</p>
-                <p><strong>Placa:</strong> {checklist.vehicle.license_plate}</p>
-                <p><strong>Modelo:</strong> {checklist.vehicle.model}</p>
-                <p><strong>Ano:</strong> {checklist.vehicle.year}</p>
-                <p><strong>Proprietário:</strong> {checklist.vehicle.owner_unique_id}</p>
+                <h4 className="text-sm font-medium text-muted-foreground mb-1">Data da Inspeção</h4>
+                <p className="font-semibold">{new Date(checklist.inspection_date).toLocaleDateString('pt-BR')}</p>
+              </div>
+              <div>
+                <h4 className="text-sm font-medium text-muted-foreground mb-1">Inspetor</h4>
+                <p className="font-semibold">{checklist.inspector.first_name} {checklist.inspector.last_name}</p>
+              </div>
+              <div>
+                <h4 className="text-sm font-medium text-muted-foreground mb-1">Status</h4>
+                <div className="font-semibold">{getStatusBadge(checklist.status)}</div>
+              </div>
+            </div>
+
+            {/* Quilometragem e Centro de Custo */}
+            {(checklist.checklist_data?.vehicle_mileage || checklist.checklist_data?.cost_center) && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-muted/50 rounded-lg">
                 {checklist.checklist_data?.vehicle_mileage && typeof checklist.checklist_data.vehicle_mileage === 'string' && (
-                  <p><strong>Quilometragem:</strong> {checklist.checklist_data.vehicle_mileage} km</p>
+                  <div>
+                    <h4 className="text-sm font-medium text-muted-foreground mb-1">Quilometragem</h4>
+                    <p className="font-semibold">{checklist.checklist_data.vehicle_mileage} km</p>
+                  </div>
                 )}
-              </div>
-              <div>
-                <h3 className="font-semibold mb-2">Inspeção</h3>
-                <p><strong>Inspetor:</strong> {checklist.inspector.first_name} {checklist.inspector.last_name}</p>
-                <p><strong>Data:</strong> {new Date(checklist.inspection_date).toLocaleDateString('pt-BR')}</p>
-                <p><strong>Status:</strong> {checklist.status}</p>
                 {checklist.checklist_data?.cost_center && typeof checklist.checklist_data.cost_center === 'string' && (
-                  <p><strong>Centro de Custo:</strong> {checklist.checklist_data.cost_center}</p>
+                  <div>
+                    <h4 className="text-sm font-medium text-muted-foreground mb-1">Centro de Custo</h4>
+                    <p className="font-semibold">{checklist.checklist_data.cost_center}</p>
+                  </div>
                 )}
               </div>
-              <div>
-                <h3 className="font-semibold mb-2">Resumo</h3>
-                <p><strong>Itens Verificados:</strong> {checklistItems.length || Object.keys(checklist.checklist_data || {}).filter(k => k !== 'cost_center' && k !== 'vehicle_mileage').length}</p>
-                <p><strong>Data de Criação:</strong> {new Date(checklist.created_at).toLocaleDateString('pt-BR')}</p>
-                <p><strong>Última Atualização:</strong> {new Date(checklist.updated_at).toLocaleDateString('pt-BR')}</p>
+            )}
+
+            {/* Detalhes do Veículo */}
+            <div>
+              <h3 className="text-lg font-semibold mb-3 pb-2 border-b">Detalhes do Veículo</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground mb-1">Modelo</h4>
+                  <p className="font-medium">{checklist.vehicle.model}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground mb-1">Placa</h4>
+                  <p className="font-medium">{checklist.vehicle.license_plate}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground mb-1">Ano</h4>
+                  <p className="font-medium">{checklist.vehicle.year}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground mb-1">Categoria</h4>
+                  <p className="font-medium">{checklist.vehicle.vehicle_category}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground mb-1">Proprietário</h4>
+                  <p className="font-medium">{checklist.vehicle.owner_unique_id}</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-muted-foreground mb-1">Itens Verificados</h4>
+                  <p className="font-medium">{checklistItems.length || Object.keys(checklist.checklist_data || {}).filter(k => k !== 'cost_center' && k !== 'vehicle_mileage').length}</p>
+                </div>
               </div>
             </div>
           </CardContent>
