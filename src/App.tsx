@@ -16,6 +16,7 @@ import VehicleManagement from "./pages/VehicleManagement";
 import ChecklistView from "./pages/ChecklistView";
 import ChecklistManagement from "./pages/ChecklistManagement";
 import InspectorManagement from "./pages/InspectorManagement";
+import CoordinatorManagement from "./pages/CoordinatorManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,6 +38,7 @@ const AnimatedRoutes = () => {
         <Route path="/vehicles" element={<VehicleManagement />} />
         <Route path="/checklists" element={<ChecklistManagement />} />
         <Route path="/inspectors" element={<InspectorManagement />} />
+        <Route path="/coordinators" element={<CoordinatorManagement />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
