@@ -193,7 +193,7 @@ const NewChecklist = () => {
         vehicle_id: data.vehicle_id,
         inspector_id: data.inspector_id,
         inspection_date: new Date(data.inspection_date),
-        vehicle_mileage: data.vehicle_mileage || '',
+        vehicle_mileage: data.checklist_data?.vehicle_mileage || data.vehicle_mileage || '',
         cost_center: data.checklist_data?.cost_center || '',
         overall_condition: data.overall_condition || '',
         additional_notes: data.additional_notes || '',
@@ -355,10 +355,11 @@ const NewChecklist = () => {
         }
       });
 
-      // Atribuir JSON de itens dinâmicos incluindo centro de custo
+      // Atribuir JSON de itens dinâmicos incluindo centro de custo e quilometragem
       checklistData.checklist_data = {
         ...dynamicItems,
-        cost_center: formData.cost_center
+        cost_center: formData.cost_center,
+        vehicle_mileage: formData.vehicle_mileage
       };
 
       // Salvar checklist no banco
