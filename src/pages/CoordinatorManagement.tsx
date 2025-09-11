@@ -61,7 +61,7 @@ export default function CoordinatorManagement() {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('role', 'admin')
+        .eq('role', 'coordinator')
         .eq('managed_by', profile?.id)
         .order('created_at', { ascending: false });
 
@@ -86,9 +86,6 @@ export default function CoordinatorManagement() {
       
       console.log('Creating coordinator with email:', values.email);
       
-      // Gerar um unique_id único para o coordenador
-      const coordinatorUniqueId = `${profile?.unique_id}-COORD-${Date.now()}`;
-      
       const { data: authData, error } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
@@ -97,8 +94,8 @@ export default function CoordinatorManagement() {
           data: {
             first_name: values.firstName,
             last_name: values.lastName,
-            role: 'admin',
-            unique_id: coordinatorUniqueId, // Unique ID específico para o coordenador
+            role: 'coordinator',
+            unique_id: profile?.unique_id, // mesmo unique_id da empresa
             company_ids: profile?.company_ids || []
           }
         }
@@ -107,12 +104,12 @@ export default function CoordinatorManagement() {
       if (error) throw error;
 
       if (authData.user) {
-        // Update the profile to mark it as managed by current admin and ensure proper setup
+        // Vincular ao admin atual e garantir unique_id correto
         const { error: updateError } = await supabase
           .from('profiles')
           .update({ 
             managed_by: profile?.id,
-            unique_id: coordinatorUniqueId, // Garantir que usa o unique_id único
+            unique_id: profile?.unique_id,
             company_ids: profile?.company_ids || []
           })
           .eq('user_id', authData.user.id);
