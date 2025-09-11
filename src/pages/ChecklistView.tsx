@@ -180,28 +180,36 @@ const ChecklistView = () => {
       // Criar PDF no formato A4
       const pdf = new jsPDF('p', 'mm', 'a4');
       const imgData = canvas.toDataURL('image/png');
-      
-      // Dimensões A4 em mm
-      const pdfWidth = 210;
-      const pdfHeight = 297;
-      
-      // Calcular dimensões da imagem para caber na página A4
-      const imgWidth = pdfWidth - 10; // margem de 5mm de cada lado
+
+      // Dimensões da página em mm (não fixar valores para suportar outros formatos)
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+
+      // Margens em mm
+      const marginTop = 5;
+      const marginBottom = 5;
+      const marginLeft = 5;
+      const marginRight = 5;
+
+      // Área útil
+      const usableWidth = pageWidth - marginLeft - marginRight;
+      const usableHeight = pageHeight - marginTop - marginBottom;
+
+      // Calcular dimensões da imagem mantendo proporção para caber na largura útil
+      const imgWidth = usableWidth;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
+
+      // Adicionar a primeira página respeitando margem superior e inferior
       let heightLeft = imgHeight;
-      let position = 0;
-      
-      // Adicionar primeira página
-      pdf.addImage(imgData, 'PNG', 5, 5, imgWidth, imgHeight);
-      heightLeft -= (pdfHeight - 10); // subtrair altura da página menos margens (5mm topo + 5mm rodapé)
-      
-      // Adicionar páginas adicionais se necessário
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
+      pdf.addImage(imgData, 'PNG', marginLeft, marginTop, imgWidth, imgHeight);
+      heightLeft -= usableHeight;
+
+      // Páginas adicionais – sempre respeitando a área útil (garante margem inferior)
+      while (heightLeft > 0) {
         pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 5, position + 5, imgWidth, imgHeight);
-        heightLeft -= (pdfHeight - 10);
+        const yOffset = marginTop - (imgHeight - heightLeft);
+        pdf.addImage(imgData, 'PNG', marginLeft, yOffset, imgWidth, imgHeight);
+        heightLeft -= usableHeight;
       }
 
       // Baixar o PDF
