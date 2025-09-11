@@ -669,7 +669,7 @@ export default function ChecklistManagement() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleDownloadPDF(checklist)}
+                      onClick={() => navigate(`/checklist/view/${checklist.id}`)}
                       className="gap-2 text-xs sm:text-sm w-full md:w-auto"
                     >
                       <Download className="w-3 h-3 sm:w-4 sm:h-4" />
