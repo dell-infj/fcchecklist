@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Car, Users, FileText, BarChart3, ClipboardList, Plus } from 'lucide-react';
+import { Car, Users, FileText, BarChart3, ClipboardList, Plus, UserPlus, Trash2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -43,16 +43,32 @@ interface DashboardStats {
   activeInspections: number;
 }
 
+interface Coordinator {
+  id: string;
+  first_name: string;
+  last_name: string;
+  user_id: string;
+  created_at: string;
+}
+
 export default function AdminDashboard() {
   const { user, profile } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   
   const [recentChecklists, setRecentChecklists] = useState<RecentChecklist[]>([]);
-  const [openCommand, setOpenCommand] = useState<'vehicles' | 'inspection' | 'reports' | null>(null);
+  const [openCommand, setOpenCommand] = useState<'vehicles' | 'inspection' | 'reports' | 'coordinators' | null>(null);
   const [isAddingVehicle, setIsAddingVehicle] = useState(false);
   const [uploadingPdf, setUploadingPdf] = useState(false);
   const [availableCompanies, setAvailableCompanies] = useState<string[]>([]);
+  const [coordinators, setCoordinators] = useState<Coordinator[]>([]);
+  const [isAddingCoordinator, setIsAddingCoordinator] = useState(false);
+  const [newCoordinator, setNewCoordinator] = useState({
+    first_name: '',
+    last_name: '',
+    email: '',
+    password: ''
+  });
   const [newVehicle, setNewVehicle] = useState({
     vehicle_category: '',
     owner_unique_id: '',
@@ -71,6 +87,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchData();
     fetchAvailableCompanies();
+    fetchCoordinators();
   }, []);
 
   const fetchAvailableCompanies = async () => {
@@ -79,6 +96,108 @@ export default function AdminDashboard() {
     // Usar Set para remover duplicatas
     const companies = [...new Set([profile.unique_id, ...(profile.company_ids || [])].filter(Boolean))];
     setAvailableCompanies(companies);
+  };
+
+  const fetchCoordinators = async () => {
+    if (!profile) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, user_id, created_at')
+        .eq('role', 'admin')
+        .eq('managed_by', profile.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setCoordinators(data || []);
+    } catch (error) {
+      console.error('Error fetching coordinators:', error);
+    }
+  };
+
+  const handleAddCoordinator = async () => {
+    if (!newCoordinator.first_name || !newCoordinator.last_name || !newCoordinator.email || !newCoordinator.password) {
+      toast({
+        title: "Erro",
+        description: "Por favor, preencha todos os campos",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      // Create user with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: newCoordinator.email,
+        password: newCoordinator.password,
+        options: {
+          data: {
+            first_name: newCoordinator.first_name,
+            last_name: newCoordinator.last_name,
+            role: 'admin',
+            unique_id: profile?.unique_id,
+            company_ids: profile?.company_ids || []
+          }
+        }
+      });
+
+      if (authError) throw authError;
+
+      if (authData.user) {
+        // Update the profile to mark it as managed by current admin
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({ managed_by: profile?.id })
+          .eq('user_id', authData.user.id);
+
+        if (updateError) throw updateError;
+      }
+
+      toast({
+        title: "Sucesso",
+        description: "Coordenador criado com sucesso!"
+      });
+
+      setNewCoordinator({
+        first_name: '',
+        last_name: '',
+        email: '',
+        password: ''
+      });
+      setIsAddingCoordinator(false);
+      fetchCoordinators();
+    } catch (error: any) {
+      console.error('Error creating coordinator:', error);
+      toast({
+        title: "Erro",
+        description: error.message || "Erro ao criar coordenador",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeleteCoordinator = async (coordinatorId: string, userId: string) => {
+    try {
+      // Delete the user from auth (this will cascade to profile via trigger)
+      const { error: deleteError } = await supabase.auth.admin.deleteUser(userId);
+      
+      if (deleteError) throw deleteError;
+
+      toast({
+        title: "Sucesso",
+        description: "Coordenador excluído com sucesso!"
+      });
+
+      fetchCoordinators();
+    } catch (error: any) {
+      console.error('Error deleting coordinator:', error);
+      toast({
+        title: "Erro", 
+        description: "Erro ao excluir coordenador",
+        variant: "destructive"
+      });
+    }
   };
 
   const handlePdfUploadForNew = async (file: File) => {
@@ -261,7 +380,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Main Action Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
         <Card 
           className="cursor-pointer hover:bg-accent transition-all duration-300 hover:scale-105 hover:shadow-lg animate-fade-in"
           onClick={() => setOpenCommand('vehicles')}
@@ -300,6 +419,24 @@ export default function AdminDashboard() {
 
         <Card 
           className="cursor-pointer hover:bg-accent transition-all duration-300 hover:scale-105 hover:shadow-lg animate-fade-in [animation-delay:200ms]"
+          onClick={() => setOpenCommand('coordinators')}
+        >
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <UserPlus className="w-8 h-8" />
+                <span>Coordenadores</span>
+              </div>
+              <Plus className="w-6 h-6 text-muted-foreground" />
+            </CardTitle>
+            <CardDescription>
+              Gerenciar coordenadores
+            </CardDescription>
+          </CardHeader>
+        </Card>
+
+        <Card 
+          className="cursor-pointer hover:bg-accent transition-all duration-300 hover:scale-105 hover:shadow-lg animate-fade-in [animation-delay:300ms]"
           onClick={() => setOpenCommand('reports')}
         >
           <CardHeader className="pb-4">
@@ -523,6 +660,122 @@ export default function AdminDashboard() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Add Coordinator Dialog */}
+      <Dialog open={isAddingCoordinator} onOpenChange={setIsAddingCoordinator}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Criar Novo Coordenador</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="coord_first_name">Nome</Label>
+              <Input
+                id="coord_first_name"
+                value={newCoordinator.first_name}
+                onChange={(e) => setNewCoordinator({...newCoordinator, first_name: e.target.value})}
+                placeholder="Nome do coordenador"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="coord_last_name">Sobrenome</Label>
+              <Input
+                id="coord_last_name"
+                value={newCoordinator.last_name}
+                onChange={(e) => setNewCoordinator({...newCoordinator, last_name: e.target.value})}
+                placeholder="Sobrenome do coordenador"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="coord_email">Email</Label>
+              <Input
+                id="coord_email"
+                type="email"
+                value={newCoordinator.email}
+                onChange={(e) => setNewCoordinator({...newCoordinator, email: e.target.value})}
+                placeholder="email@exemplo.com"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="coord_password">Senha</Label>
+              <Input
+                id="coord_password"
+                type="password"
+                value={newCoordinator.password}
+                onChange={(e) => setNewCoordinator({...newCoordinator, password: e.target.value})}
+                placeholder="Senha (mínimo 6 caracteres)"
+              />
+            </div>
+
+            <div className="flex flex-col sm:flex-row justify-end gap-2">
+              <Button variant="outline" onClick={() => setIsAddingCoordinator(false)} className="w-full sm:w-auto">
+                Cancelar
+              </Button>
+              <Button onClick={handleAddCoordinator} className="w-full sm:w-auto">
+                Criar Coordenador
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Coordinators List */}
+      {coordinators.length > 0 && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <UserPlus className="w-5 h-5" />
+                  Meus Coordenadores
+                </CardTitle>
+                <CardDescription>
+                  Coordenadores criados por você
+                </CardDescription>
+              </div>
+              <Button 
+                onClick={() => setIsAddingCoordinator(true)}
+                className="flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Novo Coordenador
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {coordinators.map((coordinator, index) => (
+                <div 
+                  key={coordinator.id} 
+                  className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg hover:bg-secondary/70 transition-all duration-300 animate-fade-in"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <div>
+                    <p className="font-medium">
+                      {coordinator.first_name} {coordinator.last_name}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Criado em: {new Date(coordinator.created_at).toLocaleDateString('pt-BR')}
+                    </p>
+                  </div>
+                  <Button 
+                    variant="destructive" 
+                    size="sm"
+                    onClick={() => handleDeleteCoordinator(coordinator.id, coordinator.user_id)}
+                    className="flex items-center gap-1"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Excluir
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Recent Checklists */}
       <Card>

@@ -151,6 +151,7 @@ export type Database = {
           first_name: string
           id: string
           last_name: string
+          managed_by: string | null
           phone: string | null
           role: string
           unique_id: string | null
@@ -168,6 +169,7 @@ export type Database = {
           first_name: string
           id?: string
           last_name: string
+          managed_by?: string | null
           phone?: string | null
           role?: string
           unique_id?: string | null
@@ -185,6 +187,7 @@ export type Database = {
           first_name?: string
           id?: string
           last_name?: string
+          managed_by?: string | null
           phone?: string | null
           role?: string
           unique_id?: string | null
@@ -196,6 +199,13 @@ export type Database = {
           {
             foreignKeyName: "profiles_admin_id_fkey"
             columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_managed_by_fkey"
+            columns: ["managed_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
