@@ -20,6 +20,7 @@ import SignatureCanvas from '@/components/SignatureCanvas';
 import DynamicChecklistForm from '@/components/DynamicChecklistForm';
 import { PDFPreviewFloatingButton } from '@/components/PDFPreviewFloatingButton';
 import ImageCapture from '@/components/ImageCapture';
+import CategoryValidationAlert from '@/components/CategoryValidationAlert';
 
 interface ChecklistItem {
   id: string;
@@ -80,6 +81,8 @@ const NewChecklist = () => {
   const [inspectorSearch, setInspectorSearch] = useState('');
   const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showCategoryAlert, setShowCategoryAlert] = useState(false);
+  const [selectedVehicleCategory, setSelectedVehicleCategory] = useState<string>('');
   
   const [formData, setFormData] = useState<FormData>({
     // Identificação
@@ -114,6 +117,42 @@ const NewChecklist = () => {
       }
     }
   }, [profile, inspectors, formData.inspector_id]);
+
+  // Validar categoria do veículo quando selecionado
+  useEffect(() => {
+    if (formData.vehicle_id) {
+      validateVehicleCategory();
+    }
+  }, [formData.vehicle_id, vehicles]);
+
+  const validateVehicleCategory = async () => {
+    const selectedVehicle = vehicles.find(v => v.id === formData.vehicle_id);
+    if (!selectedVehicle?.vehicle_category) {
+      setShowCategoryAlert(true);
+      return;
+    }
+
+    setSelectedVehicleCategory(selectedVehicle.vehicle_category);
+
+    // Verificar se existe checklist items para esta categoria
+    try {
+      const { data, error } = await supabase
+        .from('checklist_items')
+        .select('id')
+        .eq('active', true)
+        .eq('category', selectedVehicle.vehicle_category)
+        .limit(1);
+
+      if (error) throw error;
+
+      if (!data || data.length === 0) {
+        setShowCategoryAlert(true);
+      }
+    } catch (error) {
+      console.error('Error validating vehicle category:', error);
+      setShowCategoryAlert(true);
+    }
+  };
 
   useEffect(() => {
     loadData();
@@ -877,6 +916,12 @@ const NewChecklist = () => {
           profile={profile}
         />
       </div>
+
+      {/* Alert Dialog para Categoria sem Checklist */}
+      <CategoryValidationAlert 
+        open={showCategoryAlert} 
+        onOpenChange={setShowCategoryAlert} 
+      />
     </Layout>
   );
 };

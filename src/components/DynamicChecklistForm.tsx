@@ -39,29 +39,12 @@ const DynamicChecklistForm: React.FC<DynamicChecklistFormProps> = ({ formData, s
 
   const loadChecklistItems = async () => {
     try {
-      // Mapear categorias de veículo para unique_id
-      const getUniqueIdByCategory = (category: string) => {
-        switch(category?.toLowerCase()) {
-          case 'caminhao':
-          case 'caminhão':
-            return 'CAMINHAO';
-          case 'carro':
-          case 'moto':
-            return 'CARRO';
-          case 'retroescavadeira':
-            return 'RETROESCAVADEIRA';
-          default:
-            return 'CARRO'; // Default para carro se não especificado
-        }
-      };
-
-      const uniqueId = getUniqueIdByCategory(vehicleCategory || '');
-
+      // Buscar diretamente pela categoria do veículo na tabela checklist_items
       const { data, error } = await supabase
         .from('checklist_items')
         .select('*')
         .eq('active', true)
-        .eq('unique_id', uniqueId)
+        .eq('category', vehicleCategory || '')
         .order('item_order');
 
       if (error) throw error;
@@ -133,19 +116,17 @@ const DynamicChecklistForm: React.FC<DynamicChecklistFormProps> = ({ formData, s
   };
 
   // Função para obter o nome legível da categoria do veículo
-  const getVehicleCategoryDisplayName = (category: string) => {
-    switch(category?.toLowerCase()) {
-      case 'caminhao':
-      case 'caminhão':
-        return 'Caminhão/Caminhão-Munck';
-      case 'carro':
-        return 'Veículos Leves (Carro)';
-      case 'moto':
-        return 'Veículos Leves (Moto)';
-      case 'retroescavadeira':
-        return 'Retroescavadeira';
-      default:
-        return 'Veículos Leves (Carro)';
+  const getVehicleCategoryDisplayName = async (category: string) => {
+    try {
+      const { data } = await supabase
+        .from('vehicle_categories')
+        .select('label')
+        .eq('name', category)
+        .eq('active', true)
+        .single();
+      return data?.label || category;
+    } catch {
+      return category;
     }
   };
 
@@ -177,14 +158,7 @@ const DynamicChecklistForm: React.FC<DynamicChecklistFormProps> = ({ formData, s
     <div className="space-y-6 sm:space-y-8">
       {/* Mostrar informação sobre a categoria do veículo */}
       {vehicleCategory && (
-        <div className="bg-blue-50 p-3 sm:p-4 rounded-lg border border-blue-200">
-          <h2 className="text-base sm:text-lg font-semibold text-blue-900 mb-2">
-            Checklist para: {getVehicleCategoryDisplayName(vehicleCategory)}
-          </h2>
-          <p className="text-blue-700 text-xs sm:text-sm">
-            Os itens abaixo foram selecionados específicamente para esta categoria de veículo.
-          </p>
-        </div>
+        <VehicleCategoryDisplay vehicleCategory={vehicleCategory} />
       )}
 
       {checklistItems.length === 0 ? (
@@ -269,6 +243,43 @@ const DynamicChecklistForm: React.FC<DynamicChecklistFormProps> = ({ formData, s
           </div>
         ))
       )}
+    </div>
+  );
+};
+
+// Componente para exibir informações da categoria do veículo
+const VehicleCategoryDisplay: React.FC<{ vehicleCategory: string }> = ({ vehicleCategory }) => {
+  const [categoryLabel, setCategoryLabel] = useState(vehicleCategory);
+
+  useEffect(() => {
+    const loadCategoryLabel = async () => {
+      try {
+        const { data } = await supabase
+          .from('vehicle_categories')
+          .select('label')
+          .eq('name', vehicleCategory)
+          .eq('active', true)
+          .single();
+        
+        if (data?.label) {
+          setCategoryLabel(data.label);
+        }
+      } catch (error) {
+        console.error('Error loading category label:', error);
+      }
+    };
+
+    loadCategoryLabel();
+  }, [vehicleCategory]);
+
+  return (
+    <div className="bg-blue-50 p-3 sm:p-4 rounded-lg border border-blue-200">
+      <h2 className="text-base sm:text-lg font-semibold text-blue-900 mb-2">
+        Checklist para: {categoryLabel}
+      </h2>
+      <p className="text-blue-700 text-xs sm:text-sm">
+        Os itens abaixo foram selecionados específicamente para esta categoria de veículo.
+      </p>
     </div>
   );
 };

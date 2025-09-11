@@ -86,16 +86,21 @@ export default function VehicleManagement() {
       setVehicleCategories(categories);
     } catch (error) {
       console.error('Error fetching vehicle categories:', error);
-      // Fallback para categorias padrão se houver erro
+      // Fallback para categorias padrão se houver erro - usar as categorias específicas atuais
       setVehicleCategories([
         { value: 'carro', label: 'Carro' },
-        { value: 'caminhao', label: 'Caminhão' },
         { value: 'moto', label: 'Moto' },
-        { value: 'retroescavadeira', label: 'Retroescavadeira' },
-        { value: 'passageiro', label: 'Passageiro' },
-        { value: 'onibus', label: 'Ônibus' },
-        { value: 'trator', label: 'Trator' },
-        { value: 'outros', label: 'Outros' }
+        { value: 'caminhao_carroceria', label: 'Caminhão Carroceria' },
+        { value: 'caminhao_basculante', label: 'Caminhão Basculante' },
+        { value: 'caminhao_munck', label: 'Caminhão Munck' },
+        { value: 'caminhao_pipa', label: 'Caminhão Pipa' },
+        { value: 'carreta_prancha', label: 'Carreta Prancha' },
+        { value: 'retroescavadeira', label: 'Retroescavadeira/Valetadeira' },
+        { value: 'escavadeira', label: 'Escavadeira/Trator Esteira' },
+        { value: 'pa_carregadeira', label: 'Pá Carregadeira' },
+        { value: 'motoniveladora', label: 'Motoniveladora' },
+        { value: 'rolo_compactador', label: 'Rolo Compactador' },
+        { value: 'hidrojato', label: 'Hidrojato/Sucção/Roots' }
       ]);
     }
   };
