@@ -515,7 +515,7 @@ const ChecklistView = () => {
                               </p>
                             )}
                           </div>
-                          <div className={`px-3 py-1.5 rounded font-bold text-sm min-w-[100px] text-center ${getStatusColor(value)}`}>
+                          <div className={`px-3 py-1.5 rounded font-bold text-lg min-w-[100px] text-center ${getStatusColor(value)}`}>
                             {getStatusDisplay(value)}
                           </div>
                         </div>
