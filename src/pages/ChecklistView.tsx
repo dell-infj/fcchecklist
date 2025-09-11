@@ -154,51 +154,59 @@ const ChecklistView = () => {
     try {
       toast({
         title: "Gerando PDF...",
-        description: "Por favor, aguarde enquanto o PDF é gerado"
+        description: "Por favor, aguarde enquilo o PDF é gerado"
       });
 
-      const { generateChecklistPDF, downloadPDF: downloadGeneratedPDF } = await import('../lib/pdfGenerator');
-      
-      // Preparar dados para o PDF usando os dados atuais da página
-      const checklistItemsForPdf: Record<string, { status: string; observation?: string }> = {};
-      
-      Object.entries(checklist.checklist_data || {}).forEach(([key, value]) => {
-        if (typeof value === 'string') {
-          checklistItemsForPdf[key] = { status: value };
-        } else if (typeof value === 'object' && value !== null) {
-          checklistItemsForPdf[key] = {
-            status: (value as any).status || 'pending',
-            observation: (value as any).observation
-          };
-        }
+      // Importar as bibliotecas necessárias
+      const html2canvas = (await import('html2canvas')).default;
+      const jsPDF = (await import('jspdf')).default;
+
+      // Capturar o elemento do documento
+      const element = document.querySelector('.preview-document') as HTMLElement;
+      if (!element) {
+        throw new Error('Elemento do documento não encontrado');
+      }
+
+      // Configurações para captura de alta qualidade
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        width: element.scrollWidth,
+        height: element.scrollHeight
       });
 
-      const pdfData = {
-        vehicleInfo: {
-          model: checklist.vehicle.model,
-          license_plate: checklist.vehicle.license_plate,
-          year: checklist.vehicle.year || 0,
-          vehicle_category: checklist.vehicle.vehicle_category
-        },
-        inspectorInfo: {
-          first_name: checklist.inspector?.first_name || 'Não',
-          last_name: checklist.inspector?.last_name || 'informado'
-        },
-        inspection_date: new Date(checklist.inspection_date),
-        vehicle_mileage: (checklist.checklist_data?.vehicle_mileage as string) || '',
-        overall_condition: checklist.overall_condition || 'pending',
-        additional_notes: (checklist.checklist_data?.additional_notes as string) || '',
-        interior_photo_url: checklist.interior_photos?.[0] || null,
-        exterior_photo_url: checklist.exterior_photos?.[0] || null,
-        inspector_signature: checklist.inspector_signature || null,
-        checklistItems: checklistItemsForPdf,
-        checklist_items: checklistItems
-      };
+      // Criar PDF no formato A4
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgData = canvas.toDataURL('image/png');
+      
+      // Dimensões A4 em mm
+      const pdfWidth = 210;
+      const pdfHeight = 297;
+      
+      // Calcular dimensões da imagem para caber na página A4
+      const imgWidth = pdfWidth - 20; // margem de 10mm de cada lado
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      let heightLeft = imgHeight;
+      let position = 0;
+      
+      // Adicionar primeira página
+      pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+      heightLeft -= (pdfHeight - 20); // subtrair altura da página menos margens
+      
+      // Adicionar páginas adicionais se necessário
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 10, position + 10, imgWidth, imgHeight);
+        heightLeft -= (pdfHeight - 20);
+      }
 
-      const doc = await generateChecklistPDF(pdfData);
+      // Baixar o PDF
       const filename = `checklist_${checklist.vehicle.license_plate}_${checklist.inspection_date}.pdf`;
-      
-      await downloadGeneratedPDF(doc, filename);
+      pdf.save(filename);
 
       toast({
         title: "Sucesso",
