@@ -45,34 +45,11 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
 
   console.log('ChecklistPreview - selectedVehicle:', selectedVehicle);
   console.log('ChecklistPreview - selectedInspector:', selectedInspector);
+  console.log('ChecklistPreview - checklistItems (all):', checklistItems);
+  console.log('ChecklistPreview - vehicle category:', selectedVehicle?.vehicle_category);
 
-  // Mapear categorias de veículo para unique_id (mesma lógica do DynamicChecklistForm)
-  const getUniqueIdByCategory = (category: string) => {
-    switch(category?.toLowerCase()) {
-      case 'caminhao':
-      case 'caminhão':
-        return 'CAMINHAO';
-      case 'carro':
-      case 'moto':
-        return 'CARRO';
-      case 'retroescavadeira':
-        return 'RETROESCAVADEIRA';
-      default:
-        return 'CARRO'; // Default para carro se não especificado
-    }
-  };
+  // Usar a mesma lógica do DynamicChecklistForm - buscar diretamente pela categoria do veículo
 
-  const getCategoryTitle = (category: string): string => {
-    const titles: Record<string, string> = {
-      'interior': 'Interior do Veículo',
-      'exterior': 'Exterior do Veículo',
-      'safety': 'Itens de Segurança',
-      'mechanical': 'Componentes Mecânicos',
-      'cargo': 'Área de Carga',
-      'passenger': 'Área de Passageiros'
-    };
-    return titles[category] || category;
-  };
 
   const getStatusColor = (status: string): string => {
     switch (status) {
@@ -117,11 +94,12 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
     );
   }
 
-  // Filtrar itens baseado no unique_id da categoria do veículo
-  const vehicleUniqueId = getUniqueIdByCategory(selectedVehicle.vehicle_category);
+  // Filtrar itens baseado na categoria do veículo (mesma lógica do DynamicChecklistForm)
   const filteredChecklistItems = checklistItems.filter(item => 
-    item.unique_id === vehicleUniqueId
+    item.category === selectedVehicle.vehicle_category
   );
+  
+  console.log('ChecklistPreview - filteredChecklistItems:', filteredChecklistItems);
 
   return (
     <div className="w-full bg-white">
@@ -244,29 +222,24 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
         </div>
 
         {/* Checklist Items by Category */}
-        {Object.entries(
-          filteredChecklistItems.reduce((acc, item) => {
-            if (!acc[item.category]) {
-              acc[item.category] = [];
-            }
-            acc[item.category].push(item);
-            return acc;
-          }, {} as Record<string, any[]>)
-        ).map(([category, categoryItems]) => {
-          return (
-            <div key={category} className="section" style={{ marginBottom: '25px' }}>
-              <h3 style={{ 
-                fontSize: '16px', 
-                fontWeight: 'bold', 
-                marginBottom: '12px', 
-                borderBottom: '1px solid #ddd', 
-                paddingBottom: '8px',
-                color: '#000' 
-              }}>
-                {getCategoryTitle(category)}
-              </h3>
-              <div>
-                {(categoryItems as any[]).map((item) => {
+        {/* Exibir todos os itens filtrados da categoria do veículo */}
+        {filteredChecklistItems.length > 0 && (
+          <div className="section" style={{ marginBottom: '25px' }}>
+            <h3 style={{ 
+              fontSize: '16px', 
+              fontWeight: 'bold', 
+              marginBottom: '12px', 
+              borderBottom: '1px solid #ddd', 
+              paddingBottom: '8px',
+              color: '#000' 
+            }}>
+              {selectedVehicle.vehicle_category === 'caminhao_carroceria' ? 'Exterior do Veículo' : 
+               selectedVehicle.vehicle_category === 'carro' ? 'Inspeção do Veículo' :
+               selectedVehicle.vehicle_category === 'retroescavadeira' ? 'Equipamento e Máquinas' :
+               'Itens de Inspeção'}
+            </h3>
+            <div>
+              {filteredChecklistItems.map((item) => {
                   const fieldKey = getFieldKey(item.name);
                   const itemData = formData[fieldKey] || {};
                   const status = itemData.status || 'not_checked';
@@ -311,11 +284,10 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
                       </div>
                     </div>
                   );
-                })}
-              </div>
+              })}
             </div>
-          );
-        })}
+          </div>
+        )}
 
         {/* Overall Condition */}
         <div className="section" style={{ marginBottom: '25px' }}>
