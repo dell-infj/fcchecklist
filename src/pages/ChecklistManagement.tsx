@@ -152,17 +152,33 @@ export default function ChecklistManagement() {
 
   const handleDownloadPDF = async (checklist: ChecklistItem) => {
     try {
-      // Buscar dados dos itens do checklist para gerar o PDF
+      // Buscar dados dos itens do checklist pela categoria do veículo (igual ao Preview)
       const { data: checklistItems, error: itemsError } = await supabase
         .from('checklist_items')
         .select('*')
-        .eq('unique_id', checklist.id.slice(0, 8)); // Usar parte do ID como referência
+        .eq('category', checklist.vehicle.vehicle_category.toLowerCase())
+        .eq('active', true)
+        .order('item_order');
 
-      if (itemsError) {
-        console.warn('Não foi possível carregar itens personalizados:', itemsError);
+      let items = checklistItems;
+      
+      // Se não encontrou por categoria, tentar por unique_id (fallback)
+      if (!items || items.length === 0) {
+        const { data: itemsDataUnique } = await supabase
+          .from('checklist_items')
+          .select('*')
+          .eq('unique_id', checklist.vehicle.vehicle_category.toUpperCase())
+          .eq('active', true)
+          .order('item_order');
+        items = itemsDataUnique;
       }
 
-      // Criar dados para o PDF
+      // Extrair dados do checklist_data se disponível
+      const checklistData = (checklist as any).checklist_data || {};
+      const vehicleMileage = checklistData.vehicle_mileage || "Não informado";
+      const costCenter = checklistData.cost_center || "Não informado";
+
+      // Criar dados completos para o PDF seguindo o modelo do Preview
       const pdfData = {
         vehicleInfo: {
           model: checklist.vehicle.model,
@@ -174,45 +190,88 @@ export default function ChecklistManagement() {
           first_name: checklist.inspector.first_name,
           last_name: checklist.inspector.last_name
         },
+        companyInfo: {
+          name: 'FC GESTÃO EMPRESARIAL LTDA',
+          cnpj: '05.873.924/0001-80',
+          email: 'contato@fcgestao.com.br',
+          address: 'Rua princesa imperial, 220 - Realengo - RJ'
+        },
         inspection_date: new Date(checklist.inspection_date),
-        vehicle_mileage: "Não informado",
+        vehicle_mileage: vehicleMileage,
+        cost_center: costCenter,
         overall_condition: checklist.overall_condition || "Não informado",
         additional_notes: checklist.additional_notes || "",
         interior_photo_url: checklist.interior_photo_url,
         exterior_photo_url: checklist.exterior_photo_url,
         inspector_signature: checklist.inspector_signature,
-        checklistItems: {
-          // Mapear campos booleanos para formato esperado
-          all_interior_lights: { 
-            status: checklist.all_interior_lights ? 'funcionando' : 'ausente'
-          },
-          passenger_seat: { 
-            status: checklist.passenger_seat ? 'funcionando' : 'ausente'
-          },
-          fire_extinguisher: { 
-            status: checklist.fire_extinguisher ? 'funcionando' : 'ausente'
-          },
-          all_outside_lights: { 
-            status: checklist.all_outside_lights ? 'funcionando' : 'ausente'
-          },
-          cigarette_lighter: { 
-            status: checklist.cigarette_lighter || 'não verificado'
-          },
-          all_cabinets_latches: { 
-            status: checklist.all_cabinets_latches || 'não verificado'
+        // Mapear dados do checklist seguindo a estrutura do Preview
+        checklistItems: (() => {
+          const mappedItems: Record<string, { status: string; observation?: string }> = {};
+          
+          // Se tem itens configurados, mapear cada um
+          if (items && items.length > 0) {
+            items.forEach((item: any) => {
+              const fieldKey = item.name
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^a-z0-9]/g, '_')
+                .replace(/_+/g, '_')
+                .replace(/^_|_$/g, '');
+              
+              // Buscar no checklist_data primeiro
+              const itemData = checklistData[fieldKey];
+              if (itemData && typeof itemData === 'object') {
+                mappedItems[fieldKey] = {
+                  status: itemData.status || 'não verificado',
+                  observation: itemData.observation
+                };
+              } else {
+                // Fallback para campos diretos do checklist
+                const directValue = (checklist as any)[fieldKey];
+                if (directValue !== undefined) {
+                  let status = 'não verificado';
+                  if (typeof directValue === 'boolean') {
+                    status = directValue ? 'funcionando' : 'ausente';
+                  } else if (typeof directValue === 'string') {
+                    status = directValue;
+                  }
+                  mappedItems[fieldKey] = { status };
+                }
+              }
+            });
+          } else {
+            // Mapear campos booleanos básicos se não há itens configurados
+            const booleanFields = {
+              all_interior_lights: checklist.all_interior_lights,
+              passenger_seat: checklist.passenger_seat,
+              fire_extinguisher: checklist.fire_extinguisher,
+              all_outside_lights: checklist.all_outside_lights
+            };
+            
+            Object.entries(booleanFields).forEach(([key, value]) => {
+              if (value !== undefined) {
+                mappedItems[key] = { 
+                  status: typeof value === 'boolean' ? (value ? 'funcionando' : 'ausente') : String(value)
+                };
+              }
+            });
+            
+            // Campos string
+            if (checklist.cigarette_lighter) {
+              mappedItems.cigarette_lighter = { status: checklist.cigarette_lighter };
+            }
+            if (checklist.all_cabinets_latches) {
+              mappedItems.all_cabinets_latches = { status: checklist.all_cabinets_latches };
+            }
           }
-        },
-        checklist_items: checklistItems || [
-          { name: 'Luzes Internas', category: 'interior', description: 'Verificação das luzes internas', required: true },
-          { name: 'Assento do Passageiro', category: 'interior', description: 'Condição do assento', required: true },
-          { name: 'Extintor de Incêndio', category: 'safety', description: 'Presença e validade do extintor', required: true },
-          { name: 'Luzes Externas', category: 'exterior', description: 'Faróis, lanternas e setas', required: true },
-          { name: 'Acendedor de Cigarros', category: 'interior', description: 'Funcionamento do acendedor', required: false },
-          { name: 'Travas dos Armários', category: 'interior', description: 'Funcionamento das travas', required: false }
-        ]
+          
+          return mappedItems;
+        })(),
+        checklist_items: items || []
       };
 
-      // Gerar PDF (agora é assíncrono)
+      // Gerar PDF seguindo o modelo do Preview
       const doc = await generateChecklistPDF(pdfData);
       
       // Fazer download
