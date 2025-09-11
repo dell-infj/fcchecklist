@@ -278,7 +278,12 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
                         fontWeight: 'bold',
                         whiteSpace: 'nowrap',
                         minWidth: '100px',
-                        textAlign: 'center'
+                        textAlign: 'center',
+                        backgroundColor: status === 'funcionando' ? '#1b5e20' : 
+                                       status === 'revisao' ? '#ff8f00' : 
+                                       status === 'ausente' ? '#b71c1c' : '#f5f5f5',
+                        color: status === 'funcionando' || status === 'revisao' || status === 'ausente' ? '#ffffff' : '#666',
+                        border: 'none'
                       }}>
                         {getStatusText(status)}
                       </div>
