@@ -163,141 +163,27 @@ export default function ChecklistManagement() {
 
   const handleDownloadPDF = async (checklist: ChecklistItem) => {
     try {
-      // Buscar dados dos itens do checklist pela categoria do veículo (igual ao Preview)
-      const { data: checklistItems, error: itemsError } = await supabase
-        .from('checklist_items')
-        .select('*')
-        .eq('category', checklist.vehicle.vehicle_category.toLowerCase())
-        .eq('active', true)
-        .order('item_order');
-
-      let items = checklistItems;
-      
-      // Se não encontrou por categoria, tentar por unique_id (fallback)
-      if (!items || items.length === 0) {
-        const { data: itemsDataUnique } = await supabase
-          .from('checklist_items')
-          .select('*')
-          .eq('unique_id', checklist.vehicle.vehicle_category.toUpperCase())
-          .eq('active', true)
-          .order('item_order');
-        items = itemsDataUnique;
-      }
-
-      // Extrair dados do checklist_data se disponível
-      const checklistData = (checklist as any).checklist_data || {};
-      const vehicleMileage = checklistData.vehicle_mileage || "Não informado";
-      const costCenter = checklistData.cost_center || "Não informado";
-
-      // Criar dados completos para o PDF seguindo o modelo do Preview
-      const pdfData = {
-        vehicleInfo: {
-          model: checklist.vehicle.model,
-          license_plate: checklist.vehicle.license_plate,
-          year: checklist.vehicle.year,
-          vehicle_category: checklist.vehicle.vehicle_category
-        },
-        inspectorInfo: {
-          first_name: checklist.inspector.first_name,
-          last_name: checklist.inspector.last_name
-        },
-        companyInfo: {
-          name: 'FC GESTÃO EMPRESARIAL LTDA',
-          cnpj: '05.873.924/0001-80',
-          email: 'contato@fcgestao.com.br',
-          address: 'Rua princesa imperial, 220 - Realengo - RJ'
-        },
-        inspection_date: new Date(checklist.inspection_date),
-        vehicle_mileage: vehicleMileage,
-        cost_center: costCenter,
-        overall_condition: checklist.overall_condition || "Não informado",
-        additional_notes: checklist.additional_notes || "",
-        interior_photo_url: checklist.interior_photo_url,
-        exterior_photo_url: checklist.exterior_photo_url,
-        inspector_signature: checklist.inspector_signature,
-        // Mapear dados do checklist seguindo a estrutura do Preview
-        checklistItems: (() => {
-          const mappedItems: Record<string, { status: string; observation?: string }> = {};
-          
-          // Se tem itens configurados, mapear cada um
-          if (items && items.length > 0) {
-            items.forEach((item: any) => {
-              const fieldKey = item.name
-                .toLowerCase()
-                .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '')
-                .replace(/[^a-z0-9]/g, '_')
-                .replace(/_+/g, '_')
-                .replace(/^_|_$/g, '');
-              
-              // Buscar no checklist_data primeiro
-              const itemData = checklistData[fieldKey];
-              if (itemData && typeof itemData === 'object') {
-                mappedItems[fieldKey] = {
-                  status: itemData.status || 'não verificado',
-                  observation: itemData.observation
-                };
-              } else {
-                // Fallback para campos diretos do checklist
-                const directValue = (checklist as any)[fieldKey];
-                if (directValue !== undefined) {
-                  let status = 'não verificado';
-                  if (typeof directValue === 'boolean') {
-                    status = directValue ? 'funcionando' : 'ausente';
-                  } else if (typeof directValue === 'string') {
-                    status = directValue;
-                  }
-                  mappedItems[fieldKey] = { status };
-                }
-              }
-            });
-          } else {
-            // Mapear campos booleanos básicos se não há itens configurados
-            const booleanFields = {
-              all_interior_lights: checklist.all_interior_lights,
-              passenger_seat: checklist.passenger_seat,
-              fire_extinguisher: checklist.fire_extinguisher,
-              all_outside_lights: checklist.all_outside_lights
-            };
-            
-            Object.entries(booleanFields).forEach(([key, value]) => {
-              if (value !== undefined) {
-                mappedItems[key] = { 
-                  status: typeof value === 'boolean' ? (value ? 'funcionando' : 'ausente') : String(value)
-                };
-              }
-            });
-            
-            // Campos string
-            if (checklist.cigarette_lighter) {
-              mappedItems.cigarette_lighter = { status: checklist.cigarette_lighter };
-            }
-            if (checklist.all_cabinets_latches) {
-              mappedItems.all_cabinets_latches = { status: checklist.all_cabinets_latches };
-            }
-          }
-          
-          return mappedItems;
-        })(),
-        checklist_items: items || []
-      };
-
-      // Gerar PDF seguindo o modelo do Preview
-      const doc = await generateChecklistPDF(pdfData);
-      
-      // Fazer download
-      const filename = `checklist_${checklist.vehicle.license_plate}_${checklist.inspection_date}.pdf`;
-      await downloadPDF(doc, filename);
-
       toast({
-        title: "Sucesso",
-        description: "PDF gerado e baixado com sucesso!"
+        title: "Gerando PDF...",
+        description: "Por favor, aguarde enquanto o PDF é gerado"
       });
+
+      // Navegar para a página de visualização onde o usuário pode baixar o PDF
+      navigate(`/checklist/view/${checklist.id}`);
+      
+      // Mostrar uma mensagem indicando que o usuário será redirecionado
+      setTimeout(() => {
+        toast({
+          title: "Redirecionado",
+          description: "Use o botão 'Baixar PDF' na página de visualização"
+        });
+      }, 1000);
+      
     } catch (error) {
-      console.error('Error generating PDF:', error);
+      console.error('Error navigating to PDF view:', error);
       toast({
         title: "Erro",
-        description: "Erro ao gerar PDF",
+        description: "Erro ao navegar para visualização",
         variant: "destructive"
       });
     }
@@ -669,7 +555,7 @@ export default function ChecklistManagement() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => navigate(`/checklist/view/${checklist.id}`)}
+                      onClick={() => handleDownloadPDF(checklist)}
                       className="gap-2 text-xs sm:text-sm w-full md:w-auto"
                     >
                       <Download className="w-3 h-3 sm:w-4 sm:h-4" />
