@@ -86,6 +86,9 @@ export default function CoordinatorManagement() {
       
       console.log('Creating coordinator with email:', values.email);
       
+      // Gerar um unique_id único para o coordenador
+      const coordinatorUniqueId = `${profile?.unique_id}-COORD-${Date.now()}`;
+      
       const { data: authData, error } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
@@ -95,7 +98,7 @@ export default function CoordinatorManagement() {
             first_name: values.firstName,
             last_name: values.lastName,
             role: 'admin',
-            unique_id: profile?.unique_id, // Herdar o unique_id do administrador pai
+            unique_id: coordinatorUniqueId, // Unique ID específico para o coordenador
             company_ids: profile?.company_ids || []
           }
         }
@@ -109,7 +112,7 @@ export default function CoordinatorManagement() {
           .from('profiles')
           .update({ 
             managed_by: profile?.id,
-            unique_id: profile?.unique_id, // Garantir que herda o unique_id
+            unique_id: coordinatorUniqueId, // Garantir que usa o unique_id único
             company_ids: profile?.company_ids || []
           })
           .eq('user_id', authData.user.id);
