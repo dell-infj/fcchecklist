@@ -280,9 +280,9 @@ export default function ChecklistManagement() {
   }
 
   return (
-    <div className="container mx-auto p-3 sm:p-6">
-      <div className="mb-4 sm:mb-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 mb-4">
+    <div className="container mx-auto p-2 sm:p-4 lg:p-6">
+      <div className="mb-3 sm:mb-4 lg:mb-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mb-3 sm:mb-4">
           <Button 
             variant="outline" 
             onClick={() => navigate('/')} 
@@ -302,17 +302,17 @@ export default function ChecklistManagement() {
             <span className="sm:hidden">Home</span>
           </Button>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-bold">Gerenciamento de Checklists</h1>
-        <p className="text-muted-foreground text-sm">Visualize, baixe e gerencie os checklists de inspeção</p>
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Gerenciamento de Checklists</h1>
+        <p className="text-muted-foreground text-xs sm:text-sm">Visualize, baixe e gerencie os checklists de inspeção</p>
       </div>
 
-      <div className="grid gap-6">
+      <div className="grid gap-3 sm:gap-4 lg:gap-6">
         {checklists.length === 0 ? (
           <Card>
-            <CardContent className="p-8 text-center">
-              <FileText className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-lg font-semibold mb-2">Nenhum checklist encontrado</h3>
-              <p className="text-muted-foreground">
+            <CardContent className="p-6 sm:p-8 text-center">
+              <FileText className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 text-muted-foreground" />
+              <h3 className="text-base sm:text-lg font-semibold mb-2">Nenhum checklist encontrado</h3>
+              <p className="text-muted-foreground text-sm">
                 Ainda não há checklists registrados no sistema.
               </p>
             </CardContent>
@@ -321,11 +321,11 @@ export default function ChecklistManagement() {
           checklists.map((checklist) => (
             <Card key={checklist.id}>
               <CardHeader>
-                <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                <div className="flex flex-col lg:flex-row justify-between items-start gap-3 lg:gap-4">
                   <div className="space-y-2 flex-1 min-w-0">
                     <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <FileText className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <FileText className="w-4 h-4 flex-shrink-0" />
                         <span className="truncate text-sm sm:text-base">Checklist #{checklist.id.slice(0, 8)}</span>
                       </div>
                       {getStatusBadge(checklist.status)}
@@ -356,12 +356,12 @@ export default function ChecklistManagement() {
                     </CardDescription>
                   </div>
                   
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+                  <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 w-full lg:w-auto">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => navigate(`/checklist/view/${checklist.id}`)}
-                      className="gap-2 text-xs sm:text-sm w-full sm:w-auto"
+                      className="gap-2 text-xs sm:text-sm w-full md:w-auto"
                     >
                       <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
                       <span className="hidden sm:inline">Visualizar</span>
@@ -372,7 +372,7 @@ export default function ChecklistManagement() {
                       variant="outline"
                       size="sm"
                       onClick={() => handleDownloadPDF(checklist)}
-                      className="gap-2 text-xs sm:text-sm w-full sm:w-auto"
+                      className="gap-2 text-xs sm:text-sm w-full md:w-auto"
                     >
                       <Download className="w-3 h-3 sm:w-4 sm:h-4" />
                       PDF
@@ -383,7 +383,7 @@ export default function ChecklistManagement() {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="gap-2 text-destructive hover:text-destructive text-xs sm:text-sm w-full sm:w-auto"
+                          className="gap-2 text-destructive hover:text-destructive text-xs sm:text-sm w-full md:w-auto"
                           disabled={deletingId === checklist.id}
                         >
                           <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -391,7 +391,7 @@ export default function ChecklistManagement() {
                           <span className="sm:hidden">Del</span>
                         </Button>
                       </AlertDialogTrigger>
-                      <AlertDialogContent className="max-w-[95vw] sm:max-w-md mx-2 sm:mx-auto">
+                      <AlertDialogContent className="max-w-[95vw] sm:max-w-md mx-1 sm:mx-2 lg:mx-auto">
                         <AlertDialogHeader>
                           <AlertDialogTitle className="text-base sm:text-lg">Confirmar exclusão</AlertDialogTitle>
                           <AlertDialogDescription className="text-sm">

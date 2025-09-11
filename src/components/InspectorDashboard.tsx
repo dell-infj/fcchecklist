@@ -319,7 +319,7 @@ const InspectorDashboard = () => {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6 px-2 sm:px-4">
+    <div className="space-y-3 sm:space-y-4 lg:space-y-6 px-1 sm:px-2 lg:px-4">
       <div className="flex flex-col gap-2 sm:gap-3">
         <div>
           <h2 className="text-lg sm:text-xl font-bold">Painel do Inspetor</h2>
@@ -330,44 +330,44 @@ const InspectorDashboard = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 lg:gap-4">
         <Card className="shadow-card">
-          <CardContent className="p-3 sm:p-4">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="p-2 bg-destructive/10 rounded-lg">
-                <X className="h-4 w-4 sm:h-5 sm:w-5 text-destructive" />
+          <CardContent className="p-2 sm:p-3 lg:p-4">
+            <div className="flex items-center gap-2 lg:gap-3">
+              <div className="p-1.5 sm:p-2 bg-destructive/10 rounded-lg">
+                <X className="h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-destructive" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Canceladas</p>
-                <p className="text-lg sm:text-xl font-bold">{stats.cancelled}</p>
+                <p className="text-base sm:text-lg lg:text-xl font-bold">{stats.cancelled}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="shadow-card">
-          <CardContent className="p-3 sm:p-4">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="p-2 bg-success/10 rounded-lg">
-                <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-success" />
+          <CardContent className="p-2 sm:p-3 lg:p-4">
+            <div className="flex items-center gap-2 lg:gap-3">
+              <div className="p-1.5 sm:p-2 bg-success/10 rounded-lg">
+                <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-success" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Concluídas</p>
-                <p className="text-lg sm:text-xl font-bold">{stats.completed}</p>
+                <p className="text-base sm:text-lg lg:text-xl font-bold">{stats.completed}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="shadow-card">
-          <CardContent className="p-3 sm:p-4">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <ClipboardList className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+          <CardContent className="p-2 sm:p-3 lg:p-4">
+            <div className="flex items-center gap-2 lg:gap-3">
+              <div className="p-1.5 sm:p-2 bg-primary/10 rounded-lg">
+                <ClipboardList className="h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-primary" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Hoje</p>
-                <p className="text-lg sm:text-xl font-bold">{stats.todayCompleted}</p>
+                <p className="text-base sm:text-lg lg:text-xl font-bold">{stats.todayCompleted}</p>
               </div>
             </div>
           </CardContent>
@@ -389,32 +389,32 @@ const InspectorDashboard = () => {
               Minhas Inspeções
             </CardTitle>
             {myChecklists.length > 0 && (
-              <div className="flex flex-row gap-2">
+              <div className="flex flex-col sm:flex-row gap-1 sm:gap-2">
                 <Button 
                   size="sm" 
                   variant="outline" 
-                  className="gap-2 h-8 sm:h-10 text-xs sm:text-sm"
+                  className="gap-2 h-8 lg:h-10 text-xs lg:text-sm"
                   onClick={() => navigate('/checklists')}
                 >
-                  <ClipboardList className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <ClipboardList className="h-3 w-3 lg:h-4 lg:w-4" />
                   Ver Todas
                 </Button>
                  <Button 
                    size="sm" 
                    variant="default" 
-                   className="gap-2 h-8 sm:h-10 text-xs sm:text-sm"
+                   className="gap-2 h-8 lg:h-10 text-xs lg:text-sm"
                    onClick={() => navigate('/checklist/new')}
                  >
-                   <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+                   <Plus className="h-3 w-3 lg:h-4 lg:w-4" />
                    Nova Inspeção
                  </Button>
                  <Button 
                    size="sm" 
                    variant="outline" 
-                   className="gap-2 h-8 sm:h-10 text-xs sm:text-sm"
+                   className="gap-2 h-8 lg:h-10 text-xs lg:text-sm"
                    onClick={() => navigate('/vehicles')}
                  >
-                   <Truck className="h-3 w-3 sm:h-4 sm:w-4" />
+                   <Truck className="h-3 w-3 lg:h-4 lg:w-4" />
                    Ver Veículos
                  </Button>
               </div>

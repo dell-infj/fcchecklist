@@ -261,7 +261,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Main Action Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
         <Card 
           className="cursor-pointer hover:bg-accent transition-all duration-300 hover:scale-105 hover:shadow-lg animate-fade-in"
           onClick={() => setOpenCommand('vehicles')}
@@ -375,12 +375,12 @@ export default function AdminDashboard() {
 
       {/* Vehicle Registration Modal */}
       <Dialog open={isAddingVehicle} onOpenChange={setIsAddingVehicle}>
-        <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto mx-2 sm:mx-auto">
+        <DialogContent className="max-w-[95vw] sm:max-w-[90vw] lg:max-w-2xl max-h-[95vh] overflow-y-auto mx-1 sm:mx-2 lg:mx-auto">
           <DialogHeader>
             <DialogTitle>Cadastrar Novo Veículo</DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid gap-3 sm:gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <Label htmlFor="vehicle_category">Categoria *</Label>
                 <Select value={newVehicle.vehicle_category} onValueChange={(value) => setNewVehicle(prev => ({ ...prev, vehicle_category: value }))}>
@@ -416,7 +416,7 @@ export default function AdminDashboard() {
               </div>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <Label htmlFor="license_plate">Placa *</Label>
                 <Input
@@ -437,7 +437,7 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <Label htmlFor="year">Ano</Label>
                 <Input
@@ -465,7 +465,7 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <Label htmlFor="chassis">Chassi</Label>
                 <Input

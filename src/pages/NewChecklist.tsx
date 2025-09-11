@@ -542,36 +542,36 @@ const NewChecklist = () => {
 
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto space-y-4 px-4">
+      <div className="max-w-4xl mx-auto space-y-3 sm:space-y-4 lg:space-y-6 px-1 sm:px-2 lg:px-4">
         {/* Header */}
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2 sm:gap-3">
           <Button
             variant="outline"
-            size="lg"
+            size="sm"
             onClick={() => navigate('/')}
-            className="gap-2 h-12 px-4 w-full"
+            className="gap-2 h-10 sm:h-12 px-3 sm:px-4 w-full sm:w-auto"
           >
-            <ArrowLeft className="h-5 w-5" />
+            <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
             Voltar
           </Button>
-          <div className="flex items-center gap-3">
-            <FileText className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-bold">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-primary flex-shrink-0" />
+            <h1 className="text-lg sm:text-xl font-bold break-words">
               {isEditing ? 'Editar Checklist de Inspeção' : 'Novo Checklist de Inspeção'}
             </h1>
           </div>
         </div>
 
-        <div className="grid gap-6">
+        <div className="grid gap-3 sm:gap-4 lg:gap-6">
           {/* Seção de Identificação */}
           <Card className="shadow-warm">
             <CardHeader className="bg-gradient-secondary text-foreground rounded-t-lg">
               <CardTitle className="text-lg">Identificação do Inspetor e Veículo</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6 p-4">
-              <div className="grid grid-cols-1 gap-6">
-                <div className="space-y-4">
-                  <h3 className="font-semibold text-base">Identificação do Inspetor</h3>
+            <CardContent className="space-y-4 sm:space-y-6 p-3 sm:p-4">
+              <div className="grid grid-cols-1 gap-4 sm:gap-6">
+                <div className="space-y-3 sm:space-y-4">
+                  <h3 className="font-semibold text-sm sm:text-base">Identificação do Inspetor</h3>
                   {profile?.role === 'admin' && (
                     <div className="space-y-2">
                       <Label className="text-sm font-semibold">Inspetor *</Label>
@@ -594,7 +594,7 @@ const NewChecklist = () => {
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                           </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-full p-0">
+                        <PopoverContent className="w-[95vw] sm:w-full p-0 max-w-sm">
                           <Command>
                             <CommandInput 
                               placeholder="Pesquisar por nome ou telefone..." 
@@ -673,8 +673,8 @@ const NewChecklist = () => {
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  <h3 className="font-semibold text-base">Identificação do Veículo</h3>
+                <div className="space-y-3 sm:space-y-4">
+                  <h3 className="font-semibold text-sm sm:text-base">Identificação do Veículo</h3>
                   <div className="space-y-2">
                     <Label className="text-sm font-semibold">Veículo *</Label>
                     <Popover>
@@ -695,7 +695,7 @@ const NewChecklist = () => {
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </PopoverTrigger>
-                        <PopoverContent className="w-[300px] p-0">
+                        <PopoverContent className="w-[95vw] sm:w-[300px] p-0 max-w-sm">
                         <Command>
                           <CommandInput placeholder="Pesquisar veículo..." />
                           <CommandEmpty>Nenhum veículo encontrado.</CommandEmpty>
@@ -750,15 +750,15 @@ const NewChecklist = () => {
                     />
                   </div>
                   {formData.vehicle_id && (
-                    <div className="p-4 bg-muted rounded-lg">
+                    <div className="p-3 sm:p-4 bg-muted rounded-lg">
                       {(() => {
                         const selectedVehicle = vehicles.find(v => v.id === formData.vehicle_id);
                         return selectedVehicle ? (
                           <>
-                            <p className="font-medium text-base">{selectedVehicle.vehicle_category} - {selectedVehicle.license_plate}</p>
-                            <p className="text-sm">Proprietário: {selectedVehicle.owner_unique_id}</p>
+                            <p className="font-medium text-sm sm:text-base">{selectedVehicle.vehicle_category} - {selectedVehicle.license_plate}</p>
+                            <p className="text-xs sm:text-sm">Proprietário: {selectedVehicle.owner_unique_id}</p>
                             {selectedVehicle.model && (
-                              <p className="text-sm">Modelo: {selectedVehicle.model}</p>
+                              <p className="text-xs sm:text-sm">Modelo: {selectedVehicle.model}</p>
                             )}
                           </>
                         ) : null;

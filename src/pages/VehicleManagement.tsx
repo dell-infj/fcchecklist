@@ -357,10 +357,10 @@ export default function VehicleManagement() {
   }
 
   return (
-    <div className="container mx-auto p-3 sm:p-6">
-      <div className="mb-4 sm:mb-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
+    <div className="container mx-auto p-2 sm:p-4 lg:p-6">
+      <div className="mb-3 sm:mb-4 lg:mb-6">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-3 sm:mb-4 gap-3 lg:gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full lg:w-auto">
             <Button 
               variant="outline" 
               onClick={() => navigate('/')} 
@@ -382,18 +382,18 @@ export default function VehicleManagement() {
           </div>
           <Dialog open={isAddingVehicle} onOpenChange={setIsAddingVehicle}>
             <DialogTrigger asChild>
-              <Button variant="default" className="gap-2 w-full sm:w-auto">
+              <Button variant="default" className="gap-2 w-full lg:w-auto">
                 <Plus className="h-4 w-4" />
                 <span className="hidden sm:inline">Novo Veículo</span>
                 <span className="sm:hidden">Novo</span>
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto mx-2 sm:mx-auto">
+            <DialogContent className="max-w-[95vw] sm:max-w-[90vw] lg:max-w-2xl max-h-[95vh] overflow-y-auto mx-1 sm:mx-2 lg:mx-auto">
               <DialogHeader>
                 <DialogTitle>Cadastrar Novo Veículo</DialogTitle>
               </DialogHeader>
-              <div className="grid gap-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid gap-3 sm:gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <Label htmlFor="vehicle_category">Categoria *</Label>
                     <Select value={newVehicle.vehicle_category} onValueChange={(value) => setNewVehicle(prev => ({ ...prev, vehicle_category: value }))}>
@@ -426,7 +426,7 @@ export default function VehicleManagement() {
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <Label htmlFor="license_plate">Placa *</Label>
                     <Input
@@ -447,7 +447,7 @@ export default function VehicleManagement() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <Label htmlFor="year">Ano</Label>
                     <Input
@@ -475,7 +475,7 @@ export default function VehicleManagement() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <Label htmlFor="chassis">Chassi</Label>
                     <Input
@@ -551,19 +551,19 @@ export default function VehicleManagement() {
         <p className="text-muted-foreground text-sm">Visualize e edite informações dos veículos cadastrados</p>
       </div>
 
-      <div className="grid gap-6">
+      <div className="grid gap-3 sm:gap-4 lg:gap-6">
         {vehicles.map((vehicle) => (
           <Card key={vehicle.id}>
             <CardHeader>
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    {vehicle.license_plate}
-                    <Badge variant={vehicle.status === 'active' ? 'default' : 'secondary'}>
+              <div className="flex flex-col md:flex-row justify-between items-start gap-3 md:gap-0">
+                <div className="flex-1 min-w-0">
+                  <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mb-2">
+                    <span className="text-base sm:text-lg truncate">{vehicle.license_plate}</span>
+                    <Badge variant={vehicle.status === 'active' ? 'default' : 'secondary'} className="text-xs">
                       {vehicle.status === 'active' ? 'Ativo' : 'Inativo'}
                     </Badge>
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-xs sm:text-sm break-words">
                     {vehicle.model} • {vehicle.vehicle_category} • {vehicle.year}
                   </CardDescription>
                 </div>
@@ -573,18 +573,19 @@ export default function VehicleManagement() {
                       variant="outline"
                       size="sm"
                       onClick={() => setEditingVehicle(vehicle)}
+                      className="w-full md:w-auto text-xs sm:text-sm"
                     >
-                      <Edit className="w-4 h-4 mr-1" />
+                      <Edit className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                       Editar
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                  <DialogContent className="max-w-[95vw] sm:max-w-[90vw] lg:max-w-2xl max-h-[95vh] overflow-y-auto mx-1 sm:mx-2 lg:mx-auto">
                     <DialogHeader>
                       <DialogTitle>Editar Veículo - {vehicle.license_plate}</DialogTitle>
                     </DialogHeader>
                     {editingVehicle && (
-                      <div className="grid gap-4">
-                        <div className="grid grid-cols-2 gap-4">
+                      <div className="grid gap-3 sm:gap-4">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
                           <div>
                             <Label>Categoria *</Label>
                             <Select
@@ -626,7 +627,7 @@ export default function VehicleManagement() {
                           </div>
                         </div>
                         
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
                           <div>
                             <Label>Placa *</Label>
                             <Input
@@ -643,7 +644,7 @@ export default function VehicleManagement() {
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
                           <div>
                             <Label>Ano</Label>
                             <Input
