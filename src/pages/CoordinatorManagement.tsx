@@ -95,7 +95,6 @@ export default function CoordinatorManagement() {
             first_name: values.firstName,
             last_name: values.lastName,
             role: 'admin',
-            unique_id: profile?.unique_id,
             company_ids: profile?.company_ids || []
           }
         }
