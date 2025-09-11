@@ -142,58 +142,73 @@ const ChecklistView = () => {
   };
 
   const downloadPDF = async () => {
-    if (!checklist?.pdf_url) {
+    if (!checklist) {
       toast({
-        title: "PDF não disponível",
-        description: "O PDF deste checklist não está disponível",
+        title: "Dados não disponíveis",
+        description: "Os dados do checklist não estão disponíveis",
         variant: "destructive"
       });
       return;
     }
 
     try {
-      // Tentar baixar diretamente pelo URL se for um URL público
-      if (checklist.pdf_url.startsWith('http')) {
-        const a = document.createElement('a');
-        a.href = checklist.pdf_url;
-        a.download = `checklist_${checklist.vehicle.license_plate}_${checklist.inspection_date}.pdf`;
-        a.target = '_blank';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        
-        toast({
-          title: "Sucesso",
-          description: "PDF baixado com sucesso!"
-        });
-        return;
-      }
+      toast({
+        title: "Gerando PDF...",
+        description: "Por favor, aguarde enquanto o PDF é gerado"
+      });
 
-      // Caso contrário, tentar baixar do storage
-      const { data, error } = await supabase.storage
-        .from('checklist-pdfs')
-        .download(checklist.pdf_url);
+      const { generateChecklistPDF, downloadPDF: downloadGeneratedPDF } = await import('../lib/pdfGenerator');
+      
+      // Preparar dados para o PDF usando os dados atuais da página
+      const checklistItemsForPdf: Record<string, { status: string; observation?: string }> = {};
+      
+      Object.entries(checklist.checklist_data || {}).forEach(([key, value]) => {
+        if (typeof value === 'string') {
+          checklistItemsForPdf[key] = { status: value };
+        } else if (typeof value === 'object' && value !== null) {
+          checklistItemsForPdf[key] = {
+            status: (value as any).status || 'pending',
+            observation: (value as any).observation
+          };
+        }
+      });
 
-      if (error) throw error;
+      const pdfData = {
+        vehicleInfo: {
+          model: checklist.vehicle.model,
+          license_plate: checklist.vehicle.license_plate,
+          year: checklist.vehicle.year || 0,
+          vehicle_category: checklist.vehicle.vehicle_category
+        },
+        inspectorInfo: {
+          first_name: checklist.inspector?.first_name || 'Não',
+          last_name: checklist.inspector?.last_name || 'informado'
+        },
+        inspection_date: new Date(checklist.inspection_date),
+        vehicle_mileage: (checklist.checklist_data?.vehicle_mileage as string) || '',
+        overall_condition: checklist.overall_condition || 'pending',
+        additional_notes: (checklist.checklist_data?.additional_notes as string) || '',
+        interior_photo_url: checklist.interior_photos?.[0] || null,
+        exterior_photo_url: checklist.exterior_photos?.[0] || null,
+        inspector_signature: checklist.inspector_signature || null,
+        checklistItems: checklistItemsForPdf,
+        checklist_items: checklistItems
+      };
 
-      const url = URL.createObjectURL(data);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `checklist_${checklist.vehicle.license_plate}_${checklist.inspection_date}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      const doc = await generateChecklistPDF(pdfData);
+      const filename = `checklist_${checklist.vehicle.license_plate}_${checklist.inspection_date}.pdf`;
+      
+      await downloadGeneratedPDF(doc, filename);
 
       toast({
         title: "Sucesso",
-        description: "PDF baixado com sucesso!"
+        description: "PDF gerado e baixado com sucesso!"
       });
     } catch (error) {
-      console.error('Error downloading PDF:', error);
+      console.error('Error generating PDF:', error);
       toast({
         title: "Erro",
-        description: "Erro ao baixar PDF",
+        description: "Erro ao gerar PDF. Tente novamente.",
         variant: "destructive"
       });
     }
