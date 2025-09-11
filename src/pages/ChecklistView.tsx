@@ -499,7 +499,7 @@ const ChecklistView = () => {
                       };
 
                       return (
-                        <div key={item.id} className="flex justify-between items-start p-2 border border-gray-300 bg-white">
+                        <div key={item.id} className="flex justify-between items-start p-1 border border-gray-300 bg-white">
                           <div className="flex-1 pr-3">
                             <p className="font-bold text-base text-black mb-1">
                               {item.name}
