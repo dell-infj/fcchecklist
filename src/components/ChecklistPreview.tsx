@@ -190,7 +190,7 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
               {profile?.company_name || 'Facilita Serviços e Construções LTDA'}
             </h1>
             <p style={{ fontSize: '14px', color: '#666', marginBottom: '4px' }}>
-              CNPJ: {profile?.cnpj || '05.873.924/0001-80'} | Email: contato@fcgestao.com.br
+              CNPJ: {profile?.cnpj || '05.873.924/0001-80'} | Email: {profile?.email || 'contato@fcgestao.com.br'}
             </p>
             <p style={{ fontSize: '14px', color: '#666', marginBottom: '20px' }}>
               {profile?.address || 'Rua princesa imperial, 220 - Realengo - RJ'}
@@ -208,17 +208,17 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
               Informações Gerais
             </h3>
             <div style={{ marginBottom: '8px' }}>
-              <p style={{ fontSize: '14px', marginBottom: '4px' }}>
+              <p style={{ fontSize: '16px', marginBottom: '4px' }}>
                 <strong>Data da Inspeção:</strong> {format(new Date(formData.inspection_date || new Date()), 'dd/MM/yyyy', { locale: ptBR })}
               </p>
-              <p style={{ fontSize: '14px', marginBottom: '4px' }}>
+              <p style={{ fontSize: '16px', marginBottom: '4px' }}>
                 <strong>Inspetor:</strong> {selectedInspector.first_name} {selectedInspector.last_name}
               </p>
-              <p style={{ fontSize: '14px', marginBottom: '4px' }}>
+              <p style={{ fontSize: '16px', marginBottom: '4px' }}>
                 <strong>Quilometragem:</strong> {formData.vehicle_mileage || 'Não informado'} km
               </p>
-              {formData.cost_center && (
-                <p style={{ fontSize: '14px', marginBottom: '4px' }}>
+                {formData.cost_center && (
+                <p style={{ fontSize: '16px', marginBottom: '4px' }}>
                   <strong>Centro de Custo:</strong> {formData.cost_center}
                 </p>
               )}
@@ -286,7 +286,7 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
                       fontSize: '14px'
                     }}>
                       <div style={{ flex: 1, paddingRight: '10px' }}>
-                        <p style={{ fontSize: '14px', fontWeight: '500', marginBottom: '2px' }}>
+                        <p style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '2px' }}>
                           {item.name}
                         </p>
                         {item.description && (
