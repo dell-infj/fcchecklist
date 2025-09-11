@@ -217,11 +217,9 @@ export const ChecklistPreview: React.FC<ChecklistPreviewProps> = ({
               <p style={{ fontSize: '16px', marginBottom: '4px' }}>
                 <strong>Quilometragem:</strong> {formData.vehicle_mileage || 'Não informado'} km
               </p>
-                {formData.cost_center && (
-                <p style={{ fontSize: '16px', marginBottom: '4px' }}>
-                  <strong>Centro de Custo:</strong> {formData.cost_center}
-                </p>
-              )}
+              <p style={{ fontSize: '16px', marginBottom: '4px' }}>
+                <strong>Centro de Custo:</strong> {formData.cost_center || 'Não informado'}
+              </p>
             </div>
           </div>
           <div>
