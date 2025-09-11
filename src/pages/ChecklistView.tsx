@@ -376,17 +376,23 @@ const ChecklistView = () => {
             }}>
               
               {/* Header da Empresa */}
-              <div className="company-header text-center mb-8">
-                <h1 className="text-xl font-bold mb-2 text-black">
-                  Facilita Serviços e Construções LTDA
-                </h1>
-                <p className="text-sm text-gray-600 mb-1">
-                  CNPJ: 05.873.924/0001-80 | Email: contato@fcgestao.com.br
-                </p>
-                <p className="text-sm text-gray-600 mb-5">
-                  Rua princesa imperial, 220 - Realengo - RJ
-                </p>
-                <h2 className="text-lg font-bold text-black">
+              <div className="company-header flex justify-between items-start mb-4 py-2">
+                <div className="flex-1">
+                  <h1 className="text-lg font-bold text-black">
+                    Facilita Serviços e Construções LTDA
+                  </h1>
+                </div>
+                <div className="flex-1 text-right">
+                  <p className="text-xs text-gray-600">
+                    CNPJ: 05.873.924/0001-80 | Email: contato@fcgestao.com.br
+                  </p>
+                  <p className="text-xs text-gray-600">
+                    Rua princesa imperial, 220 - Realengo - RJ
+                  </p>
+                </div>
+              </div>
+              <div className="text-center mb-6">
+                <h2 className="text-base font-bold text-black">
                   CHECKLIST DE INSPEÇÃO VEICULAR
                 </h2>
               </div>
