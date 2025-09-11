@@ -186,22 +186,22 @@ const ChecklistView = () => {
       const pdfHeight = 297;
       
       // Calcular dimensões da imagem para caber na página A4
-      const imgWidth = pdfWidth - 5; // margem de 2,5mm de cada lado
+      const imgWidth = pdfWidth - 50; // margem de 25mm de cada lado (2,5cm)
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       
       let heightLeft = imgHeight;
       let position = 0;
       
       // Adicionar primeira página
-      pdf.addImage(imgData, 'PNG', 2.5, 2.5, imgWidth, imgHeight);
-      heightLeft -= (pdfHeight - 5); // subtrair altura da página menos margens
+      pdf.addImage(imgData, 'PNG', 25, 25, imgWidth, imgHeight);
+      heightLeft -= (pdfHeight - 50); // subtrair altura da página menos margens (25mm topo + 25mm rodapé)
       
       // Adicionar páginas adicionais se necessário
       while (heightLeft >= 0) {
         position = heightLeft - imgHeight;
         pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 2.5, position + 2.5, imgWidth, imgHeight);
-        heightLeft -= (pdfHeight - 5);
+        pdf.addImage(imgData, 'PNG', 25, position + 25, imgWidth, imgHeight);
+        heightLeft -= (pdfHeight - 50);
       }
 
       // Baixar o PDF
