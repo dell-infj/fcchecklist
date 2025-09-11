@@ -58,12 +58,16 @@ export default function CoordinatorManagement() {
 
   const fetchCoordinators = async () => {
     try {
+      console.log('Fetching coordinators for admin ID:', profile?.id);
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('role', 'coordinator')
+        .eq('role', 'admin')
         .eq('managed_by', profile?.id)
         .order('created_at', { ascending: false });
+
+      console.log('Coordinators query result:', { data, error });
 
       if (error) throw error;
       setCoordinators(data || []);
@@ -94,8 +98,8 @@ export default function CoordinatorManagement() {
           data: {
             first_name: values.firstName,
             last_name: values.lastName,
-            role: 'coordinator',
-            unique_id: profile?.unique_id, // mesmo unique_id da empresa
+            role: 'admin',
+            unique_id: profile?.unique_id,
             company_ids: profile?.company_ids || []
           }
         }
