@@ -168,22 +168,297 @@ export default function ChecklistManagement() {
         description: "Por favor, aguarde enquanto o PDF é gerado"
       });
 
-      // Navegar para a página de visualização onde o usuário pode baixar o PDF
-      navigate(`/checklist/view/${checklist.id}`);
+      // Buscar dados completos do checklist (igual à página de visualização)
+      const { data: fullChecklist, error: checklistError } = await supabase
+        .from('checklists')
+        .select(`
+          *,
+          vehicles!inner (
+            vehicle_category,
+            license_plate,
+            model,
+            year,
+            owner_unique_id
+          ),
+          profiles!inner (
+            first_name,
+            last_name
+          )
+        `)
+        .eq('id', checklist.id)
+        .single();
+
+      if (checklistError) throw checklistError;
+
+      // Buscar itens de checklist
+      const vehicleCategory = fullChecklist.vehicles.vehicle_category.toLowerCase();
+      const vehicleCategoryUpper = fullChecklist.vehicles.vehicle_category.toUpperCase();
       
-      // Mostrar uma mensagem indicando que o usuário será redirecionado
-      setTimeout(() => {
-        toast({
-          title: "Redirecionado",
-          description: "Use o botão 'Baixar PDF' na página de visualização"
+      let itemsData;
+      
+      // Primeira tentativa: buscar por category
+      const { data: itemsDataCategory } = await supabase
+        .from('checklist_items')
+        .select('*')
+        .eq('category', vehicleCategory)
+        .eq('active', true)
+        .order('item_order');
+
+      if (itemsDataCategory && itemsDataCategory.length > 0) {
+        itemsData = itemsDataCategory;
+      } else {
+        // Segunda tentativa: buscar por unique_id
+        const { data: itemsDataUnique } = await supabase
+          .from('checklist_items')
+          .select('*')
+          .eq('unique_id', vehicleCategoryUpper)
+          .eq('active', true)
+          .order('item_order');
+        
+        itemsData = itemsDataUnique;
+      }
+
+      // Criar elemento HTML temporário para renderização (igual à página de visualização)
+      const tempElement = document.createElement('div');
+      tempElement.className = 'preview-document';
+      tempElement.style.position = 'absolute';
+      tempElement.style.left = '-9999px';
+      tempElement.style.top = '-9999px';
+      tempElement.style.width = '800px';
+      tempElement.style.fontFamily = 'Arial, sans-serif';
+      tempElement.style.fontSize = '14px';
+      tempElement.style.lineHeight = '1.4';
+      tempElement.style.color = '#000';
+      tempElement.style.backgroundColor = '#ffffff';
+      tempElement.style.padding = '32px';
+
+      // Função para normalizar nomes de campos
+      const getFieldKey = (itemName: string) => {
+        return itemName
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^a-z0-9]/g, '_')
+          .replace(/_+/g, '_')
+          .replace(/^_|_$/g, '');
+      };
+
+      // Construir HTML do documento
+      let htmlContent = `
+        <!-- Header da Empresa -->
+        <div style="text-align: center; margin-bottom: 32px;">
+          <h1 style="font-size: 20px; font-weight: bold; margin-bottom: 8px; color: #000;">
+            Facilita Serviços e Construções LTDA
+          </h1>
+          <p style="font-size: 14px; color: #666; margin-bottom: 4px;">
+            CNPJ: 05.873.924/0001-80 | Email: contato@fcgestao.com.br
+          </p>
+          <p style="font-size: 14px; color: #666; margin-bottom: 20px;">
+            Rua princesa imperial, 220 - Realengo - RJ
+          </p>
+          <h2 style="font-size: 18px; font-weight: bold; color: #000;">
+            CHECKLIST DE INSPEÇÃO VEICULAR
+          </h2>
+        </div>
+
+        <!-- Informações em Duas Colunas -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px;">
+          <div>
+            <h3 style="font-size: 16px; font-weight: bold; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #ccc; color: #000;">
+              Informações Gerais
+            </h3>
+            <div style="font-size: 14px; line-height: 1.6;">
+              <p><strong>Data da Inspeção:</strong> ${new Date(fullChecklist.inspection_date).toLocaleDateString('pt-BR')}</p>
+              <p><strong>Inspetor:</strong> ${fullChecklist.profiles.first_name} ${fullChecklist.profiles.last_name}</p>
+              <p><strong>Quilometragem:</strong> ${(fullChecklist.checklist_data as any)?.vehicle_mileage && typeof (fullChecklist.checklist_data as any).vehicle_mileage === 'string' ? `${(fullChecklist.checklist_data as any).vehicle_mileage} km` : 'Não informado'}</p>
+              <p><strong>Centro de Custo:</strong> ${(fullChecklist.checklist_data as any)?.cost_center && typeof (fullChecklist.checklist_data as any).cost_center === 'string' ? (fullChecklist.checklist_data as any).cost_center : 'Não informado'}</p>
+            </div>
+          </div>
+          
+          <div>
+            <h3 style="font-size: 16px; font-weight: bold; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #ccc; color: #000;">
+              Dados do Veículo
+            </h3>
+            <div style="font-size: 14px; line-height: 1.6;">
+              <p><strong>Modelo:</strong> ${fullChecklist.vehicles.model}</p>
+              <p><strong>Placa:</strong> ${fullChecklist.vehicles.license_plate}</p>
+              <p><strong>Ano:</strong> ${fullChecklist.vehicles.year}</p>
+              <p><strong>Categoria:</strong> ${fullChecklist.vehicles.vehicle_category}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Itens de Inspeção -->
+        <div style="margin-bottom: 24px;">
+          <h3 style="font-size: 16px; font-weight: bold; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #ccc; color: #000;">
+            Itens de Inspeção
+          </h3>
+          <div style="font-size: 14px;">
+      `;
+
+      // Adicionar itens de inspeção
+      if (itemsData && itemsData.length > 0) {
+        itemsData.forEach((item: any) => {
+          const fieldKey = getFieldKey(item.name);
+          const itemData = fullChecklist?.checklist_data?.[fieldKey];
+          const value = itemData?.status ?? fullChecklist[fieldKey];
+          const observation = itemData?.observation;
+          
+          const getStatusDisplay = (val: boolean | string) => {
+            if (typeof val === 'boolean') {
+              return val ? 'CONFORME' : 'NÃO CONFORME';
+            }
+            const v = String(val).toLowerCase();
+            switch (v) {
+              case 'funcionando':
+              case 'sim':
+              case 'ok':
+                return 'CONFORME';
+              case 'revisao':
+              case 'revisão':
+                return 'REVISÃO';
+              case 'ausente':
+                return 'AUSENTE';
+              case 'not_ok':
+              case 'nao':
+              case 'não':
+                return 'NÃO CONFORME';
+              case 'not_applicable':
+                return 'N/A';
+              default:
+                return 'Não verificado';
+            }
+          };
+
+          const getStatusColor = (val: boolean | string) => {
+            if (typeof val === 'boolean') {
+              return val ? 'background-color: #15803d; color: white;' : 'background-color: #b91c1c; color: white;';
+            }
+            const v = String(val).toLowerCase();
+            switch (v) {
+              case 'funcionando':
+              case 'sim':
+              case 'ok':
+                return 'background-color: #15803d; color: white;';
+              case 'revisao':
+              case 'revisão':
+                return 'background-color: #f59e0b; color: white;';
+              case 'ausente':
+              case 'not_ok':
+              case 'nao':
+              case 'não':
+                return 'background-color: #b91c1c; color: white;';
+              case 'not_applicable':
+                return 'background-color: #6b7280; color: white;';
+              default:
+                return 'background-color: #d1d5db; color: #374151;';
+            }
+          };
+
+          htmlContent += `
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; padding: 12px; border: 1px solid #ccc; background: white; margin-bottom: 8px;">
+              <div style="flex: 1; padding-right: 12px;">
+                <p style="font-weight: bold; font-size: 14px; color: #000; margin-bottom: 4px;">
+                  ${item.name}
+                </p>
+                ${item.description ? `<p style="font-size: 12px; color: #666; margin-bottom: 4px;">${item.description}</p>` : ''}
+                ${observation ? `<p style="font-size: 12px; color: #ea580c; margin-top: 4px;"><strong>Observação:</strong> ${observation}</p>` : ''}
+              </div>
+              <div style="padding: 6px 12px; border-radius: 4px; font-weight: bold; font-size: 14px; min-width: 100px; text-align: center; ${getStatusColor(value)}">
+                ${getStatusDisplay(value)}
+              </div>
+            </div>
+          `;
         });
-      }, 1000);
-      
+      }
+
+      htmlContent += `
+          </div>
+        </div>
+
+        <!-- Condição Geral -->
+        <div style="margin-bottom: 24px;">
+          <h3 style="font-size: 14px; font-weight: bold; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #ccc; color: #000;">
+            Condição Geral
+          </h3>
+          <p style="padding: 12px; background-color: #f9fafb; border: 1px solid #ccc; font-size: 12px;">
+            ${fullChecklist.overall_condition || 'Não informado'}
+          </p>
+        </div>
+
+        ${fullChecklist.additional_notes ? `
+        <!-- Observações Adicionais -->
+        <div style="margin-bottom: 24px;">
+          <h3 style="font-size: 14px; font-weight: bold; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #ccc; color: #000;">
+            Observações Adicionais
+          </h3>
+          <p style="padding: 12px; background-color: #f9fafb; border: 1px solid #ccc; font-size: 12px; white-space: pre-wrap;">
+            ${fullChecklist.additional_notes}
+          </p>
+        </div>
+        ` : ''}
+      `;
+
+      tempElement.innerHTML = htmlContent;
+      document.body.appendChild(tempElement);
+
+      // Importar bibliotecas e gerar PDF
+      const html2canvas = (await import('html2canvas')).default;
+      const jsPDF = (await import('jspdf')).default;
+
+      // Aguardar renderização
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      const canvas = await html2canvas(tempElement, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        width: tempElement.scrollWidth,
+        height: tempElement.scrollHeight
+      });
+
+      // Remover elemento temporário
+      document.body.removeChild(tempElement);
+
+      // Criar PDF
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgData = canvas.toDataURL('image/png');
+
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const marginTop = 5;
+      const marginBottom = 5;
+      const marginLeft = 5;
+      const marginRight = 5;
+      const usableWidth = pageWidth - marginLeft - marginRight;
+      const usableHeight = pageHeight - marginTop - marginBottom;
+      const imgWidth = usableWidth;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      let heightLeft = imgHeight;
+      pdf.addImage(imgData, 'PNG', marginLeft, marginTop, imgWidth, imgHeight);
+      heightLeft -= usableHeight;
+
+      while (heightLeft > 0) {
+        pdf.addPage();
+        const yOffset = marginTop - (imgHeight - heightLeft);
+        pdf.addImage(imgData, 'PNG', marginLeft, yOffset, imgWidth, imgHeight);
+        heightLeft -= usableHeight;
+      }
+
+      const filename = `checklist_${fullChecklist.vehicles.license_plate}_${fullChecklist.inspection_date}.pdf`;
+      pdf.save(filename);
+
+      toast({
+        title: "Sucesso",
+        description: "PDF gerado e baixado com sucesso!"
+      });
     } catch (error) {
-      console.error('Error navigating to PDF view:', error);
+      console.error('Error generating PDF:', error);
       toast({
         title: "Erro",
-        description: "Erro ao navegar para visualização",
+        description: "Erro ao gerar PDF. Tente novamente.",
         variant: "destructive"
       });
     }
