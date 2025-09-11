@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Plus, Edit, Trash2, Save, Settings, ArrowUp, ArrowDown, Car, Truck, Construction, X, Bike, HardHat, Bus, Wrench } from 'lucide-react';
+import { ArrowLeft, Plus, Edit, Trash2, Save, Settings, ArrowUp, ArrowDown, Car, Truck, Construction, X, Bike, HardHat, Bus, Wrench, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -19,7 +19,7 @@ interface ChecklistItem {
   id: string;
   name: string;
   description?: string;
-  category: 'interior' | 'exterior' | 'safety' | 'mechanical';
+  category: string;
   required: boolean;
   order: number;
 }
@@ -38,21 +38,16 @@ const ItemForm = React.memo(({
   formData, 
   setFormData, 
   onSubmit, 
-  onCancel 
+  onCancel,
+  selectedVehicleCategory 
 }: { 
   isEdit?: boolean;
   formData: any;
   setFormData: (data: any) => void;
   onSubmit: () => void;
   onCancel: () => void;
+  selectedVehicleCategory: string;
 }) => {
-  const categories = [
-    { value: 'interior', label: 'Interior' },
-    { value: 'exterior', label: 'Exterior' },
-    { value: 'safety', label: 'Segurança' },
-    { value: 'mechanical', label: 'Mecânico' }
-  ];
-
   return (
     <div className="space-y-4">
       <div>
@@ -75,17 +70,10 @@ const ItemForm = React.memo(({
         />
       </div>
       <div>
-        <Label htmlFor="category">Categoria</Label>
-        <select
-          id="category"
-          value={formData.category}
-          onChange={(e) => setFormData({...formData, category: e.target.value})}
-          className="w-full h-10 px-3 py-2 border border-input bg-background rounded-md text-sm"
-        >
-          {categories.map(cat => (
-            <option key={cat.value} value={cat.value}>{cat.label}</option>
-          ))}
-        </select>
+        <Label>Categoria do Veículo</Label>
+        <div className="p-2 border rounded-md bg-muted">
+          {selectedVehicleCategory || 'Nenhuma categoria selecionada'}
+        </div>
       </div>
       <div className="flex items-center space-x-2">
         <input
@@ -145,7 +133,7 @@ const ChecklistEditor = () => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    category: 'interior',
+    category: '',
     required: false
   });
 
@@ -159,12 +147,15 @@ const ChecklistEditor = () => {
     icon_name: 'Car'
   });
 
-  const categories = [
-    { value: 'interior', label: 'Interior', color: 'bg-blue-100 text-blue-800' },
-    { value: 'exterior', label: 'Exterior', color: 'bg-green-100 text-green-800' },
-    { value: 'safety', label: 'Segurança', color: 'bg-red-100 text-red-800' },
-    { value: 'mechanical', label: 'Mecânico', color: 'bg-yellow-100 text-yellow-800' }
-  ];
+  // Gerar categorias dinâmicas baseadas nos itens carregados
+  const getItemCategories = () => {
+    const uniqueCategories = Array.from(new Set(items.map(item => item.category)));
+    return uniqueCategories.map((cat, index) => ({
+      value: cat,
+      label: cat.charAt(0).toUpperCase() + cat.slice(1),
+      color: `bg-${['blue', 'green', 'red', 'yellow', 'purple', 'indigo'][index % 6]}-100 text-${['blue', 'green', 'red', 'yellow', 'purple', 'indigo'][index % 6]}-800`
+    }));
+  };
 
   useEffect(() => {
     loadVehicleCategories();
@@ -212,7 +203,7 @@ const ChecklistEditor = () => {
         .from('checklist_items')
         .select('*')
         .eq('active', true)
-        .eq('unique_id', selectedVehicleCategory)
+        .eq('category', selectedVehicleCategory)
         .order('item_order');
 
       if (error) throw error;
@@ -221,7 +212,7 @@ const ChecklistEditor = () => {
         id: item.id,
         name: item.name,
         description: item.description,
-        category: item.category as ChecklistItem['category'],
+        category: selectedVehicleCategory as ChecklistItem['category'],
         required: item.required,
         order: item.item_order
       }));
@@ -240,7 +231,8 @@ const ChecklistEditor = () => {
   };
 
   const getCategoryInfo = (category: string) => {
-    return categories.find(c => c.value === category) || categories[0];
+    const itemCategories = getItemCategories();
+    return itemCategories.find(c => c.value === category) || { value: category, label: category, color: 'bg-gray-100 text-gray-800' };
   };
 
   const moveItem = async (index: number, direction: 'up' | 'down') => {
@@ -296,10 +288,10 @@ const ChecklistEditor = () => {
         .insert({
           name: formData.name,
           description: formData.description,
-          category: formData.category,
+          category: selectedVehicleCategory,
           required: formData.required,
           item_order: items.length + 1,
-          unique_id: selectedVehicleCategory
+          unique_id: 'default'
         })
         .select()
         .single();
@@ -316,7 +308,7 @@ const ChecklistEditor = () => {
       };
 
       setItems(prev => [...prev, newItem]);
-      setFormData({ name: '', description: '', category: 'interior', required: false });
+      setFormData({ name: '', description: '', category: '', required: false });
       setIsAddDialogOpen(false);
 
       toast({
@@ -349,7 +341,6 @@ const ChecklistEditor = () => {
         .update({
           name: formData.name,
           description: formData.description,
-          category: formData.category,
           required: formData.required
         })
         .eq('id', currentItem.id);
@@ -358,13 +349,13 @@ const ChecklistEditor = () => {
 
       setItems(prev => prev.map(item => 
         item.id === currentItem.id 
-          ? { ...item, name: formData.name, description: formData.description, category: formData.category as ChecklistItem['category'], required: formData.required }
+          ? { ...item, name: formData.name, description: formData.description, required: formData.required }
           : item
       ));
 
       setIsEditDialogOpen(false);
       setCurrentItem(null);
-      setFormData({ name: '', description: '', category: 'interior', required: false });
+      setFormData({ name: '', description: '', category: '', required: false });
 
       toast({
         title: "Item atualizado",
@@ -410,7 +401,7 @@ const ChecklistEditor = () => {
     setFormData({
       name: item.name,
       description: item.description || '',
-      category: item.category,
+      category: '',
       required: item.required
     });
     setIsEditDialogOpen(true);
@@ -418,21 +409,32 @@ const ChecklistEditor = () => {
 
   const handleCancelAdd = useCallback(() => {
     setIsAddDialogOpen(false);
-    setFormData({ name: '', description: '', category: 'interior', required: false });
+    setFormData({ name: '', description: '', category: '', required: false });
   }, []);
 
   const handleCancelEdit = useCallback(() => {
     setIsEditDialogOpen(false);
     setCurrentItem(null);
-    setFormData({ name: '', description: '', category: 'interior', required: false });
+    setFormData({ name: '', description: '', category: '', required: false });
   }, []);
 
   const resetToDefault = async () => {
+    if (!selectedVehicleCategory) {
+      toast({
+        title: "Erro",
+        description: "Selecione uma categoria de veículo primeiro",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
+      // Remove itens customizados da categoria selecionada
       await supabase
         .from('checklist_items')
         .update({ active: false })
-        .eq('unique_id', profile?.unique_id);
+        .eq('category', selectedVehicleCategory)
+        .neq('unique_id', 'default');
 
       await loadChecklistItems();
       
@@ -791,12 +793,22 @@ const ChecklistEditor = () => {
                 setFormData={setFormData}
                 onSubmit={handleAdd}
                 onCancel={handleCancelAdd}
+                selectedVehicleCategory={selectedVehicleCategory}
               />
             </DialogContent>
           </Dialog>
 
           <Button variant="outline" onClick={resetToDefault} className="gap-2">
             Resetar Padrão
+          </Button>
+
+          <Button 
+            variant="secondary" 
+            onClick={() => navigate('/checklist/new')} 
+            className="gap-2"
+          >
+            <FileText className="h-4 w-4" />
+            Criar Checklist
           </Button>
         </div>
 
@@ -829,7 +841,7 @@ const ChecklistEditor = () => {
           <Card>
             <CardContent className="p-4">
               <div className="text-center">
-                <p className="text-2xl font-bold text-muted-foreground">{new Set(items.map(i => i.category)).size}</p>
+                <p className="text-2xl font-bold text-muted-foreground">{vehicleCategories.length}</p>
                 <p className="text-sm text-muted-foreground">Categorias</p>
               </div>
             </CardContent>
@@ -887,8 +899,8 @@ const ChecklistEditor = () => {
                             <p className="text-sm text-muted-foreground mt-1">{item.description}</p>
                           )}
                           <div className="flex items-center gap-2 mt-2">
-                            <Badge variant="outline" className={getCategoryInfo(item.category).color}>
-                              {getCategoryInfo(item.category).label}
+                            <Badge variant="outline">
+                              {vehicleCategories.find(c => c.name === selectedVehicleCategory)?.label || selectedVehicleCategory}
                             </Badge>
                             {item.required && (
                               <Badge variant="default" className="bg-success text-white">
@@ -935,6 +947,7 @@ const ChecklistEditor = () => {
               setFormData={setFormData}
               onSubmit={handleEdit}
               onCancel={handleCancelEdit}
+              selectedVehicleCategory={selectedVehicleCategory}
             />
           </DialogContent>
         </Dialog>
