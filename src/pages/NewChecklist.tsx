@@ -141,13 +141,15 @@ const NewChecklist = () => {
         .from('checklist_items')
         .select('id')
         .eq('active', true)
-        .eq('category', selectedVehicle.vehicle_category)
+        .eq('category', selectedVehicle.vehicle_category.toLowerCase())
         .limit(1);
 
       if (error) throw error;
 
       if (!data || data.length === 0) {
         setShowCategoryAlert(true);
+      } else {
+        setShowCategoryAlert(false);
       }
     } catch (error) {
       console.error('Error validating vehicle category:', error);

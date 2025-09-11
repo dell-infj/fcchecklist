@@ -29,7 +29,7 @@ const CategoryValidationAlert: React.FC<CategoryValidationAlertProps> = ({ open,
           <AlertDialogAction
             onClick={() => {
               onOpenChange(false);
-              navigate('/vehicle-management');
+              navigate('/vehicles');
             }}
             className="bg-primary hover:bg-primary/90"
           >
