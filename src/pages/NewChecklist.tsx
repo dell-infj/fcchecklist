@@ -44,7 +44,7 @@ interface Inspector {
   id: string;
   first_name: string;
   last_name: string;
-  email: string;
+  phone: string;
 }
 
 interface FormData {
@@ -167,7 +167,7 @@ const NewChecklist = () => {
       const filtered = inspectors.filter(inspector =>
         inspector.first_name.toLowerCase().includes(inspectorSearch.toLowerCase()) ||
         inspector.last_name.toLowerCase().includes(inspectorSearch.toLowerCase()) ||
-        inspector.email.toLowerCase().includes(inspectorSearch.toLowerCase()) ||
+        inspector.phone.toLowerCase().includes(inspectorSearch.toLowerCase()) ||
         `${inspector.first_name} ${inspector.last_name}`.toLowerCase().includes(inspectorSearch.toLowerCase())
       );
       setFilteredInspectors(filtered);
@@ -236,17 +236,16 @@ const NewChecklist = () => {
       if (profile?.role === 'admin') {
         const { data: profilesData } = await supabase
           .from('profiles')
-          .select('id, first_name, last_name, user_id')
+          .select('id, first_name, last_name, phone')
           .eq('role', 'inspector')
           .order('first_name');
 
         if (profilesData) {
-          // Carregar dados dos usuários via RPC ou API admin se necessário
           inspectorData = profilesData.map(profile => ({
             id: profile.id,
             first_name: profile.first_name,
             last_name: profile.last_name,
-            email: 'Email não disponível' // Simplificado para evitar problemas de API
+            phone: profile.phone || 'Telefone não informado'
           }));
         }
       } else if (profile?.role === 'inspector' && profile) {
@@ -255,7 +254,7 @@ const NewChecklist = () => {
           id: profile.id,
           first_name: profile.first_name || 'Inspetor',
           last_name: profile.last_name || '',
-          email: 'Email não disponível'
+          phone: profile.phone || 'Telefone não informado'
         }];
       }
 
@@ -265,11 +264,11 @@ const NewChecklist = () => {
       setChecklistItems((checklistData || []) as ChecklistItem[]);
     } catch (error) {
       console.error('Error loading data:', error);
-      // Fallback: load without emails
+      // Fallback: load without phones
       if (profile?.role === 'admin') {
         const { data: profilesData } = await supabase
           .from('profiles')
-          .select('id, first_name, last_name')
+          .select('id, first_name, last_name, phone')
           .eq('role', 'inspector')
           .order('first_name');
         
@@ -277,7 +276,7 @@ const NewChecklist = () => {
           id: p.id,
           first_name: p.first_name,
           last_name: p.last_name,
-          email: 'Email não disponível'
+          phone: p.phone || 'Telefone não informado'
         }));
         
         setInspectors(inspectorData);
@@ -595,7 +594,7 @@ const NewChecklist = () => {
                         <PopoverContent className="w-full p-0">
                           <Command>
                             <CommandInput 
-                              placeholder="Pesquisar por nome ou email..." 
+                              placeholder="Pesquisar por nome ou telefone..." 
                               value={inspectorSearch}
                               onValueChange={setInspectorSearch}
                             />
@@ -604,7 +603,7 @@ const NewChecklist = () => {
                               {filteredInspectors.map((inspector) => (
                                 <CommandItem
                                   key={inspector.id}
-                                  value={`${inspector.first_name} ${inspector.last_name} ${inspector.email}`}
+                                  value={`${inspector.first_name} ${inspector.last_name} ${inspector.phone}`}
                                   onSelect={() => {
                                     setFormData(prev => ({...prev, inspector_id: inspector.id}));
                                     setInspectorSearchOpen(false);
@@ -622,7 +621,7 @@ const NewChecklist = () => {
                                       {inspector.first_name} {inspector.last_name}
                                     </span>
                                     <span className="text-sm text-muted-foreground">
-                                      {inspector.email}
+                                      {inspector.phone}
                                     </span>
                                   </div>
                                 </CommandItem>
