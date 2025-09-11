@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, Plus, Edit, Trash2, Save, Settings, ArrowUp, ArrowDown, Car, Truck, Construction, X, Bike, HardHat, Bus, Wrench, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -147,6 +148,9 @@ const ChecklistEditor = () => {
     icon_name: 'Car'
   });
 
+  // Itens órfãos (categorias que não existem mais)
+  const [orphanCategories, setOrphanCategories] = useState<string[]>([]);
+
   // Gerar categorias dinâmicas baseadas nos itens carregados
   const getItemCategories = () => {
     const uniqueCategories = Array.from(new Set(items.map(item => item.category)));
@@ -235,6 +239,54 @@ const ChecklistEditor = () => {
     return itemCategories.find(c => c.value === category) || { value: category, label: category, color: 'bg-gray-100 text-gray-800' };
   };
 
+  // Verifica itens de checklist que pertencem a categorias inexistentes
+  const checkOrphanItems = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('checklist_items')
+        .select('id, category')
+        .eq('active', true);
+      if (error) throw error;
+      const existing = new Set(vehicleCategories.map(c => c.name));
+      const orphans = Array.from(new Set((data || []).map(i => i.category).filter(cat => !existing.has(cat))));
+      setOrphanCategories(orphans);
+    } catch (err) {
+      console.error('Error checking orphan items:', err);
+    }
+  }, [vehicleCategories]);
+
+  useEffect(() => {
+    if (vehicleCategories.length) {
+      checkOrphanItems();
+    }
+  }, [vehicleCategories, checkOrphanItems]);
+
+  const reassignOrphanItems = async () => {
+    if (!selectedVehicleCategory || orphanCategories.length === 0) return;
+    try {
+      const { error } = await supabase
+        .from('checklist_items')
+        .update({ category: selectedVehicleCategory })
+        .in('category', orphanCategories);
+      if (error) throw error;
+
+      await checkOrphanItems();
+      await loadChecklistItems();
+
+      toast({
+        title: 'Itens reatribuídos',
+        description: 'Itens órfãos foram movidos para a categoria selecionada.'
+      });
+    } catch (error) {
+      console.error('Error reassigning orphan items:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível reatribuir itens órfãos',
+        variant: 'destructive'
+      });
+    }
+  };
+  
   const moveItem = async (index: number, direction: 'up' | 'down') => {
     const newIndex = direction === 'up' ? index - 1 : index + 1;
     if (newIndex < 0 || newIndex >= items.length) return;
@@ -507,7 +559,6 @@ const ChecklistEditor = () => {
       const { error } = await supabase
         .from('vehicle_categories')
         .update({
-          name: categoryFormData.name.toUpperCase(),
           label: categoryFormData.label,
           icon_name: categoryFormData.icon_name
         })
@@ -733,7 +784,9 @@ const ChecklistEditor = () => {
                 <Input
                   id="edit-category-name"
                   value={categoryFormData.name}
-                  onChange={(e) => setCategoryFormData({...categoryFormData, name: e.target.value})}
+                  disabled
+                  readOnly
+                  title="Nome/ID é fixo para preservar itens vinculados"
                   placeholder="Ex: CAMINHAO"
                 />
               </div>
