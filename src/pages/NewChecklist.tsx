@@ -296,6 +296,56 @@ const NewChecklist = () => {
     }
   };
 
+  // Função para redimensionar imagens para proporção 1:1 (A4/Ofício)
+  const resizeImageToSquare = (imageData: string, maxSize: number = 400): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        if (!ctx) {
+          resolve(imageData);
+          return;
+        }
+
+        // Definir tamanho do canvas como quadrado
+        canvas.width = maxSize;
+        canvas.height = maxSize;
+
+        // Calcular dimensões para centralizar a imagem no quadrado
+        const size = Math.min(img.width, img.height);
+        const startX = (img.width - size) / 2;
+        const startY = (img.height - size) / 2;
+
+        // Preencher fundo branco
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, maxSize, maxSize);
+
+        // Desenhar a imagem centralizada e redimensionada
+        ctx.drawImage(
+          img,
+          startX, startY, size, size, // região de origem (quadrada)
+          0, 0, maxSize, maxSize      // destino (canvas inteiro)
+        );
+
+        resolve(canvas.toDataURL('image/jpeg', 0.8));
+      };
+      img.src = imageData;
+    });
+  };
+
+  // Função para processar múltiplas imagens
+  const processImages = async (images: string[]): Promise<string[]> => {
+    if (!images || images.length === 0) return [];
+    
+    const processedImages = await Promise.all(
+      images.map(image => resizeImageToSquare(image))
+    );
+    
+    return processedImages;
+  };
+
   const handleSubmit = async () => {
     if (!formData.vehicle_id || !formData.inspector_id || !formData.vehicle_mileage) {
       toast({
@@ -307,6 +357,10 @@ const NewChecklist = () => {
     }
 
     try {
+      // Processar e redimensionar imagens para proporção 1:1
+      const processedInteriorPhotos = await processImages(formData.interior_photos || []);
+      const processedExteriorPhotos = await processImages(formData.exterior_photos || []);
+
       // Preparar dados do checklist para salvar
       const checklistData: any = {
         vehicle_id: formData.vehicle_id,
@@ -319,6 +373,8 @@ const NewChecklist = () => {
         inspector_signature: formData.inspector_signature,
         status: 'completed',
         unique_id: profile?.unique_id,
+        // Salvar imagens processadas no checklist_data ao invés de colunas separadas
+        // (removendo campos que não existem na tabela)
       };
 
       // Coletar itens dinâmicos do checklist para salvar como JSON
@@ -355,11 +411,13 @@ const NewChecklist = () => {
         }
       });
 
-      // Atribuir JSON de itens dinâmicos incluindo centro de custo e quilometragem
+      // Atribuir JSON de itens dinâmicos incluindo centro de custo, quilometragem e imagens processadas
       checklistData.checklist_data = {
         ...dynamicItems,
         cost_center: formData.cost_center,
-        vehicle_mileage: formData.vehicle_mileage
+        vehicle_mileage: formData.vehicle_mileage,
+        interior_photos: processedInteriorPhotos,
+        exterior_photos: processedExteriorPhotos
       };
 
       // Salvar checklist no banco
@@ -491,15 +549,48 @@ const NewChecklist = () => {
             .eq('id', savedChecklist.id);
         }
 
-          // Download do PDF
-          const url = window.URL.createObjectURL(pdfBlob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = pdfFileName;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          window.URL.revokeObjectURL(url);
+          // Opção "Salvar Como" - Web Share API ou download
+          if (navigator.share && navigator.canShare) {
+            // Mobile: usar Web Share API
+            try {
+              const file = new File([pdfBlob], pdfFileName, { type: 'application/pdf' });
+              
+              if (navigator.canShare({ files: [file] })) {
+                await navigator.share({
+                  title: 'Checklist de Inspeção',
+                  text: `Checklist do veículo ${selectedVehicle.license_plate}`,
+                  files: [file]
+                });
+              } else {
+                // Fallback para compartilhamento sem arquivo
+                const url = window.URL.createObjectURL(pdfBlob);
+                await navigator.share({
+                  title: 'Checklist de Inspeção',
+                  text: `Checklist do veículo ${selectedVehicle.license_plate}`,
+                  url: url
+                });
+                window.URL.revokeObjectURL(url);
+              }
+            } catch (error) {
+              console.log('Share cancelled or failed:', error);
+              // Fallback para download tradicional
+              downloadPDF();
+            }
+          } else {
+            // Desktop: mostrar opção de salvar
+            downloadPDF();
+          }
+
+          function downloadPDF() {
+            const url = window.URL.createObjectURL(pdfBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = pdfFileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+          }
         } finally {
           // Limpar container temporário
           document.body.removeChild(tempContainer);
